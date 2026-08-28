@@ -11,7 +11,7 @@ const GAMES := [
 	{
 		"id": "packid", "title": "Packid",
 		"icon": "packid.icon.png", "hover": "packid_ro.icon.png",
-		"scene": "res://scenes/minigames/Packid.tscn",
+		"scene": "res://scenes/games/Packid.tscn",
 	},
 	{
 		"id": "fallingletter", "title": "Falling Letter",
