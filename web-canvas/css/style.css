@@ -1,0 +1,77 @@
+/* Childsplay-Modern — web-canvas base styles
+   Goal: a single canvas that fills the viewport on phones, tablets and
+   Chromebooks without introducing scrollbars or letterbox jitter. */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #222b3d;
+  color: #eef2f7;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The canvas is sized in JS (see js/engine.js -> resize()), but these
+   rules stop the browser from stretching the bitmap or overflowing. */
+#stage {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  background: #1a2230;
+  image-rendering: -webkit-optimize-contrast;
+  touch-action: none;
+}
+
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  background: rgba(20, 26, 38, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+#hud[hidden] { display: none; }
+
+#back-btn {
+  font: inherit;
+  padding: 8px 16px;
+  min-height: 44px; /* touch target */
+  border: 0;
+  border-radius: 8px;
+  background: #4c7dff;
+  color: #fff;
+  cursor: pointer;
+}
+
+#back-btn:active { background: #3a63d0; }
+
+#activity-name {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.fallback {
+  padding: 2rem;
+  text-align: center;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#222b3d" />
+  <title>Childsplay-Modern</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="hud" hidden>
+      <button id="back-btn" type="button" aria-label="Back to menu">&larr; Menu</button>
+      <span id="activity-name"></span>
+    </header>
+
+    <!-- Single responsive canvas; the engine keeps its internal
+         resolution at 1280x720 and scales to fit the viewport. -->
+    <canvas id="stage" width="1280" height="720" role="img"
+            aria-label="Childsplay-Modern game stage">
+      This game needs a browser with HTML5 Canvas support.
+    </canvas>
+
+    <noscript>
+      <p class="fallback">Childsplay-Modern needs JavaScript enabled.</p>
+    </noscript>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

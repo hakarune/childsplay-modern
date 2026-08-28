@@ -1,0 +1,186 @@
+[gd_scene load_steps=2 format=3 uid="uid://cchildsplaymenu0"]
+
+[ext_resource type="Script" path="res://scripts/MainMenu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13, 0.17, 0.24, 1)
+
+[node name="Screen" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 36
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 36
+
+[node name="Layout" type="VBoxContainer" parent="Screen"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="TopBar" type="HBoxContainer" parent="Screen/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Screen/Layout/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 44
+text = "Childsplay Modern"
+vertical_alignment = 1
+
+[node name="AudioToggle" type="Button" parent="Screen/Layout/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 56)
+layout_mode = 2
+toggle_mode = true
+text = "Audio: On"
+
+[node name="ExitButton" type="Button" parent="Screen/Layout/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 56)
+layout_mode = 2
+text = "Exit"
+
+[node name="GameGrid" type="GridContainer" parent="Screen/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 28
+theme_override_constants/v_separation = 28
+columns = 3
+
+[node name="PackidButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
+custom_minimum_size = Vector2(300, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+tooltip_text = "Packid"
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/PackidButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 28
+text = "Packid"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="FallingletterButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
+custom_minimum_size = Vector2(300, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+tooltip_text = "Falling Letter"
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/FallingletterButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 28
+text = "Falling Letter"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="SoundmemoryButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
+custom_minimum_size = Vector2(300, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+tooltip_text = "Sound Memory"
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/SoundmemoryButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 28
+text = "Sound Memory"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="MemoryButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
+custom_minimum_size = Vector2(300, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+tooltip_text = "Memory"
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/MemoryButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 28
+text = "Memory"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="BilliardsButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
+custom_minimum_size = Vector2(300, 220)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+tooltip_text = "Billiards"
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/BilliardsButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 28
+text = "Billiards"
+horizontal_alignment = 1
+vertical_alignment = 2

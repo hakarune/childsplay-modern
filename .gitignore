@@ -1,0 +1,73 @@
+# ---------------------------------------------------------------------------
+# Childsplay-Modern .gitignore
+# Covers: Godot 4, HTML/JS, and Debian build artifacts
+# ---------------------------------------------------------------------------
+
+# --- Godot 4 engine ---
+# .godot/ holds the throwaway import cache and editor state.
+.godot/
+.import/
+export_presets.cfg
+*.translation
+# NOTE: *.import / *.uid files for committed source assets (e.g. icon.svg)
+# are intentionally tracked so a fresh clone opens without a full reimport.
+# The bulk asset copy under desktop-godot/assets/ is ignored separately.
+# Godot editor / mono / temp
+.mono/
+data_*/
+*.tmp
+
+# --- Godot exports / native builds ---
+desktop-godot/build/
+desktop-godot/bin/
+*.pck
+*.x86_64
+*.exe
+*.dmg
+*.app
+
+# --- HTML / JS / Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+.cache/
+.parcel-cache/
+.eslintcache
+
+# --- Generic build / distribution output ---
+build/
+dist/
+out/
+*.log
+
+# --- Debian packaging artifacts ---
+*.deb
+*.ddeb
+*.buildinfo
+*.changes
+debian/.debhelper/
+debian/files
+debian/*.substvars
+debian/*.debhelper
+pkgroot/
+deb-pkg/
+
+# --- Legacy upstream sources (checked out locally, not tracked) ---
+legacy-sources/
+
+# --- Derived asset copy for the Godot project ---
+# Canonical assets live in /assets; desktop-godot/assets/ is a local mirror
+# produced by desktop-godot/sync-assets.sh (res:// cannot span directories).
+desktop-godot/assets/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
