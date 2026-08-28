@@ -16,7 +16,7 @@ const GAMES := [
 	{
 		"id": "fallingletter", "title": "Falling Letter",
 		"icon": "fallingletters.icon.png", "hover": "fallingletters_ro.icon.png",
-		"scene": "res://scenes/minigames/Fallingletter.tscn",
+		"scene": "res://scenes/games/FallingLetter.tscn",
 	},
 	{
 		"id": "soundmemory", "title": "Sound Memory",
