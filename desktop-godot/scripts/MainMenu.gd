@@ -21,7 +21,7 @@ const GAMES := [
 	{
 		"id": "soundmemory", "title": "Sound Memory",
 		"icon": "soundmemory.icon.png", "hover": "soundmemory_ro.icon.png",
-		"scene": "res://scenes/minigames/Soundmemory.tscn",
+		"scene": "res://scenes/games/SoundMemory.tscn",
 	},
 	{
 		"id": "memory", "title": "Memory",
