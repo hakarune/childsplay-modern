@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://bbilliardball0"]
+
+[ext_resource type="Script" path="res://scripts/BilliardsBall.gd" id="1_bb"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
+radius = 15.0
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ball"]
+friction = 0.08
+bounce = 0.72
+
+[node name="BilliardsBall" type="RigidBody2D"]
+physics_material_override = SubResource("PhysicsMaterial_ball")
+gravity_scale = 0.0
+linear_damp = 1.15
+angular_damp = 2.0
+continuous_cd = 1
+contact_monitor = true
+max_contacts_reported = 6
+script = ExtResource("1_bb")
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ball")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)

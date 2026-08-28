@@ -31,7 +31,7 @@ const GAMES := [
 	{
 		"id": "billiards", "title": "Billiards",
 		"icon": "billiard.icon.png", "hover": "billiard_ro.icon.png",
-		"scene": "res://scenes/minigames/Billiards.tscn",
+		"scene": "res://scenes/games/Billiards.tscn",
 	},
 ]
 
