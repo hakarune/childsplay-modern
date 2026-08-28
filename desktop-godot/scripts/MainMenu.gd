@@ -26,7 +26,7 @@ const GAMES := [
 	{
 		"id": "memory", "title": "Memory",
 		"icon": "memory_sp.icon.png", "hover": "memory_sp_ro.icon.png",
-		"scene": "res://scenes/minigames/Memory.tscn",
+		"scene": "res://scenes/games/Memory.tscn",
 	},
 	{
 		"id": "billiards", "title": "Billiards",

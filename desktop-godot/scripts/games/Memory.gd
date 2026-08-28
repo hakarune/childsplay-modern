@@ -1,0 +1,212 @@
+extends Control
+## Memory — classic picture-pairs game.
+##
+## Difficulty scales through a ladder of grid sizes. Each level builds a
+## fresh deck by picking N random pictures from the legacy tileset (via
+## AssetLoader), duplicating each into a pair, and shuffling them into the
+## GridContainer. Two cards may be face-up at once; a match locks the pair,
+## a mismatch flips them back after a short delay. Clearing every pair
+## plays a fanfare and offers the next level.
+
+const MAIN_MENU := "res://scenes/MainMenu.tscn"
+const CARD_SCENE := preload("res://scenes/components/MemoryCard.tscn")
+
+# Difficulty ladder: columns x rows (product must be even).
+const LEVELS := [
+	{ "name": "Toddler", "cols": 2, "rows": 2 },
+	{ "name": "Easy",    "cols": 4, "rows": 3 },
+	{ "name": "Medium",  "cols": 4, "rows": 4 },
+	{ "name": "Hard",    "cols": 5, "rows": 4 },
+]
+
+# Picture pool: tileset_2 has unique filenames, so AssetLoader resolves
+# each unambiguously. 21 pictures cover the largest deck (10 pairs).
+const CARD_IMAGES := [
+	"01_cat.png", "02_pig.png", "03_bear.png", "04_hippopotamus.png",
+	"05_penguin.png", "06_cow.png", "07_sheep.png", "08_turtle.png",
+	"09_panda.png", "10_chicken.png", "11_redbird.png", "12_wolf.png",
+	"13_monkey.png", "14_fox.png", "15_bluebirds.png", "16_elephant.png",
+	"17_lion.png", "18_gnu.png", "19_bluebaby.png", "20_greenbaby.png",
+	"21_frog.png",
+]
+const BACK_IMAGE := "CP_cardback.png"
+
+const SND_FLIP := "dealcard1.wav"
+const SND_MATCH := "good.ogg"
+const SND_MISMATCH := "wrong.ogg"
+const SND_WIN := "winner.ogg"
+
+const PRE_MATCH_DELAY := 0.25
+const MISMATCH_DELAY := 0.8
+
+var _level_index := 0
+var _flips := 0
+var _matched_pairs := 0
+var _total_pairs := 0
+var _open_cards: Array[MemoryCard] = []
+var _busy := false            # blocks input during resolve / win
+
+var _back_tex: Texture2D
+
+@onready var _grid: GridContainer = %CardGrid
+@onready var _flip_label: Label = %FlipCounter
+@onready var _level_label: Label = %LevelIndicator
+@onready var _back_button: Button = %BackButton
+@onready var _popup: Control = %WinPopup
+@onready var _popup_label: Label = %WinPopupLabel
+@onready var _popup_button: Button = %WinPopupNext
+
+@onready var _sfx_flip: AudioStreamPlayer = $Audio/FlipSound
+@onready var _sfx_match: AudioStreamPlayer = $Audio/MatchSound
+@onready var _sfx_mismatch: AudioStreamPlayer = $Audio/MismatchSound
+@onready var _sfx_win: AudioStreamPlayer = $Audio/WinSound
+
+
+func _ready() -> void:
+	_back_tex = AssetLoader.get_texture(BACK_IMAGE)
+	_sfx_flip.stream = AssetLoader.get_stream(SND_FLIP)
+	_sfx_match.stream = AssetLoader.get_stream(SND_MATCH)
+	_sfx_mismatch.stream = AssetLoader.get_stream(SND_MISMATCH)
+	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
+
+	_back_button.pressed.connect(_go_home)
+	_popup_button.pressed.connect(_on_popup_button)
+	_popup.visible = false
+
+	_start_level(0)
+
+
+# ---------------------------------------------------------------------------
+# Level setup
+# ---------------------------------------------------------------------------
+
+func _start_level(index: int) -> void:
+	_level_index = clampi(index, 0, LEVELS.size() - 1)
+	var lvl: Dictionary = LEVELS[_level_index]
+
+	_flips = 0
+	_matched_pairs = 0
+	_open_cards.clear()
+	_busy = false
+	_popup.visible = false
+
+	_total_pairs = int(lvl["cols"] * lvl["rows"] / 2.0)
+	_grid.columns = lvl["cols"]
+	_level_label.text = "Level %d / %d  -  %s" % [_level_index + 1, LEVELS.size(), lvl["name"]]
+	_update_flip_label()
+	_build_deck()
+
+
+func _build_deck() -> void:
+	for c in _grid.get_children():
+		c.queue_free()
+
+	var pool: Array = CARD_IMAGES.duplicate()
+	pool.shuffle()
+	var chosen: Array = pool.slice(0, _total_pairs)
+
+	var deck: Array = []
+	for image_name in chosen:
+		deck.append(image_name)
+		deck.append(image_name)
+	deck.shuffle()
+
+	for image_name in deck:
+		var card: MemoryCard = CARD_SCENE.instantiate()
+		_grid.add_child(card)
+		card.setup(image_name, AssetLoader.get_texture(image_name), _back_tex)
+		card.card_clicked.connect(_on_card_clicked)
+
+
+# ---------------------------------------------------------------------------
+# Match logic
+# ---------------------------------------------------------------------------
+
+func _on_card_clicked(card: MemoryCard) -> void:
+	if _busy or card in _open_cards or card.is_matched:
+		return
+
+	card.flip_up()
+	_play(_sfx_flip)
+	_open_cards.append(card)
+
+	if _open_cards.size() < 2:
+		return
+
+	_flips += 1
+	_update_flip_label()
+
+	var a: MemoryCard = _open_cards[0]
+	var b: MemoryCard = _open_cards[1]
+	if a.card_id == b.card_id:
+		_resolve_match(a, b)
+	else:
+		_resolve_mismatch(a, b)
+
+
+func _resolve_match(a: MemoryCard, b: MemoryCard) -> void:
+	_busy = true
+	await get_tree().create_timer(PRE_MATCH_DELAY).timeout
+	a.set_matched()
+	b.set_matched()
+	_play(_sfx_match)
+	_matched_pairs += 1
+	_open_cards.clear()
+	_update_flip_label()
+	_busy = false
+
+	if _matched_pairs == _total_pairs:
+		_on_level_complete()
+
+
+func _resolve_mismatch(a: MemoryCard, b: MemoryCard) -> void:
+	_busy = true
+	await get_tree().create_timer(MISMATCH_DELAY).timeout
+	_play(_sfx_mismatch)
+	a.flip_down()
+	b.flip_down()
+	_open_cards.clear()
+	_busy = false
+
+
+# ---------------------------------------------------------------------------
+# Win / navigation
+# ---------------------------------------------------------------------------
+
+func _on_level_complete() -> void:
+	_busy = true
+	_play(_sfx_win)
+	var is_last := _level_index >= LEVELS.size() - 1
+	_popup_label.text = "Great job!\nYou cleared %d pairs in %d flips." % [_total_pairs, _flips]
+	_popup_button.text = "Back to Menu" if is_last else "Next Level"
+	_popup.visible = true
+	_popup_button.grab_focus()
+
+
+func _on_popup_button() -> void:
+	if _level_index >= LEVELS.size() - 1:
+		_go_home()
+	else:
+		_start_level(_level_index + 1)
+
+
+func _go_home() -> void:
+	get_tree().change_scene_to_file(MAIN_MENU)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+func _update_flip_label() -> void:
+	_flip_label.text = "Flips: %d    Pairs: %d / %d" % [_flips, _matched_pairs, _total_pairs]
+
+
+func _play(player: AudioStreamPlayer) -> void:
+	if player.stream != null:
+		player.play()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_go_home()
