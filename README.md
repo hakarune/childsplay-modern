@@ -56,7 +56,7 @@ childsplay-modern/
 │   ├── index.html          Responsive full-viewport canvas
 │   ├── css/                Layout + HUD styling
 │   └── js/                 engine.js, menu.js, main.js, minigames/*
-├── build-deb.sh         Headless Godot export -> Linux x86_64 -> .deb
+├── build-deb.sh         Wrapper -> desktop-godot/build-deb.sh (export + .deb)
 ├── legacy-sources/      Upstream checkout (not tracked; see below)
 ├── LICENSE              GPL-3.0
 └── README.md
@@ -66,9 +66,11 @@ childsplay-modern/
 
 Requirements on the build host:
 
-* [Godot 4](https://godotengine.org/) (`godot4` on `PATH`, or set `GODOT_BIN`)
-  with the **Linux/X11 export templates** installed
-* `dpkg-deb` and (recommended) `fakeroot`
+* [Godot 4](https://godotengine.org/) (`godot4` or `godot` on `PATH`, or set
+  `GODOT_BIN`) with the matching **Linux export templates** installed
+* `dpkg-deb` (from `dpkg`); `fakeroot` only if your `dpkg-deb` predates
+  `--root-owner-group`
+* optional: `desktop-file-utils` (the script validates the `.desktop` entry)
 
 Run the project from the editor:
 
@@ -86,12 +88,24 @@ Produce an installable package:
 ```sh
 ./build-deb.sh            # -> dist/childsplay-modern_0.1.0_amd64.deb
 ./build-deb.sh 0.2.0      # override the version string
+./build-deb.sh --no-export   # re-package an already-exported binary only
 ```
 
-`build-deb.sh` does a headless `--import` + `--export-release` of the Godot
-project to a Linux x86_64 binary, stages it under `/usr/lib/childsplay-modern`
-with a `/usr/bin` wrapper, a `.desktop` entry and an icon, then builds the
-`.deb` into `dist/`.
+`desktop-godot/build-deb.sh` runs `sync-assets.sh`, writes an
+`export_presets.cfg` (Linux / `x86_64`, **all resources**, embedded `.pck`)
+if none exists, does a headless `--import` + `--export-release "Linux"` to a
+single self-contained ELF, then stages an FHS layout and packages it:
+
+```
+usr/bin/childsplay-modern                                  (the game)
+usr/share/applications/childsplay-modern.desktop           (menu entry)
+usr/share/icons/hicolor/scalable/apps/childsplay-modern.svg
+usr/share/doc/childsplay-modern/copyright
+DEBIAN/{control,postinst,postrm}   (postinst/postrm refresh the menu caches)
+```
+
+Staging happens under `$TMPDIR` (override with `CHILDSPLAY_BUILD_DIR`) so a
+FAT/exFAT checkout can't break the `DEBIAN/` permissions `dpkg-deb` requires.
 
 Install / remove:
 

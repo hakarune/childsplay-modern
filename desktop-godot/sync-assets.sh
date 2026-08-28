@@ -20,6 +20,7 @@ DST="$HERE/assets"
 
 mkdir -p "$DST"
 if command -v rsync >/dev/null 2>&1; then
+  # Incremental: unchanged files keep their mtime, so Godot skips re-import.
   rsync -a --delete \
     --exclude '.godot/' --exclude '*.import' \
     "$SRC/" "$DST/"
