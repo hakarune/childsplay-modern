@@ -45,9 +45,10 @@ export default class FallingLetterGame extends Scene {
   }
 
   _buildKeyboard() {
-    const keyW = 112;             // 10-wide QWERTY top row fits 1280 with margin
-    const keyH = 42;
     const gap = 8;
+    // widest row is 10 keys — size them to fit the current world width
+    const keyW = Math.min(112, (VIEW_W - 40 - 9 * gap) / 10);
+    const keyH = 42;
     const bottom = VIEW_H - 24;
     this._keys = [];
     KB_ROWS.forEach((row, r) => {
@@ -58,6 +59,12 @@ export default class FallingLetterGame extends Scene {
         this._keys.push({ ch: row[i], x: x0 + i * (keyW + gap), y, w: keyW, h: keyH });
       }
     });
+  }
+
+  resize() {
+    this._buildKeyboard();
+    for (const b of this._balloons) b.x = clamp(b.x, R + 20, VIEW_W - R - 20);
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
   // --- spawning / difficulty ---

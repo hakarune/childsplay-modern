@@ -8,8 +8,19 @@
 //
 // Games are modules whose default export is (game, opts) => Scene.
 
-export const VIEW_W = 1280;
+// The world is a fixed 720-unit-tall canvas whose WIDTH flexes to match the
+// viewport's aspect ratio, so the game fills the screen instead of being
+// letter-boxed. VIEW_W is a live binding — engine._resize() reassigns it and
+// every importer sees the new value. Games must read VIEW_W/VIEW_H inside
+// their methods (never cache a width-derived constant at module scope) and
+// implement resize() to re-lay-out.
+export let VIEW_W = 1280;
 export const VIEW_H = 720;
+
+// Clamp the world aspect so layouts drawn around 16:9 don't distort on very
+// square or very wide screens (the remainder letter-boxes as before).
+const MIN_ASPECT = 1.30;   // ~4:3  — iPad, older monitors
+const MAX_ASPECT = 2.00;   // ~18:9 — wide laptops, split view
 
 const ASSET_ROOT = new URL('../assets/', import.meta.url).href;
 const isImage = (p) => /\.(png|jpe?g|svg|webp|gif)$/i.test(p);
@@ -168,7 +179,22 @@ export class Game {
 
   _resize() {
     const dpr = window.devicePixelRatio || 1;
-    const scale = Math.min(window.innerWidth / VIEW_W, window.innerHeight / VIEW_H);
+    const vw = Math.max(1, window.innerWidth);
+    const vh = Math.max(1, window.innerHeight);
+
+    // Portrait phones can't fit a landscape world usefully — ask the player
+    // to turn the device and let main.js show the hint overlay.
+    const portrait = vh > vw;
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.toggle('portrait-lock', portrait);
+    }
+
+    // World width tracks the viewport aspect (clamped), so the aspect-fit
+    // scale below leaves little or no letter-box on ordinary screens.
+    const aspect = Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, vw / vh));
+    VIEW_W = Math.round(VIEW_H * aspect);
+
+    const scale = Math.min(vw / VIEW_W, vh / VIEW_H);
     const cssW = Math.round(VIEW_W * scale);
     const cssH = Math.round(VIEW_H * scale);
 

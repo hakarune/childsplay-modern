@@ -16,6 +16,28 @@ const hud = document.getElementById('hud');
 const backBtn = document.getElementById('back-btn');
 const title = document.getElementById('activity-name');
 const splash = document.getElementById('splash');
+const fsBtn = document.getElementById('fs-btn');
+
+// --- fullscreen toggle -----------------------------------------------------
+const fsEl = document.documentElement;
+const canFullscreen = !!(fsEl.requestFullscreen || fsEl.webkitRequestFullscreen);
+if (!canFullscreen) {
+  fsBtn.hidden = true;
+} else {
+  fsBtn.addEventListener('click', () => {
+    const d = document;
+    const on = d.fullscreenElement || d.webkitFullscreenElement;
+    if (on) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    else (fsEl.requestFullscreen || fsEl.webkitRequestFullscreen).call(fsEl);
+  });
+  const sync = () => {
+    const on = document.fullscreenElement || document.webkitFullscreenElement;
+    fsBtn.textContent = on ? '✕' : '⛶';
+    fsBtn.title = on ? 'Exit fullscreen' : 'Fullscreen';
+  };
+  document.addEventListener('fullscreenchange', sync);
+  document.addEventListener('webkitfullscreenchange', sync);
+}
 
 const game = new Game(canvas);
 

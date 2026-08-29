@@ -121,6 +121,12 @@ export default class PongGame extends Scene {
     );
   }
 
+  resize() {
+    this._py = clamp(this._py, HUD, VIEW_H - PH);
+    this._ay = clamp(this._ay, HUD, VIEW_H - PH);
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
+  }
+
   keydown(e) {
     if (e.key === 'ArrowUp') this._keys.up = true;
     if (e.key === 'ArrowDown') this._keys.down = true;

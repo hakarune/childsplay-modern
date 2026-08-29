@@ -64,10 +64,29 @@ export class Overlay {
     this.buttons = buttons;
     this.visible = true;
     this._hover = -1;
+    this._anchor = this._center();
   }
 
   hide() {
     this.visible = false;
+  }
+
+  _center() {
+    if (!this.buttons.length) return { x: 0, y: 0 };
+    let x = 0;
+    let y = 0;
+    for (const b of this.buttons) { x += b.x + b.w / 2; y += b.y + b.h / 2; }
+    return { x: x / this.buttons.length, y: y / this.buttons.length };
+  }
+
+  // Re-centre the button row after the world size changed. Games call this
+  // from resize() with the same (cx, cy) they passed to buttonRow().
+  reflow(cx, cy) {
+    if (!this.visible || !this._anchor) return;
+    const dx = cx - this._anchor.x;
+    const dy = cy - this._anchor.y;
+    for (const b of this.buttons) { b.x += dx; b.y += dy; }
+    this._anchor = { x: cx, y: cy };
   }
 
   pointermove(x, y) {

@@ -4,7 +4,9 @@
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
 import { clamp, dist, inRect, Overlay, buttonRow } from '../util.js';
 
-const T = { x: 150, y: 128, w: 980, h: 520 };
+const TABLE_MAX_W = 980;
+const TABLE_H = 520;
+const TABLE_Y = 128;
 const R = 16;
 const POCKET_R = 34;
 const FRICTION = 0.6;       // velocity retained per second
@@ -29,13 +31,6 @@ const SND_CLICK = 'sfx/sndt.wav';
 const SND_POCKET = 'sfx/pick.wav';
 const SND_WIN = 'sfx/winner.ogg';
 
-const POCKETS = [
-  { x: T.x, y: T.y }, { x: T.x + T.w / 2, y: T.y }, { x: T.x + T.w, y: T.y },
-  { x: T.x, y: T.y + T.h }, { x: T.x + T.w / 2, y: T.y + T.h }, { x: T.x + T.w, y: T.y + T.h },
-];
-const HEAD = { x: T.x + T.w * 0.26, y: T.y + T.h / 2 };
-const FOOT = { x: T.x + T.w * 0.70, y: T.y + T.h / 2 };
-
 export default class BilliardsGame extends Scene {
   constructor(game, opts = {}) {
     super(game);
@@ -43,7 +38,32 @@ export default class BilliardsGame extends Scene {
     this._overlay = new Overlay();
     this._clickCd = 0;
     this._level = 0;
+    this._geo();
     this._startLevel(0);
+  }
+
+  // Table + pockets + spot positions for the current world width. The table
+  // is centred and shrinks to keep a margin on narrow worlds.
+  _geo() {
+    const w = Math.min(TABLE_MAX_W, VIEW_W - 150);
+    const T = { x: Math.round((VIEW_W - w) / 2), y: TABLE_Y, w, h: TABLE_H };
+    this._T = T;
+    this._pockets = [
+      { x: T.x, y: T.y }, { x: T.x + T.w / 2, y: T.y }, { x: T.x + T.w, y: T.y },
+      { x: T.x, y: T.y + T.h }, { x: T.x + T.w / 2, y: T.y + T.h }, { x: T.x + T.w, y: T.y + T.h },
+    ];
+    this._head = { x: T.x + T.w * 0.26, y: T.y + T.h / 2 };
+    this._foot = { x: T.x + T.w * 0.70, y: T.y + T.h / 2 };
+  }
+
+  resize() {
+    const oldX = this._T ? this._T.x : null;
+    this._geo();
+    if (oldX != null && this._balls) {
+      const dx = this._T.x - oldX;
+      for (const b of this._balls) b.x += dx;
+    }
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
   _startLevel(n) {
@@ -53,15 +73,16 @@ export default class BilliardsGame extends Scene {
     this._over = false;
     this._aim = null;
     this._overlay.hide();
+    this._geo();
 
-    this._cue = { x: HEAD.x, y: HEAD.y, vx: 0, vy: 0, cue: true, potted: false };
+    this._cue = { x: this._head.x, y: this._head.y, vx: 0, vy: 0, cue: true, potted: false };
     this._balls = [this._cue];
 
     let row = 0, col = 0, per = 1;
     for (let i = 0; i < count; i++) {
       this._balls.push({
-        x: FOOT.x + row * (R * 2 + 1) * 0.92 + (Math.random() - 0.5) * 2,
-        y: FOOT.y + (col - row / 2) * (R * 2 + 1) + (Math.random() - 0.5) * 2,
+        x: this._foot.x + row * (R * 2 + 1) * 0.92 + (Math.random() - 0.5) * 2,
+        y: this._foot.y + (col - row / 2) * (R * 2 + 1) + (Math.random() - 0.5) * 2,
         vx: 0, vy: 0, cue: false, potted: false, color: COLORS[i % COLORS.length],
       });
       if (++col >= per) { row++; per++; col = 0; }
@@ -128,11 +149,12 @@ export default class BilliardsGame extends Scene {
   }
 
   _pocketsAndWalls(b) {
-    for (const p of POCKETS) {
+    const T = this._T;
+    for (const p of this._pockets) {
       if (dist(b.x, b.y, p.x, p.y) < POCKET_R) {
         if (b.cue) {
           playSound(SND_POCKET);
-          b.x = HEAD.x; b.y = HEAD.y; b.vx = 0; b.vy = 0;
+          b.x = this._head.x; b.y = this._head.y; b.vx = 0; b.vy = 0;
         } else {
           b.potted = true; b.vx = 0; b.vy = 0;
           this._left--;
@@ -143,7 +165,7 @@ export default class BilliardsGame extends Scene {
       }
     }
     // Skip cushion bounce while near a pocket mouth (forgiving pots).
-    const nearPocket = POCKETS.some((p) => dist(b.x, b.y, p.x, p.y) < POCKET_R * 1.8);
+    const nearPocket = this._pockets.some((p) => dist(b.x, b.y, p.x, p.y) < POCKET_R * 1.8);
     if (nearPocket) return;
 
     if (b.x - R < T.x) { b.x = T.x + R; b.vx = Math.abs(b.vx) * REST; }
@@ -199,12 +221,13 @@ export default class BilliardsGame extends Scene {
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     // rail + felt
+    const T = this._T;
     ctx.fillStyle = '#5c3a20';
     ctx.fillRect(T.x - 18, T.y - 18, T.w + 36, T.h + 36);
     ctx.fillStyle = '#1f7a48';
     ctx.fillRect(T.x, T.y, T.w, T.h);
 
-    for (const p of POCKETS) {
+    for (const p of this._pockets) {
       ctx.fillStyle = '#07120c';
       ctx.beginPath();
       ctx.arc(p.x, p.y, POCKET_R * 0.8, 0, Math.PI * 2);

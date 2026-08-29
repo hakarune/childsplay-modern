@@ -45,18 +45,10 @@ export default class FindItGame extends Scene {
   }
 
   _layout(im, lv) {
-    const aspect = (im.naturalWidth || 4) / (im.naturalHeight || 3);
-    let pw = 560;
-    let ph = pw / aspect;
-    if (ph > 470) { ph = 470; pw = ph * aspect; }
-    const gap = 40;
-    const total = pw * 2 + gap;
-    const x0 = (VIEW_W - total) / 2;
-    const y0 = HUD + (VIEW_H - HUD - ph) / 2;
-    this._L = { x: x0, y: y0, w: pw, h: ph };
-    this._R = { x: x0 + pw + gap, y: y0, w: pw, h: ph };
+    this._place();
 
-    // scatter difference points, spaced apart, away from the edges
+    // scatter difference points, spaced apart, away from the edges.
+    // Stored normalised (nx, ny) so _place() alone handles a resize.
     this._diffs = [];
     let guard = 0;
     while (this._diffs.length < lv.diffs && guard++ < 400) {
@@ -65,6 +57,28 @@ export default class FindItGame extends Scene {
       if (this._diffs.some((d) => Math.hypot(d.nx - nx, d.ny - ny) < 0.16)) continue;
       this._diffs.push({ nx, ny, color: BLOBS[this._diffs.length % BLOBS.length], found: false });
     }
+  }
+
+  // Compute the two picture panels for the current world size.
+  _place() {
+    const im = this._img;
+    if (!im) return;
+    const aspect = (im.naturalWidth || 4) / (im.naturalHeight || 3);
+    const gap = 40;
+    let pw = Math.min(560, (VIEW_W - gap - 80) / 2);
+    let ph = pw / aspect;
+    const maxH = VIEW_H - HUD - 40;
+    if (ph > maxH) { ph = maxH; pw = ph * aspect; }
+    const total = pw * 2 + gap;
+    const x0 = (VIEW_W - total) / 2;
+    const y0 = HUD + (VIEW_H - HUD - ph) / 2;
+    this._L = { x: x0, y: y0, w: pw, h: ph };
+    this._R = { x: x0 + pw + gap, y: y0, w: pw, h: ph };
+  }
+
+  resize() {
+    this._place();
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
   update(dt) {
@@ -86,8 +100,9 @@ export default class FindItGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
+    if (!this._img || !this._L) return;   // picture still loading
     const p = this._panelPoint(this._L, x, y) || this._panelPoint(this._R, x, y);
-    if (!p || !this._img) return;
+    if (!p) return;
     const tolN = LEVELS[this._level].r / this._R.w * 1.4;
     const hit = this._diffs.find((d) => !d.found && Math.hypot(d.nx - p.nx, d.ny - p.ny) < tolN);
     if (hit) {

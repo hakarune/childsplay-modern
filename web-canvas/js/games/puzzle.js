@@ -84,15 +84,20 @@ export default class PuzzleGame extends Scene {
     });
   }
 
-  _build(lv) {
+  // Frame rect for the current world size (left half, leaving room for the
+  // scatter area on the right).
+  _reframe() {
     const im = this._image;
     const aspect = (im.naturalWidth || 4) / (im.naturalHeight || 3);
-
-    // Frame on the left; pieces scatter on the right.
-    let fw = 660;
+    let fw = Math.min(660, VIEW_W * 0.52);
     let fh = fw / aspect;
-    if (fh > 520) { fh = 520; fw = fh * aspect; }
-    this._frame = { x: 56, y: 96 + (600 - fh) / 2, w: fw, h: fh };
+    const maxH = VIEW_H - 140;
+    if (fh > maxH) { fh = maxH; fw = fh * aspect; }
+    this._frame = { x: 56, y: 96 + (VIEW_H - 120 - fh) / 2, w: fw, h: fh };
+  }
+
+  _build(lv) {
+    this._reframe();
 
     const norm = lv.kind === 'grid'
       ? gridRects(lv.cols, lv.rows)
@@ -110,6 +115,26 @@ export default class PuzzleGame extends Scene {
       };
     });
     shuffle(this._pieces); // random draw order
+  }
+
+  resize() {
+    if (!this._image || !this._pieces.length) {
+      this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
+      return;
+    }
+    this._reframe();
+    const f = this._frame;
+    for (const p of this._pieces) {
+      p.home = { x: f.x + p.nr.x * f.w, y: f.y + p.nr.y * f.h, w: p.nr.w * f.w, h: p.nr.h * f.h };
+      if (p.placed) {
+        p.px = p.home.x;
+        p.py = p.home.y;
+      } else {
+        p.px = clamp(p.px, 0, VIEW_W - p.home.w);
+        p.py = clamp(p.py, 0, VIEW_H - p.home.h);
+      }
+    }
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
   // --- input ---

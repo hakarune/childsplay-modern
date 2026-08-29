@@ -45,6 +45,13 @@ export default class SoundMemoryGame extends Scene {
     const ids = shuffle(POOL.slice()).slice(0, this._pairs);
     const cells = shuffle(ids.concat(ids));
 
+    this._cards = cells.map((id) => ({ id, x: 0, y: 0, s: 0, matched: false }));
+    this._place();
+  }
+
+  // Re-position cards for the current world size, keeping their state.
+  _place() {
+    const lv = LEVELS[this._level];
     const top = 90;
     const gw = VIEW_W - 120;
     const gh = VIEW_H - top - 40;
@@ -55,13 +62,16 @@ export default class SoundMemoryGame extends Scene {
     const ox = (VIEW_W - (size * lv.cols + gap * (lv.cols - 1))) / 2;
     const oy = top + (gh - (size * lv.rows + gap * (lv.rows - 1))) / 2;
 
-    this._cards = cells.map((id, i) => ({
-      id,
-      x: ox + (i % lv.cols) * (size + gap),
-      y: oy + ((i / lv.cols) | 0) * (size + gap),
-      s: size,
-      matched: false,
-    }));
+    this._cards.forEach((c, i) => {
+      c.x = ox + (i % lv.cols) * (size + gap);
+      c.y = oy + ((i / lv.cols) | 0) * (size + gap);
+      c.s = size;
+    });
+  }
+
+  resize() {
+    if (this._cards && this._cards.length) this._place();
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
   update(dt) {

@@ -66,6 +66,20 @@ export default class MemoryGame extends Scene {
     const faces = shuffle(this._deck.slice()).slice(0, this._pairs);
     const cells = shuffle(faces.concat(faces));
 
+    this._cards = cells.map((face) => ({
+      face,
+      x: 0, y: 0, s: 0,
+      t: 0,        // flip anim 0=down 1=up
+      up: false,
+      matched: false,
+    }));
+    this._place();
+  }
+
+  // Position the cards for the current world size. Keeps card state
+  // (up / matched / flip anim) so it can run on every resize().
+  _place() {
+    const lv = LEVELS[this._level];
     const marginX = 60;
     const top = 90;
     const bottom = 40;
@@ -78,15 +92,16 @@ export default class MemoryGame extends Scene {
     const ox = (VIEW_W - (size * lv.cols + gap * (lv.cols - 1))) / 2;
     const oy = top + (gh - (size * lv.rows + gap * (lv.rows - 1))) / 2;
 
-    this._cards = cells.map((face, i) => ({
-      face,
-      x: ox + (i % lv.cols) * (size + gap),
-      y: oy + ((i / lv.cols) | 0) * (size + gap),
-      s: size,
-      t: 0,        // flip anim 0=down 1=up
-      up: false,
-      matched: false,
-    }));
+    this._cards.forEach((c, i) => {
+      c.x = ox + (i % lv.cols) * (size + gap);
+      c.y = oy + ((i / lv.cols) | 0) * (size + gap);
+      c.s = size;
+    });
+  }
+
+  resize() {
+    if (this._cards && this._cards.length) this._place();
+    this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
   update(dt) {
