@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **15 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Packid, Billiards.
+The main dashboard has **16 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,16 +66,16 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Numbers (counting), Image Changer, Wipe, Synonyms, Photo Album,
-Spin the Bottle and the Quiz decks.
+below — Numbers (counting), Image Changer, Synonyms, Photo Album, Spin
+the Bottle and the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
 The original also ships these. **Four in a Row**, **Block Breaker**,
-**Simon**, **Electro** and **Tic Tac Toe** are converted so far; the rest
-are listed so nothing is lost.
+**Simon**, **Electro**, **Tic Tac Toe** and **Wipe** are converted so
+far; the rest are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
@@ -88,7 +88,7 @@ are listed so nothing is lost.
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
 | Image Changer | `ichanger.py` | ⬜ | ⬜ | Memorise images, then spot which one changed. |
 | Photo Album | `photoalbum.py` | ⬜ | ⬜ | Browse a themed set of photos. |
-| Wipe | `wipe.py` | ⬜ | ⬜ | "Wipe" the screen to reveal the picture underneath. |
+| Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. Clear the target fraction to finish — six paintings (the GPL `WipeData` set), rising target 55→84% and a shrinking sponge. Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
 | Synonyms | `synonyms.py` | ⬜ | ⬜ | Make a word from given letters. |
 | Spin the Bottle | `spinbottle.py` | ⬜ | ⬜ | Word game — name something starting with a letter. |
 | Quiz engine | `quizengine.py` / `quiz.py` | ⬜ | ⬜ | Multiple-choice quiz framework. |
@@ -104,6 +104,6 @@ are listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — **Tic Tac Toe** ported on both targets
-(random / heuristic / minimax opponents). Extended-catalogue standalone
-activities done so far: Block Breaker, Simon, Electro, Tic Tac Toe._
+_Last updated: 2026-08-29 — **Wipe** ported on both targets (scratch-off
+painting reveal). Extended-catalogue standalone activities done so far:
+Block Breaker, Simon, Electro, Tic Tac Toe, Wipe._

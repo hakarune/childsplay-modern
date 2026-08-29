@@ -83,6 +83,11 @@ const GAMES := [
 		"icon": "TicTacToe.icon.png", "hover": "TicTacToe_ro.icon.png",
 		"scene": "res://scenes/games/TicTacToe.tscn",
 	},
+	{
+		"id": "wipe", "title": "Wipe",
+		"icon": "wipe.icon.png", "hover": "wipe_ro.icon.png",
+		"scene": "res://scenes/games/Wipe.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

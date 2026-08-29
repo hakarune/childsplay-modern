@@ -22,6 +22,7 @@ export const GAMES = [
   { id: 'simon',         name: 'Simon',          load: () => import('./simon.js') },
   { id: 'electro',       name: 'Electro',        load: () => import('./electro.js') },
   { id: 'tictactoe',     name: 'Tic Tac Toe',    load: () => import('./tictactoe.js') },
+  { id: 'wipe',          name: 'Wipe',           load: () => import('./wipe.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
 ];
@@ -40,6 +41,7 @@ export const MENU = [
   { id: 'simon',         name: 'Simon',        icon: 'icons/simon.png' },
   { id: 'electro',       name: 'Electro',      icon: 'icons/electro.png' },
   { id: 'tictactoe',     name: 'Tic Tac Toe',  icon: 'icons/tictactoe.png' },
+  { id: 'wipe',          name: 'Wipe',         icon: 'icons/wipe.png' },
   { id: 'packid',        name: 'Packid',        icon: 'icons/packid.png' },
   { id: 'billiards',     name: 'Billiards',     icon: 'icons/billiards.png' },
 ];
