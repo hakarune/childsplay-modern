@@ -27,7 +27,7 @@ export class MainMenu extends Scene {
   }
 
   _layout() {
-    const cols = MENU.length <= 3 ? MENU.length : 3;
+    const cols = MENU.length <= 3 ? MENU.length : MENU.length <= 8 ? 3 : 4;
     const rows = Math.ceil(MENU.length / cols);
     const availW = VIEW_W - PAD * 2;
     const availH = VIEW_H - TITLE_H - PAD;

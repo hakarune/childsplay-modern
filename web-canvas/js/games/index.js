@@ -13,19 +13,25 @@ export const GAMES = [
   { id: 'soundmemory',   name: 'Sound Memory',   load: () => import('./soundmemory.js') },
   { id: 'findsound',     name: 'Find Sound',     load: () => import('./findsound.js') },
   { id: 'puzzle',        name: 'Puzzle',         load: () => import('./puzzle.js') },
+  { id: 'findit',        name: 'Find It',        load: () => import('./findit.js') },
   { id: 'aquarium',      name: 'Aquarium',       load: () => import('./aquarium.js') },
+  { id: 'pong',          name: 'Pong',           load: () => import('./pong.js') },
+  { id: 'fourrow',       name: 'Four in a Row',  load: () => import('./fourrow.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
 ];
 
 export const MENU = [
-  { id: 'memory',        name: 'Memory',         icon: 'icons/memory.png',        submenu: true },
+  { id: 'memory',        name: 'Memory',        icon: 'icons/memory.png',        submenu: true },
   { id: 'fallingletter', name: 'Falling Letter', icon: 'icons/fallingletter.png' },
-  { id: 'findsound',     name: 'Find Sound',     icon: 'icons/findsound.png' },
-  { id: 'puzzle',        name: 'Puzzle',         icon: 'icons/puzzle.png' },
-  { id: 'aquarium',      name: 'Aquarium',       icon: 'icons/aquarium.png' },
-  { id: 'packid',        name: 'Packid',         icon: 'icons/packid.png' },
-  { id: 'billiards',     name: 'Billiards',      icon: 'icons/billiards.png' },
+  { id: 'findsound',     name: 'Find Sound',    icon: 'icons/findsound.png' },
+  { id: 'puzzle',        name: 'Puzzle',        icon: 'icons/puzzle.png' },
+  { id: 'findit',        name: 'Find It',       icon: 'icons/findit.png' },
+  { id: 'aquarium',      name: 'Aquarium',      icon: 'icons/aquarium.png' },
+  { id: 'pong',          name: 'Pong',          icon: 'icons/pong.png' },
+  { id: 'fourrow',       name: 'Four in a Row', icon: 'icons/fourrow.png' },
+  { id: 'packid',        name: 'Packid',        icon: 'icons/packid.png' },
+  { id: 'billiards',     name: 'Billiards',     icon: 'icons/billiards.png' },
 ];
 
 export function getGame(id) {

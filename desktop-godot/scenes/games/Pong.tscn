@@ -1,0 +1,143 @@
+[gd_scene load_steps=2 format=3 uid="uid://cponggame00000"]
+
+[ext_resource type="Script" path="res://scripts/games/Pong.gd" id="1_pong"]
+
+[node name="Pong" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pong")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.06, 0.09, 0.15, 1)
+
+[node name="HUD" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 64.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_right = 24
+
+[node name="Bar" type="HBoxContainer" parent="HUD"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="BackButton" type="Button" parent="HUD/Bar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "Home"
+
+[node name="ScoreLabel" type="Label" parent="HUD/Bar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "0   -   0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InfoLabel" type="Label" parent="HUD/Bar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "first to 5"
+vertical_alignment = 1
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="WallSound" type="AudioStreamPlayer" parent="Audio"]
+bus = &"SFX"
+
+[node name="HitSound" type="AudioStreamPlayer" parent="Audio"]
+bus = &"SFX"
+
+[node name="GoalSound" type="AudioStreamPlayer" parent="Audio"]
+bus = &"SFX"
+
+[node name="WinSound" type="AudioStreamPlayer" parent="Audio"]
+bus = &"Music"
+
+[node name="WinPopup" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="WinPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Center" type="CenterContainer" parent="WinPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="WinPopup/Center"]
+layout_mode = 2
+
+[node name="Pad" type="MarginContainer" parent="WinPopup/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 46
+theme_override_constants/margin_top = 38
+theme_override_constants/margin_right = 46
+theme_override_constants/margin_bottom = 38
+
+[node name="VBox" type="VBoxContainer" parent="WinPopup/Center/Panel/Pad"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="WinPopupLabel" type="Label" parent="WinPopup/Center/Panel/Pad/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "You win!"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="WinPopup/Center/Panel/Pad/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="WinPopupNext" type="Button" parent="WinPopup/Center/Panel/Pad/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 52)
+layout_mode = 2
+text = "Next Level"
+
+[node name="WinPopupReplay" type="Button" parent="WinPopup/Center/Panel/Pad/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 52)
+layout_mode = 2
+text = "Replay"
+
+[node name="WinPopupMenu" type="Button" parent="WinPopup/Center/Panel/Pad/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 52)
+layout_mode = 2
+text = "Menu"

@@ -43,6 +43,21 @@ const GAMES := [
 		"icon": "fishtank.icon.png", "hover": "fishtank_ro.icon.png",
 		"scene": "res://scenes/games/Aquarium.tscn",
 	},
+	{
+		"id": "pong", "title": "Pong",
+		"icon": "pong.icon.png", "hover": "pong_ro.icon.png",
+		"scene": "res://scenes/games/Pong.tscn",
+	},
+	{
+		"id": "findit", "title": "Find It",
+		"icon": "findit_sp.icon.png", "hover": "findit_sp_ro.icon.png",
+		"scene": "res://scenes/games/FindIt.tscn",
+	},
+	{
+		"id": "fourrow", "title": "Four in a Row",
+		"icon": "fourrow.icon.png", "hover": "fourrow_ro.icon.png",
+		"scene": "res://scenes/games/FourRow.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"
@@ -73,7 +88,7 @@ func _ready() -> void:
 ## from AssetLoader and wire their signals. Buttons are matched to GAMES by
 ## order; a missing button is created so the menu still fills in.
 func _wire_grid() -> void:
-	_grid.columns = 3
+	_grid.columns = 4 if GAMES.size() > 8 else 3
 	var buttons := _grid.get_children()
 
 	for i in GAMES.size():

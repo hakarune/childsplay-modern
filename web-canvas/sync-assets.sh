@@ -34,6 +34,9 @@ cp "$ICONS/billiard.icon.png"       "$DST/icons/billiards.png"
 cp "$ICONS/findsound.icon.png"      "$DST/icons/findsound.png"
 cp "$ICONS/puzzle.icon.png"         "$DST/icons/puzzle.png"
 cp "$ICONS/fishtank.icon.png"       "$DST/icons/aquarium.png"
+cp "$ICONS/pong.icon.png"           "$DST/icons/pong.png"
+cp "$ICONS/findit_sp.icon.png"      "$DST/icons/findit.png"
+cp "$ICONS/fourrow.icon.png"        "$DST/icons/fourrow.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
@@ -83,7 +86,10 @@ cp "$A/good.ogg" "$A/wrong.ogg" "$A/wahoo.wav" "$A/bummer.wav" \
    "$A/PongData/winner.ogg" "$A/PongData/bump.wav" "$A/PongData/pick.wav" \
    "$A/BilliardData/sndh.wav" "$A/BilliardData/sndt.wav" \
    "$A/FishtankData/sounds/blub0.wav" "$A/FishtankData/sounds/poolsplash.wav" \
+   "$A/PongData/goal.wav" \
    "$DST/sfx/"
 cp "$A/FishtankData/sounds/glockenschmoutz.ogg" "$DST/sfx/aqua_ambient.ogg"
+cp "$A/FourrowData/won.ogg"  "$DST/sfx/fourrow_win.ogg"
+cp "$A/FourrowData/loss.ogg" "$DST/sfx/fourrow_loss.ogg"
 
 echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)"
