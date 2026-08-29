@@ -9,6 +9,20 @@ Tracks every activity from the original **Childsplay**
 
 Update this file in the same commit that adds or finishes a game.
 
+## Design Policy
+
+Every game on both targets MUST follow **[docs/Design-Policy.md](Design-Policy.md)**
+— the universal rules written after the first play-test: flat purpose-named
+asset pools with tag-based difficulty, shared picture pools with session
+no-repeat, `svg → png → jpg` format fallback, a mandatory light/dark palette
+with WCAG contrast, "no audio outlives its scene" + a 🔊 read-instructions
+button in every game, a one-row HUD contract (`HUD_H = 64`, no gameplay above
+it), ≥ 5 monotonically-ramping levels, ≥ 44 px touch targets with
+snap-to-nearest, content in `assets/data/` files, and optional local
+2-player for turn-based games. New games build to it from the start; existing
+games carry a per-game migration checklist in §L of that doc. The per-game
+graphics declaration uses **[docs/templates/ASSETS.template.md](templates/ASSETS.template.md)**.
+
 ## Legend
 
 | Mark | Meaning |
