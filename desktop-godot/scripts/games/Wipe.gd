@@ -7,17 +7,16 @@ const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
 const CELL := 20.0
 
-const LEVELS := [
-	{ "img": "renoir0.jpg", "target": 0.55, "sponge": 52.0 },
-	{ "img": "monet0.jpg", "target": 0.60, "sponge": 48.0 },
-	{ "img": "bruegel0.jpg", "target": 0.66, "sponge": 44.0 },
-	{ "img": "gogh0.jpg", "target": 0.72, "sponge": 40.0 },
-	{ "img": "pieck0.jpg", "target": 0.78, "sponge": 38.0 },
-	{ "img": "vermeer1.jpg", "target": 0.84, "sponge": 34.0 },
-]
-
+const PAINTINGS := ["renoir0.jpg", "monet0.jpg", "bruegel0.jpg", "gogh0.jpg", "pieck0.jpg", "vermeer1.jpg"]
+const LEVEL_COUNT := 12
 const SND_WIPE := "pick.wav"
 const SND_WIN := "winner.ogg"
+
+func _level_target(i: int) -> float:
+	return 0.65 + (0.99 - 0.65) * (float(i) / float(LEVEL_COUNT - 1))
+
+func _level_sponge(i: int) -> float:
+	return round(54.0 - (54.0 - 26.0) * (float(i) / float(LEVEL_COUNT - 1)))
 
 var _level := 0
 var _tex: Texture2D = null
@@ -65,14 +64,14 @@ func _tex_for(name: String) -> Texture2D:
 
 
 func _start_level(n: int) -> void:
-	_level = clampi(n, 0, LEVELS.size() - 1)
+	_level = clampi(n, 0, LEVEL_COUNT - 1)
 	_done = false
 	_drag = false
 	_has_ptr = false
 	_cover = PackedByteArray()
 	_cols = 0
 	_rows = 0
-	_tex = _tex_for(LEVELS[_level]["img"])
+	_tex = _tex_for(str(GameContext.draw_from_pool("backgrounds", PAINTINGS, 1)[0]))
 	_popup.visible = false
 	_geo()
 	_update_hud()
@@ -129,7 +128,7 @@ func _wipe_at(p: Vector2) -> void:
 		return
 	var cw := f.size.x / _cols
 	var ch := f.size.y / _rows
-	var rad: float = LEVELS[_level]["sponge"]
+	var rad: float = _level_sponge(_level)
 	var c0: int = clampi(int((p.x - rad - f.position.x) / cw), 0, _cols - 1)
 	var c1: int = clampi(int(ceil((p.x + rad - f.position.x) / cw)), 0, _cols - 1)
 	var r0: int = clampi(int((p.y - rad - f.position.y) / ch), 0, _rows - 1)
@@ -154,7 +153,7 @@ func _wipe_at(p: Vector2) -> void:
 	if changed:
 		queue_redraw()
 		_update_hud()
-	if _revealed() >= float(LEVELS[_level]["target"]):
+	if _revealed() >= _level_target(_level):
 		_finish()
 
 
@@ -165,7 +164,7 @@ func _finish() -> void:
 	_cover.fill(0)
 	if _sfx_win.stream != null:
 		_sfx_win.play()
-	var last := _level >= LEVELS.size() - 1
+	var last := _level >= LEVEL_COUNT - 1
 	if last:
 		_popup_label.text = "Every painting uncovered!"
 		_popup_next.visible = false
@@ -238,13 +237,13 @@ func _draw() -> void:
 	draw_rect(f, Color("41567d"), false, 4.0)
 
 	if _has_ptr and not _done and not _popup.visible:
-		draw_arc(_ptr, LEVELS[_level]["sponge"], 0.0, TAU, 48, Color(1, 1, 1, 0.6), 3.0)
+		draw_arc(_ptr, _level_sponge(_level), 0.0, TAU, 48, Color(1, 1, 1, 0.6), 3.0)
 
 
 func _update_hud() -> void:
 	var pct := roundi(_revealed() * 100.0)
-	var goal := roundi(float(LEVELS[_level]["target"]) * 100.0)
-	_info.text = "Level %d/%d   ·   %d%% revealed  (goal %d%%)" % [_level + 1, LEVELS.size(), pct, goal]
+	var goal := roundi(_level_target(_level) * 100.0)
+	_info.text = "L%d/%d   ·   %d%%  (goal %d%%)" % [_level + 1, LEVEL_COUNT, pct, goal]
 
 
 func _go_home() -> void:

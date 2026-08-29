@@ -4,9 +4,9 @@
 // the whole board for a moment — no progress lost. Six levels, 4 → 9 tiles.
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
-import { clamp, rand, roundRect, shuffle, Overlay, buttonRow } from '../util.js';
+import { clamp, rand, roundRect, shuffle, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
+const HUD = 64;
 const R = 42;                       // tile radius
 
 const SND_START = 'sfx/pick.wav';
@@ -84,6 +84,7 @@ export default class NumbersGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -180,13 +181,14 @@ export default class NumbersGame extends Scene {
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const got = Math.min(this._next - 1, this._count());
-    ctx.fillText(`Level ${this._level + 1}/6   ·   ${got}/${this._count()} found`, 200, HUD / 2);
+    ctx.fillText(`L${this._level + 1}/6   ·   ${got}/${this._count()}`, 24, HUD / 2);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     const msg = this._phase === 'study' ? 'remember where the numbers are, then press Start'
       : this._phase === 'peek' ? 'take another look…'
       : `tap number ${this._next}`;
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

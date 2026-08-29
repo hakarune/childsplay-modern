@@ -4,9 +4,9 @@
 // + shuffle. Three rounds per level.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { clamp, roundRect, shuffle, inRect, Overlay, buttonRow } from '../util.js';
+import { clamp, roundRect, shuffle, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
+const HUD = 64;
 const ROUNDS = 3;
 
 const LEVELS = [
@@ -133,6 +133,7 @@ export default class ImageChangerGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -254,6 +255,7 @@ export default class ImageChangerGame extends Scene {
       : this._phase === 'result' ? 'nice!'
       : 'watch closely…';
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

@@ -4,9 +4,9 @@
 // fall away. Connect every pair to clear the level. Six levels, 3 → 8 pairs.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { clamp, roundRect, shuffle, dist, Overlay, buttonRow } from '../util.js';
+import { clamp, roundRect, shuffle, dist, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
+const HUD = 64;
 const SIDE = 44;
 const PAIRS = [3, 4, 5, 6, 7, 8];
 
@@ -66,18 +66,24 @@ export default class ElectroGame extends Scene {
     this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
-  _nodeHit(x, y) {
+  // Generous target: a fingertip is ~44px. Also snap to the NEAREST
+  // unsolved node within `reach` so you don't have to hit the dot exactly.
+  _nodeHit(x, y, reach = 46) {
+    let best = null;
+    let bestD = reach;
     for (let i = 0; i < this._ids.length; i++) {
       if (!this._solved.has(this._ids[i])) {
         const n = this._leftNode(i);
-        if (dist(x, y, n.x, n.y) < NODE_R * 2.2) return { col: 'L', id: this._ids[i], i };
+        const d = dist(x, y, n.x, n.y);
+        if (d < bestD) { bestD = d; best = { col: 'L', id: this._ids[i], i }; }
       }
       if (!this._solved.has(this._rightIds[i])) {
         const n = this._rightNode(i);
-        if (dist(x, y, n.x, n.y) < NODE_R * 2.2) return { col: 'R', id: this._rightIds[i], i };
+        const d = dist(x, y, n.x, n.y);
+        if (d < bestD) { bestD = d; best = { col: 'R', id: this._rightIds[i], i }; }
       }
     }
-    return null;
+    return best;
   }
 
   pointerdown(x, y) {
@@ -95,6 +101,7 @@ export default class ElectroGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -105,8 +112,9 @@ export default class ElectroGame extends Scene {
     if (!this._drag) return;
     const d = this._drag;
     this._drag = null;
-    const hit = this._nodeHit(x, y);
-    if (!hit || hit.col === d.col) return;      // needs to land on the other column
+    // release: snap to the nearest node in the OTHER column, generously
+    const hit = this._nodeHit(x, y, 120);
+    if (!hit || hit.col === d.col) return;
 
     if (hit.id === d.id) {
       this._solved.add(d.id);
@@ -200,12 +208,29 @@ export default class ElectroGame extends Scene {
       this._wire(ctx, a, b, '#ff5a5a');
       ctx.globalAlpha = 1;
     }
-    // dragging wire
+    // dragging wire + a finger halo so you can see where the end is
     if (this._drag) {
       const list = this._drag.col === 'L' ? this._ids : this._rightIds;
       const i = list.indexOf(this._drag.id);
       const a = this._drag.col === 'L' ? this._leftNode(i) : this._rightNode(i);
       this._wire(ctx, a, { x: this._drag.x, y: this._drag.y }, '#ffd93d');
+      ctx.beginPath();
+      ctx.arc(this._drag.x, this._drag.y, 26, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,217,61,0.22)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,217,61,0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // highlight the node it would snap to
+      const snap = this._nodeHit(this._drag.x, this._drag.y, 120);
+      if (snap && snap.col !== this._drag.col) {
+        const sn = snap.col === 'L' ? this._leftNode(snap.i) : this._rightNode(snap.i);
+        ctx.beginPath();
+        ctx.arc(sn.x, sn.y, NODE_R + 7, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffd93d';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
     }
 
     // HUD
@@ -219,6 +244,7 @@ export default class ElectroGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     ctx.fillText('drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, 'drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

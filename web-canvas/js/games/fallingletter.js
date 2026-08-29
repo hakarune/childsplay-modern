@@ -11,12 +11,12 @@ const R = 54;                     // balloon radius
 const KB_H = 168;
 const DANGER_Y = VIEW_H - KB_H - 46;
 
-const START_VY = 70;
-const VY_PER = 5;
-const MAX_VY = 260;
-const START_SPAWN = 1.9;
-const SPAWN_PER = 0.045;
-const MIN_SPAWN = 0.7;
+const START_VY = 52;
+const VY_PER = 3;
+const MAX_VY = 205;
+const START_SPAWN = 2.4;
+const SPAWN_PER = 0.028;
+const MIN_SPAWN = 1.0;
 
 const KB_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 

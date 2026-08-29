@@ -1,8 +1,10 @@
-// fourrow.js — Connect Four against the computer. You are red and go
-// first; drop a disc into a column, get four in a row.
+// fourrow.js — Connect Four. Solo vs the computer (3 skill levels), or a
+// local "pass & play" 2-player game (Design Policy §K). Player 1 is red and
+// goes first; drop a disc into a column, get four in a line.
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
-import { clamp, Overlay, buttonRow } from '../util.js';
+import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const COLS = 7, ROWS = 6;
 const HUD = 64;
@@ -17,6 +19,7 @@ const LEVELS = [
 const SND_DROP = 'sfx/pick.wav';
 const SND_WIN = 'sfx/fourrow_win.ogg';
 const SND_LOSS = 'sfx/fourrow_loss.ogg';
+const KEY_2P = 'cp:fourrow:2p';
 
 export default class FourRowGame extends Scene {
   constructor(game, opts = {}) {
@@ -24,6 +27,7 @@ export default class FourRowGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
+    try { this._twoP = localStorage.getItem(KEY_2P) === '1'; } catch { this._twoP = false; }
     this._startLevel(0);
   }
 
@@ -35,6 +39,8 @@ export default class FourRowGame extends Scene {
     this._winLine = null;
     this._drop = null;              // { col, row, y, vy, who } falling disc
     this._hoverCol = -1;
+    this._moves = 0;
+    this._aiTimer = null;
     this._overlay.hide();
     this._geo();
   }
@@ -45,6 +51,7 @@ export default class FourRowGame extends Scene {
     this._bx = (VIEW_W - cell * COLS) / 2;
     this._by = HUD + (VIEW_H - HUD - cell * ROWS) / 2;
     this._r = cell * 0.4;
+    this._modeBtn = { x: VIEW_W - 92, y: 14, w: 76, h: 36 };
   }
   resize() { this._geo(); }
 
@@ -52,8 +59,14 @@ export default class FourRowGame extends Scene {
   _rowY(r) { return this._by + r * this._cell + this._cell / 2; }
   _lowest(c) { for (let r = ROWS - 1; r >= 0; r--) if (!this._grid[r][c]) return r; return -1; }
 
+  _setTwoP(on) {
+    this._twoP = on;
+    try { localStorage.setItem(KEY_2P, on ? '1' : '0'); } catch { /* */ }
+    this._startLevel(this._level);
+  }
+
   update(dt) {
-    if (this._aiTimer != null && !this._drop && !this._over) {
+    if (!this._twoP && this._aiTimer != null && !this._drop && !this._over) {
       this._aiTimer -= dt;
       if (this._aiTimer <= 0) { this._aiTimer = null; this._aiMove(); }
     }
@@ -67,16 +80,17 @@ export default class FourRowGame extends Scene {
       this._grid[d.row][d.col] = d.who;
       const who = d.who;
       this._drop = null;
+      this._moves += 1;
       playSound(SND_DROP);
       const line = this._four(who);
       if (line) return this._end(who, line);
       if (this._grid[0].every((v) => v)) return this._end(0, null);
       this._turn = who === RED ? YEL : RED;
-      if (this._turn === YEL) this._aiTimer = 0.45;
+      if (!this._twoP && this._turn === YEL) this._aiTimer = 0.45;
     }
   }
 
-  // --- AI ---
+  // --- AI (solo only) ---
   _aiMove() {
     const smart = LEVELS[this._level].smart;
     const cols = [...Array(COLS).keys()].filter((c) => this._lowest(c) >= 0);
@@ -107,7 +121,6 @@ export default class FourRowGame extends Scene {
     this._drop = { col, row, y: this._by - this._cell / 2, vy: 0, who };
   }
 
-  // --- win detection ---
   _four(who) {
     const g = this._grid;
     const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
@@ -131,12 +144,15 @@ export default class FourRowGame extends Scene {
   _end(who, line) {
     this._over = true;
     this._winLine = line;
-    const youWon = who === RED;
-    playSound(youWon ? SND_WIN : SND_LOSS, { channel: 'music' });
+    const p1Won = who === RED;
+    playSound(who === 0 ? SND_LOSS : (this._twoP || p1Won) ? SND_WIN : SND_LOSS, { channel: 'music' });
     const last = this._level >= LEVELS.length - 1;
     const rows = [['Play Again', 'replay'], ['Menu', 'menu']];
-    if (youWon && !last) rows.unshift(['Next Level', 'next']);
-    const msg = who === 0 ? "It's a draw!" : youWon ? 'You got four!' : 'Computer wins!';
+    if (!this._twoP && p1Won && !last) rows.unshift(['Next Level', 'next']);
+    let msg;
+    if (who === 0) msg = "It's a draw!";
+    else if (this._twoP) msg = who === RED ? 'Red wins!' : 'Yellow wins!';
+    else msg = p1Won ? 'You got four!' : 'Computer wins!';
     this._overlay.show(msg, buttonRow(rows, VIEW_W / 2, VIEW_H / 2 + 20, 190));
   }
 
@@ -148,6 +164,7 @@ export default class FourRowGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -155,21 +172,30 @@ export default class FourRowGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
-    if (this._over || this._drop || this._turn !== RED) return;
+    // mode toggle — only before the first move of a game
+    if (this._moves === 0 && !this._drop &&
+        x >= this._modeBtn.x && x <= this._modeBtn.x + this._modeBtn.w &&
+        y >= this._modeBtn.y && y <= this._modeBtn.y + this._modeBtn.h) {
+      return this._setTwoP(!this._twoP);
+    }
+    if (this._over || this._drop) return;
+    if (!this._twoP && this._turn !== RED) return;   // solo: wait for the AI
     const c = Math.floor((x - this._bx) / this._cell);
-    if (c >= 0 && c < COLS && this._lowest(c) >= 0) this._place(c, RED);
+    if (c >= 0 && c < COLS && this._lowest(c) >= 0) this._place(c, this._turn);
   }
 
   render(ctx) {
-    ctx.fillStyle = '#141b2e';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     const { _bx: bx, _by: by, _cell: cell, _r: r } = this;
+    const discColour = (v) => (v === RED ? theme.p1 : v === YEL ? theme.p2 : theme.bg);
 
     // ghost / hover disc
-    if (this._hoverCol >= 0 && this._turn === RED && !this._over && !this._drop && this._lowest(this._hoverCol) >= 0) {
+    const canHover = !this._over && !this._drop && (this._twoP || this._turn === RED);
+    if (this._hoverCol >= 0 && canHover && this._lowest(this._hoverCol) >= 0) {
       ctx.globalAlpha = 0.35;
-      ctx.fillStyle = '#ff5a5a';
+      ctx.fillStyle = discColour(this._turn);
       ctx.beginPath();
       ctx.arc(this._colX(this._hoverCol), by - cell / 2, r, 0, Math.PI * 2);
       ctx.fill();
@@ -177,14 +203,13 @@ export default class FourRowGame extends Scene {
     }
 
     // board
-    ctx.fillStyle = '#2f57c4';
+    ctx.fillStyle = theme.surface_alt;
     ctx.fillRect(bx - 8, by - 8, cell * COLS + 16, cell * ROWS + 16);
     for (let rr = 0; rr < ROWS; rr++) {
       for (let cc = 0; cc < COLS; cc++) {
-        const v = this._grid[rr][cc];
         ctx.beginPath();
         ctx.arc(this._colX(cc), this._rowY(rr), r, 0, Math.PI * 2);
-        ctx.fillStyle = v === RED ? '#ff5a5a' : v === YEL ? '#ffd93d' : '#0e1526';
+        ctx.fillStyle = discColour(this._grid[rr][cc]);
         ctx.fill();
       }
     }
@@ -192,12 +217,12 @@ export default class FourRowGame extends Scene {
     if (this._drop) {
       ctx.beginPath();
       ctx.arc(this._colX(this._drop.col), this._drop.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = this._drop.who === RED ? '#ff5a5a' : '#ffd93d';
+      ctx.fillStyle = discColour(this._drop.who);
       ctx.fill();
     }
 
     if (this._winLine) {
-      ctx.strokeStyle = '#7be0a0';
+      ctx.strokeStyle = theme.good;
       ctx.lineWidth = 8;
       ctx.lineCap = 'round';
       const [a, b] = [this._winLine[0], this._winLine[3]];
@@ -207,16 +232,31 @@ export default class FourRowGame extends Scene {
       ctx.stroke();
     }
 
-    // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    // HUD (dark chrome strip, light text in both themes)
+    ctx.fillStyle = 'rgba(14,19,28,0.82)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
-    ctx.font = '600 24px system-ui, sans-serif';
-    ctx.textAlign = 'center';
+    ctx.fillStyle = DARK.text;
+    ctx.font = '600 22px system-ui, sans-serif';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(this._over ? 'game over' : this._turn === RED ? 'your turn (red)' : 'computer thinking…', VIEW_W / 2, HUD / 2);
-    ctx.textAlign = 'right';
-    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length} – ${LEVELS[this._level].name}`, VIEW_W - 20, HUD / 2);
+    ctx.fillText(this._twoP ? '2 players' : `Level ${this._level + 1}/${LEVELS.length} – ${LEVELS[this._level].name}`, 24, HUD / 2);
+    ctx.textAlign = 'center';
+    const _msg = this._over ? 'game over'
+      : this._twoP ? (this._turn === RED ? "red's turn" : "yellow's turn")
+      : this._turn === RED ? 'your turn (red)' : 'computer thinking…';
+    ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
+
+    // mode pill (only tappable before the first move)
+    const mb = this._modeBtn;
+    ctx.fillStyle = this._moves === 0 ? theme.accent : 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(mb.x, mb.y, mb.w, mb.h, 10);
+    else ctx.rect(mb.x, mb.y, mb.w, mb.h);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 18px system-ui, sans-serif';
+    ctx.fillText(this._twoP ? '2P' : '1P', mb.x + mb.w / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

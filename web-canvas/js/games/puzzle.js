@@ -5,15 +5,24 @@
 // no grid to lean on.
 
 import { Scene, VIEW_W, VIEW_H, loadImage, playSound } from '../engine.js';
-import { roundRect, clamp, rand, shuffle, Overlay, buttonRow } from '../util.js';
+import { roundRect, clamp, rand, shuffle, bag, Overlay, buttonRow } from '../util.js';
 
+// Shared painting pool (Wipe + Puzzle draw from the same bag so a session
+// playing both won't repeat a picture) — Design Policy §B.4.
+const PAINTINGS = ['renoir0', 'monet0', 'bruegel0', 'gogh0', 'pieck0', 'vermeer1'];
+
+// 9 levels: 3 regular grids, then progressively finer irregular cuts. The
+// picture for each level is drawn from the shared pool, not hard-coded.
 const LEVELS = [
-  { img: 'renoir0',  name: '2 x 2',       kind: 'grid', cols: 2, rows: 2 },
-  { img: 'monet0',   name: '3 x 3',       kind: 'grid', cols: 3, rows: 3 },
-  { img: 'bruegel0', name: '4 x 4',       kind: 'grid', cols: 4, rows: 4 },
-  { img: 'gogh0',    name: 'Odd shapes',  kind: 'free', pieces: 6,  min: 0.17 },
-  { img: 'pieck0',   name: 'More shapes', kind: 'free', pieces: 9,  min: 0.135 },
-  { img: 'vermeer1', name: 'Puzzler',     kind: 'free', pieces: 12, min: 0.11 },
+  { name: '2 x 2',       kind: 'grid', cols: 2, rows: 2 },
+  { name: '3 x 3',       kind: 'grid', cols: 3, rows: 3 },
+  { name: '4 x 4',       kind: 'grid', cols: 4, rows: 4 },
+  { name: 'Odd shapes',  kind: 'free', pieces: 6,  min: 0.17 },
+  { name: '5 x 5',       kind: 'grid', cols: 5, rows: 5 },
+  { name: 'More shapes', kind: 'free', pieces: 9,  min: 0.135 },
+  { name: 'Puzzler',     kind: 'free', pieces: 12, min: 0.11 },
+  { name: '6 x 5',       kind: 'grid', cols: 6, rows: 5 },
+  { name: 'Master',      kind: 'free', pieces: 16, min: 0.09 },
 ];
 
 const SND_SNAP = 'sfx/pick.wav';
@@ -77,8 +86,10 @@ export default class PuzzleGame extends Scene {
     this._overlay.hide();
 
     const lv = LEVELS[this._level];
-    loadImage(`puzzle/${lv.img}.jpg`).then((im) => {
-      if (this._level !== LEVELS.indexOf(lv)) return; // stale
+    this._imgName = bag('backgrounds', PAINTINGS).draw();
+    const want = this._imgName;
+    loadImage(`puzzle/${want}.jpg`).then((im) => {
+      if (this._imgName !== want) return; // stale
       this._image = im;
       this._build(lv);
     });

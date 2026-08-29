@@ -118,7 +118,11 @@ so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — **Word Maker** (from `synonyms`) ported on
-both targets. Extended-catalogue standalone activities done: Block
-Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Word
-Maker. Left: Photo Album, Spin the Bottle, the quiz family._
+_Last updated: 2026-08-29 — cross-cutting infra landed (palette, AudioManager,
+Bag, manifest, menu rework) and the first migration pass: sound-channel fixes,
+a 🔊 read-instructions button on every game with an instruction line, one 64px
+HUD height, Numbers HUD-overlap fix, Wipe 12-level retune + shared painting
+pool with Puzzle, Simon 8 levels, Puzzle 9 levels, Falling Letter gentler ramp,
+Electro touch targets + snap, Four in a Row palette/contrast + local 2-player,
+Tic Tac Toe local 2-player, Aquarium "say the names" mode. See docs/Design-Policy.md
+§L for the remaining per-game items._

@@ -4,9 +4,9 @@
 // hold the perfect computer to a draw to finish.
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
-import { clamp, Overlay, buttonRow } from '../util.js';
+import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
+const HUD = 64;
 const X = 1;
 const O = 2;
 
@@ -27,6 +27,7 @@ const SND_AI = 'sfx/dealcard1.wav';
 const SND_WIN = 'sfx/winner.ogg';
 const SND_LOSE = 'sfx/bummer.wav';
 const SND_DRAW = 'sfx/wrong.ogg';
+const KEY_2P = 'cp:tictactoe:2p';
 
 function winner(b) {
   for (const [a, c, d] of LINES) {
@@ -59,17 +60,26 @@ export default class TicTacToeGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
+    try { this._twoP = localStorage.getItem(KEY_2P) === '1'; } catch { this._twoP = false; }
     this._startLevel(0);
   }
 
   _startLevel(n) {
     this._level = clamp(n, 0, LEVELS.length - 1);
     this._board = Array(9).fill(0);
-    this._turn = X;                 // player always starts
+    this._turn = X;                 // player 1 (X) always starts
     this._done = null;              // { who, line }
     this._aiWait = 0;
+    this._moves = 0;
+    this._modeBtn = { x: VIEW_W - 92, y: 14, w: 76, h: 36 };
     this._overlay.hide();
     this._geo();
+  }
+
+  _setTwoP(on) {
+    this._twoP = on;
+    try { localStorage.setItem(KEY_2P, on ? '1' : '0'); } catch { /* */ }
+    this._startLevel(this._level);
   }
 
   _geo() {
@@ -147,7 +157,11 @@ export default class TicTacToeGame extends Scene {
     this._done = w;
     const last = this._level >= LEVELS.length - 1;
 
-    if (w.who === X) {
+    if (this._twoP && w.who !== 0) {
+      playSound(SND_WIN, { channel: 'music' });
+      this._overlay.show(w.who === X ? 'Blue wins!' : 'Orange wins!',
+        buttonRow([['Play Again', 'replay'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20));
+    } else if (w.who === X) {
       // player won
       playSound(SND_WIN, { channel: 'music' });
       if (last) {
@@ -176,7 +190,7 @@ export default class TicTacToeGame extends Scene {
   }
 
   update(dt) {
-    if (this._done || this._turn !== O) return;
+    if (this._twoP || this._done || this._turn !== O) return;
     this._aiWait += dt;
     if (this._aiWait > 0.4) {
       this._aiWait = 0;
@@ -185,6 +199,7 @@ export default class TicTacToeGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -192,16 +207,24 @@ export default class TicTacToeGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
-    if (this._done || this._turn !== X) return;
+    if (this._done) return;
+    // mode toggle — only before the first mark of a game
+    if (this._moves === 0 &&
+        x >= this._modeBtn.x && x <= this._modeBtn.x + this._modeBtn.w &&
+        y >= this._modeBtn.y && y <= this._modeBtn.y + this._modeBtn.h) {
+      return this._setTwoP(!this._twoP);
+    }
+    if (!this._twoP && this._turn !== X) return;   // solo: wait for the AI
     const g = this._grid;
     if (x < g.x || x > g.x + g.s || y < g.y || y > g.y + g.s) return;
     const col = Math.min(2, Math.floor((x - g.x) / this._cell));
     const row = Math.min(2, Math.floor((y - g.y) / this._cell));
     const i = row * 3 + col;
     if (this._board[i]) return;
-    this._board[i] = X;
+    this._board[i] = this._turn;
+    this._moves += 1;
     playSound(SND_MARK);
-    this._turn = O;
+    this._turn = this._turn === X ? O : X;
     this._aiWait = 0;
     this._checkEnd();
   }
@@ -261,16 +284,31 @@ export default class TicTacToeGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = 'rgba(14,19,28,0.82)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
     ctx.fillStyle = '#eef2f7';
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
-    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length} – ${LEVELS[this._level].name}`, 200, HUD / 2);
+    ctx.fillText(this._twoP ? '2 players' : `Level ${this._level + 1}/${LEVELS.length} – ${LEVELS[this._level].name}`, 24, HUD / 2);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
-    ctx.fillText(this._done ? 'game over' : this._turn === X ? 'your turn — you are ✕' : 'computer thinking…', VIEW_W / 2, HUD / 2);
+    const _msg = this._done ? 'game over'
+      : this._twoP ? (this._turn === X ? "blue's turn (✕)" : "orange's turn (◯)")
+      : this._turn === X ? 'your turn — you are ✕' : 'computer thinking…';
+    ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
+
+    // mode pill (tappable only before the first mark)
+    const mb = this._modeBtn;
+    ctx.fillStyle = this._moves === 0 ? '#5b8cff' : 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(mb.x, mb.y, mb.w, mb.h, 10);
+    else ctx.rect(mb.x, mb.y, mb.w, mb.h);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 18px system-ui, sans-serif';
+    ctx.fillText(this._twoP ? '2P' : '1P', mb.x + mb.w / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

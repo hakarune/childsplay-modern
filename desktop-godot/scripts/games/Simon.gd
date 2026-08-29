@@ -5,7 +5,7 @@ extends Control
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
-const TARGETS := [2, 3, 4, 5, 6, 7]
+const TARGETS := [2, 3, 4, 5, 6, 7, 8, 9]
 
 # quadrant colour (on / off) + tone frequency. Order = TL, TR, BL, BR.
 const PADS := [
@@ -118,7 +118,7 @@ func _geo() -> void:
 
 
 func _step_time() -> Vector2:
-	var k := 1.0 - _level * 0.07
+	var k := maxf(0.55, 1.0 - _level * 0.06)
 	return Vector2(0.44 * k, 0.18 * k)
 
 
@@ -280,7 +280,7 @@ func _draw() -> void:
 
 func _update_hud() -> void:
 	var shown: int = mini(_seq.size(), int(TARGETS[_level]))
-	_info.text = "Level %d/%d   ·   length %d/%d" % [_level + 1, TARGETS.size(), shown, int(TARGETS[_level])]
+	_info.text = "L%d/%d   ·   length %d/%d" % [_level + 1, TARGETS.size(), shown, int(TARGETS[_level])]
 	if _hint != null:
 		_hint.text = {
 			"idle": "press Start, then repeat the sequence",

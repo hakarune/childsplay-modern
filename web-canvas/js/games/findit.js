@@ -2,7 +2,7 @@
 // right copy has a few coloured spots added. Tap them all.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { rand, clamp, Overlay, buttonRow } from '../util.js';
+import { rand, clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
 const HUD = 64;
 const BLOBS = ['#ff5a5a', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45', '#31c2d6'];
@@ -93,6 +93,7 @@ export default class FindItGame extends Scene {
   pointermove(x, y) { this._overlay.pointermove(x, y); }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -174,6 +175,7 @@ export default class FindItGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     ctx.fillText('find what is different on the right picture', VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, 'find what is different on the right picture', VIEW_W / 2, HUD / 2);
 
     if (!this._img) {
       ctx.fillStyle = '#9fb4d8';

@@ -3,18 +3,19 @@
 // level. Six paintings; the target rises and the sponge shrinks.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { clamp, Overlay, buttonRow } from '../util.js';
+import { clamp, Overlay, buttonRow, bag, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
+const HUD = 64;
 
-const LEVELS = [
-  { img: 'renoir0', target: 0.55, sponge: 52 },
-  { img: 'monet0', target: 0.60, sponge: 48 },
-  { img: 'bruegel0', target: 0.66, sponge: 44 },
-  { img: 'gogh0', target: 0.72, sponge: 40 },
-  { img: 'pieck0', target: 0.78, sponge: 38 },
-  { img: 'vermeer1', target: 0.84, sponge: 34 },
-];
+// Shared painting pool (Wipe + Puzzle draw from the same bag so one session
+// playing both won't see the same picture twice) — Design Policy §B.4.
+const PAINTINGS = ['renoir0', 'monet0', 'bruegel0', 'gogh0', 'pieck0', 'vermeer1'];
+
+// 12 levels: target rises 0.65 → 0.99, sponge shrinks 54 → 26.
+const LEVELS = Array.from({ length: 12 }, (_, i) => ({
+  target: 0.65 + (0.99 - 0.65) * (i / 11),
+  sponge: Math.round(54 - (54 - 26) * (i / 11)),
+}));
 
 const CELL = 20;                    // target cover-cell size (px, world units)
 
@@ -40,9 +41,10 @@ export default class WipeGame extends Scene {
     this._cols = 0;
     this._rows = 0;
     this._overlay.hide();
-    const lv = LEVELS[this._level];
-    loadImage(`puzzle/${lv.img}.jpg`).then((im) => {
-      if (LEVELS[this._level] !== lv) return;
+    this._imgName = bag('backgrounds', PAINTINGS).draw();
+    const want = this._imgName;
+    loadImage(`puzzle/${want}.jpg`).then((im) => {
+      if (this._imgName !== want) return;
       this._img = im;
       this._geo();
     });
@@ -156,6 +158,7 @@ export default class WipeGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     this._drag = false;
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
@@ -171,7 +174,7 @@ export default class WipeGame extends Scene {
 
     const f = this._frame;
     if (f) {
-      const im = this._img || img(`puzzle/${LEVELS[this._level].img}.jpg`);
+      const im = this._img || (this._imgName && img(`puzzle/${this._imgName}.jpg`));
       if (im && im.naturalWidth) ctx.drawImage(im, f.x, f.y, f.w, f.h);
       else {
         ctx.fillStyle = '#20293a';
@@ -215,10 +218,11 @@ export default class WipeGame extends Scene {
     ctx.textAlign = 'left';
     const pct = Math.round(this._revealed() * 100);
     const goal = Math.round(LEVELS[this._level].target * 100);
-    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}   ·   ${pct}% revealed  (goal ${goal}%)`, 200, HUD / 2);
+    ctx.fillText(`L${this._level + 1}/${LEVELS.length}   ·   ${pct}%  (goal ${goal}%)`, 24, HUD / 2);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     ctx.fillText('drag to wipe the cover away', VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, 'drag to wipe the cover away', VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

@@ -3,10 +3,10 @@
 // (no lives, no game-over) — only forward progress.
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
-import { clamp, roundRect, inRect, Overlay, buttonRow } from '../util.js';
+import { clamp, roundRect, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
-const TARGETS = [2, 3, 4, 5, 6, 7];
+const HUD = 64;
+const TARGETS = [2, 3, 4, 5, 6, 7, 8, 9];
 
 // quadrant: colour + tone (Hz). Index order = TL, TR, BL, BR.
 const PADS = [
@@ -87,7 +87,7 @@ export default class SimonGame extends Scene {
   }
 
   _stepTime() {
-    const k = 1 - this._level * 0.07;        // a little quicker each level
+    const k = Math.max(0.55, 1 - this._level * 0.06);        // a little quicker each level
     return { lit: 0.44 * k, gap: 0.18 * k };
   }
 
@@ -144,6 +144,7 @@ export default class SimonGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
@@ -244,13 +245,14 @@ export default class SimonGame extends Scene {
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const shown = Math.min(this._seq.length, TARGETS[this._level]);
-    ctx.fillText(`Level ${this._level + 1}/${TARGETS.length}   ·   length ${shown}/${TARGETS[this._level]}`, 200, HUD / 2);
+    ctx.fillText(`L${this._level + 1}/${TARGETS.length}   ·   length ${shown}/${TARGETS[this._level]}`, 200, HUD / 2);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     const msg = this._phase === 'idle' ? 'press Start, then repeat the sequence'
       : (this._phase === 'show' || this._phase === 'pause') ? 'watch and listen…'
       : 'your turn — tap the colours in order';
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

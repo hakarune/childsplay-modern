@@ -3,9 +3,9 @@
 // and you just replay the wall. Six walls, then you win.
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
-import { clamp, Overlay, buttonRow } from '../util.js';
+import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
-const HUD = 56;
+const HUD = 64;
 const SIDE = 44;                 // left/right margin of the brick field
 const COLS = 11;
 const BRICK_H = 28;
@@ -158,6 +158,7 @@ export default class BlockBreakerGame extends Scene {
     if (this._ptr != null) this._aimPaddle(x);
   }
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     this._ptr = null;
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
@@ -347,7 +348,9 @@ export default class BlockBreakerGame extends Scene {
     ctx.fillText(`Wall ${this._level + 1}/${LEVELS.length}   ·   bricks left ${left}`, 200, HUD / 2);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
-    ctx.fillText(this._stuck ? 'tap or press space to launch' : 'slide to move the paddle', VIEW_W / 2, HUD / 2);
+    const _msg = this._stuck ? 'tap or press space to launch' : 'slide to move the paddle';
+    ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
     ctx.textAlign = 'right';
     ctx.fillStyle = '#ff8a8a';
     ctx.font = '600 20px system-ui, sans-serif';

@@ -4,6 +4,9 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, playLoop } from '../engine.js';
 import { rand, clamp, shuffle } from '../util.js';
+import { speak, hasVoice } from '../tts.js';
+
+const KEY_NAMES = 'cp:aquarium:names';
 
 const TANKS = ['aquarium/tank1.jpg', 'aquarium/tank2.jpg'];
 const BUBBLE = 'aquarium/bubble.png';
@@ -44,6 +47,9 @@ export default class AquariumGame extends Scene {
     this._labels = [];
     this._parallax = 0;
     this._ambient = null;
+    // mode 1 (default): fish sounds only. mode 2: also speak the name.
+    try { this._sayNames = localStorage.getItem(KEY_NAMES) === '1'; } catch { this._sayNames = false; }
+    this._namesBtn = { x: VIEW_W - 150, y: 14, w: 132, h: 36 };
 
     loadImage(this._tank);
     loadImage(BUBBLE);
@@ -170,14 +176,25 @@ export default class AquariumGame extends Scene {
   }
 
   // --- input ---
+  pointerup(x, y) {
+    const b = this._namesBtn;
+    if (hasVoice() && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+      this._sayNames = !this._sayNames;
+      try { localStorage.setItem(KEY_NAMES, this._sayNames ? '1' : '0'); } catch { /* */ }
+    }
+  }
+
   pointerdown(x, y) {
     this._startAmbient();
+    const b = this._namesBtn;
+    if (hasVoice() && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return;
     const f = this._fishAt(x, y);
     if (f) {
       f.dart = 0.7;
       playSound(SND_BLUB);
       for (let i = 0; i < 7; i++) this._bubbles.push({ x: f.x + rand(-15, 15), y: f.y, vy: rand(60, 130), r: rand(2, 7), wob: Math.random() * 10 });
       this._labels.push({ text: f.sp.name, x: f.x, y: f.y - 24, t: 0 });
+      if (this._sayNames) speak(f.sp.name);
     } else {
       this._ripples.push({ x, y, t: 0 });
       this._food.push({ x, y, vy: rand(14, 24), life: 6 });
@@ -276,7 +293,20 @@ export default class AquariumGame extends Scene {
     ctx.fillStyle = '#dfeaf5';
     ctx.font = '500 22px system-ui, sans-serif';
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText('tap a fish to say hello  ·  tap the water to feed them', VIEW_W / 2, 32);
+
+    if (hasVoice()) {
+      const b = this._namesBtn;
+      ctx.fillStyle = this._sayNames ? '#5b8cff' : 'rgba(255,255,255,0.14)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(b.x, b.y, b.w, b.h, 10);
+      else ctx.rect(b.x, b.y, b.w, b.h);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '600 16px system-ui, sans-serif';
+      ctx.fillText(this._sayNames ? '🔊 names: on' : '🔊 names: off', b.x + b.w / 2, b.y + b.h / 2);
+    }
   }
 
   _drawSeaweed(ctx) {

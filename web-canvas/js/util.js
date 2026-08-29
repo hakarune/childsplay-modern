@@ -1,6 +1,7 @@
 // util.js — small shared helpers for the canvas games.
 
 import { theme, DARK } from './theme.js';
+import { speak, hasVoice } from './tts.js';
 
 export const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 export const lerp = (a, b, t) => a + (b - a) * t;
@@ -194,6 +195,40 @@ export class Overlay {
     this.buttons.forEach((b, i) => drawButton(ctx, b, i === this._hover));
   }
 }
+
+// --- shared in-game "read the instruction aloud" button (Policy §E.2) ---
+// A game draws its own centre instruction line, then calls
+// hudSpeakButton(ctx, text, cx, cy) to place a 🔊 button just right of it
+// and register `text` for playback. pointerup checks hudSpeakHit() first.
+export const HUD_H = 64;   // one HUD height for every game (Policy §G.1)
+
+let _hudText = '';
+let _hudBtn = { x: 0, y: 0, w: 0, h: 0 };
+
+export function hudSpeakButton(ctx, centre, cx, cy) {
+  _hudText = centre || '';
+  _hudBtn = { x: 0, y: 0, w: 0, h: 0 };
+  if (!centre || !hasVoice()) return;
+  const tw = ctx.measureText(centre).width;   // caller has already set the font
+  const bx = cx + tw / 2 + 14;
+  _hudBtn = { x: bx - 3, y: cy - 17, w: 34, h: 34 };
+  roundRect(ctx, _hudBtn.x, _hudBtn.y, 34, 34, 9);
+  ctx.fillStyle = theme.accent;
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '18px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🔊', bx + 14, cy + 1);
+}
+
+/** True if (x,y) hit the 🔊 button drawn this frame. */
+export function hudSpeakHit(x, y) {
+  return _hudBtn.w > 0 && inRect(_hudBtn, x, y);
+}
+
+/** Speak the last instruction registered via hudSpeakButton(). */
+export function speakHud() { speak(_hudText); }
 
 // Lay a row of equal buttons out, centred on cx at vertical y.
 export function buttonRow(labels, cx, y, bw = 220, bh = 60, gap = 24) {

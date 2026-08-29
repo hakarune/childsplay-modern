@@ -2,7 +2,7 @@
 // cherry, dodge the wandering fruit. A bump just resets your spot.
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
-import { roundRect, inRect, Overlay, buttonRow } from '../util.js';
+import { roundRect, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
 const TILE = 40;
 const HUD_H = 64;
@@ -233,6 +233,7 @@ export default class PackidGame extends Scene {
   pointermove(x, y) { this._overlay.pointermove(x, y); }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
       if (act === 'next') this._startLevel(this._level + 1);
