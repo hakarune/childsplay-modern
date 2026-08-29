@@ -74,10 +74,12 @@ unblocked.
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
-The original also ships these. None are converted; listed so nothing is lost.
+The original also ships these. Only **Four in a Row** is converted so far;
+the rest are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
+| Daily Training | `dltr.py` | ⬜ | ⬜ | Meta-activity — runs a scripted sequence of the other activities. Not a game in itself. |
 | Numbers (counting) | `numbers_sp.py` | ⬜ | ⬜ | Count the objects on screen and pick the number. |
 | Electro | `electro_sp.py` | ⬜ | ⬜ | Match pairs of pictures with wires (a Memory variant). |
 | Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
