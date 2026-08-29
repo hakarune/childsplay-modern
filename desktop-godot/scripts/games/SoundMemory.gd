@@ -3,7 +3,7 @@ extends Control
 ## picture. Click a card to hear its clip; find the two cards that sound
 ## the same. Matched pairs reveal the matching picture.
 
-const MAIN_MENU := "res://scenes/MainMenu.tscn"
+const MAIN_MENU := "res://scenes/MemoryMenu.tscn"
 const CARD_SCENE := preload("res://scenes/components/SoundCard.tscn")
 
 # Difficulty ladder (columns x rows, product must be even): 2x2, 4x2, 4x3.

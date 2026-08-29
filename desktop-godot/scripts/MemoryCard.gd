@@ -1,11 +1,13 @@
 extends Control
 class_name MemoryCard
-## A single memory card: a picture "front" and a shared child-friendly
-## "back". Clicking an interactable card asks the board (via card_clicked)
-## to flip it; the board then drives flip_up / flip_down / set_matched.
+## A single memory card. The front is either a picture (Texture2D) or a
+## glyph (a letter / digit drawn on the plain card front); the back is a
+## shared child-friendly texture. Clicking an interactable card asks the
+## board (via card_clicked) to flip it; the board drives flip_up /
+## flip_down / set_matched.
 ##
 ## The flip is a fake-3D effect: tween the inner button's X scale to 0,
-## swap the visible texture at the midpoint, then tween it back to 1.
+## swap the visible face at the midpoint, then tween it back to 1.
 
 signal card_clicked(card: MemoryCard)
 
@@ -15,10 +17,13 @@ const FLIP_TIME := 0.12
 var is_flipped := false
 var is_matched := false
 
-var front_texture: Texture2D
 var back_texture: Texture2D
+var _front_texture: Texture2D    # picture mode
+var _front_glyph := ""           # letter / digit mode
+var _front_bg: Texture2D         # plain card front, used behind a glyph
 
 @onready var _button: TextureButton = $Card
+@onready var _glyph: Label = $Card/Glyph
 
 
 func _ready() -> void:
@@ -29,11 +34,25 @@ func _ready() -> void:
 	_button.scale = Vector2.ONE
 
 
-## Assign this card's identity and textures. Safe to call right after
-## instantiate(); the visual is refreshed once the node is ready.
+## Picture card. `front` is the face texture, `back` the shared back.
 func setup(id: String, front: Texture2D, back: Texture2D) -> void:
+	_front_texture = front
+	_front_glyph = ""
+	_front_bg = null
+	_common_setup(id, back)
+
+
+## Glyph card. `glyph` is the letter/digit, `front_bg` the plain card
+## front drawn behind it.
+func setup_glyph(id: String, glyph: String, back: Texture2D, front_bg: Texture2D) -> void:
+	_front_texture = null
+	_front_glyph = glyph
+	_front_bg = front_bg
+	_common_setup(id, back)
+
+
+func _common_setup(id: String, back: Texture2D) -> void:
 	card_id = id
-	front_texture = front
 	back_texture = back
 	is_flipped = false
 	is_matched = false
@@ -58,7 +77,7 @@ func flip_down() -> void:
 	_animate_flip(false)
 
 
-## Lock the card in its matched (face-up) state and dim it slightly.
+## Lock the card face-up and dim it slightly.
 func set_matched() -> void:
 	is_matched = true
 	is_flipped = true
@@ -82,7 +101,16 @@ func _animate_flip(show_front: bool) -> void:
 
 
 func _apply_face(show_front: bool) -> void:
-	_button.texture_normal = front_texture if show_front else back_texture
+	if not show_front:
+		_button.texture_normal = back_texture
+		_glyph.visible = false
+	elif _front_glyph != "":
+		_button.texture_normal = _front_bg
+		_glyph.text = _front_glyph
+		_glyph.visible = true
+	else:
+		_button.texture_normal = _front_texture
+		_glyph.visible = false
 
 
 func _update_pivot() -> void:

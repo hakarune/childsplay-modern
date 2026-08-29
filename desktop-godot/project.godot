@@ -24,6 +24,7 @@ buses/default_bus_layout="res://default_bus_layout.tres"
 [autoload]
 
 AssetLoader="*res://scripts/AssetLoader.gd"
+GameContext="*res://scripts/GameContext.gd"
 
 [display]
 

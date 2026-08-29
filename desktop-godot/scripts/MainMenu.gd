@@ -19,14 +19,9 @@ const GAMES := [
 		"scene": "res://scenes/games/FallingLetter.tscn",
 	},
 	{
-		"id": "soundmemory", "title": "Sound Memory",
-		"icon": "soundmemory.icon.png", "hover": "soundmemory_ro.icon.png",
-		"scene": "res://scenes/games/SoundMemory.tscn",
-	},
-	{
 		"id": "memory", "title": "Memory",
 		"icon": "memory_sp.icon.png", "hover": "memory_sp_ro.icon.png",
-		"scene": "res://scenes/games/Memory.tscn",
+		"scene": "res://scenes/MemoryMenu.tscn",
 	},
 	{
 		"id": "billiards", "title": "Billiards",

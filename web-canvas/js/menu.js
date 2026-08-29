@@ -1,7 +1,7 @@
 // menu.js — the MainMenu state: a kiosk grid of big icon tiles.
 
 import { Scene, VIEW_W, VIEW_H, img } from './engine.js';
-import { GAMES } from './games/index.js';
+import { MENU } from './games/index.js';
 import { roundRect, drawImageFit, inRect } from './util.js';
 
 const PAD = 64;
@@ -27,8 +27,8 @@ export class MainMenu extends Scene {
   }
 
   _layout() {
-    const cols = GAMES.length <= 3 ? GAMES.length : 3;
-    const rows = Math.ceil(GAMES.length / cols);
+    const cols = MENU.length <= 3 ? MENU.length : 3;
+    const rows = Math.ceil(MENU.length / cols);
     const availW = VIEW_W - PAD * 2;
     const availH = VIEW_H - TITLE_H - PAD;
     const tileW = (availW - GAP * (cols - 1)) / cols;
@@ -38,7 +38,7 @@ export class MainMenu extends Scene {
     const sx = (VIEW_W - gridW) / 2;
     const sy = TITLE_H + (availH - gridH) / 2;
 
-    this._tiles = GAMES.map((g, i) => ({
+    this._tiles = MENU.map((g, i) => ({
       game: g,
       x: sx + (i % cols) * (tileW + GAP),
       y: sy + Math.floor(i / cols) * (tileH + GAP),

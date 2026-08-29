@@ -8,8 +8,12 @@ extends Control
 ## a mismatch flips them back after a short delay. Clearing every pair
 ## plays a fanfare and offers the next level.
 
-const MAIN_MENU := "res://scenes/MainMenu.tscn"
+const MEMORY_MENU := "res://scenes/MemoryMenu.tscn"
 const CARD_SCENE := preload("res://scenes/components/MemoryCard.tscn")
+
+const VARIANT_LABEL := {
+	"pictures": "Pictures", "lower": "lowercase", "upper": "UPPERCASE", "numbers": "Numbers",
+}
 
 # Difficulty ladder: columns x rows (product must be even).
 const LEVELS := [
@@ -30,6 +34,7 @@ const CARD_IMAGES := [
 	"21_frog.png",
 ]
 const BACK_IMAGE := "CP_cardback.png"
+const FRONT_IMAGE := "CP_cardfront.png"
 
 const SND_FLIP := "dealcard1.wav"
 const SND_MATCH := "good.ogg"
@@ -47,6 +52,8 @@ var _open_cards: Array[MemoryCard] = []
 var _busy := false            # blocks input during resolve / win
 
 var _back_tex: Texture2D
+var _front_tex: Texture2D
+var _variant := "pictures"
 
 @onready var _grid: GridContainer = %CardGrid
 @onready var _flip_label: Label = %FlipCounter
@@ -63,7 +70,11 @@ var _back_tex: Texture2D
 
 
 func _ready() -> void:
+	_variant = GameContext.memory_variant
+	if not VARIANT_LABEL.has(_variant):
+		_variant = "pictures"
 	_back_tex = AssetLoader.get_texture(BACK_IMAGE)
+	_front_tex = AssetLoader.get_texture(FRONT_IMAGE)
 	_sfx_flip.stream = AssetLoader.get_stream(SND_FLIP)
 	_sfx_match.stream = AssetLoader.get_stream(SND_MATCH)
 	_sfx_mismatch.stream = AssetLoader.get_stream(SND_MISMATCH)
@@ -90,31 +101,56 @@ func _start_level(index: int) -> void:
 	_busy = false
 	_popup.visible = false
 
-	_total_pairs = int(lvl["cols"] * lvl["rows"] / 2.0)
+	var faces: Array = _deck_faces()
+	_total_pairs = mini(int(lvl["cols"] * lvl["rows"] / 2.0), faces.size())
 	_grid.columns = lvl["cols"]
-	_level_label.text = "Level %d / %d  -  %s" % [_level_index + 1, LEVELS.size(), lvl["name"]]
+	_level_label.text = "Memory - %s      Level %d / %d  -  %s" % [
+		VARIANT_LABEL[_variant], _level_index + 1, LEVELS.size(), lvl["name"]
+	]
 	_update_flip_label()
-	_build_deck()
+	_build_deck(faces)
 
 
-func _build_deck() -> void:
+## A face is { "id": String, "img": String("") , "glyph": String("") }.
+func _deck_faces() -> Array:
+	var out: Array = []
+	match _variant:
+		"lower":
+			for c in "abcdefghijklmnopqrstuvwxyz":
+				out.append({ "id": c, "glyph": c })
+		"upper":
+			for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+				out.append({ "id": c, "glyph": c })
+		"numbers":
+			for c in "0123456789":
+				out.append({ "id": c, "glyph": c })
+		_:
+			for name in CARD_IMAGES:
+				out.append({ "id": name, "img": name })
+	return out
+
+
+func _build_deck(faces: Array) -> void:
 	for c in _grid.get_children():
 		c.queue_free()
 
-	var pool: Array = CARD_IMAGES.duplicate()
+	var pool: Array = faces.duplicate()
 	pool.shuffle()
 	var chosen: Array = pool.slice(0, _total_pairs)
 
 	var deck: Array = []
-	for image_name in chosen:
-		deck.append(image_name)
-		deck.append(image_name)
+	for face in chosen:
+		deck.append(face)
+		deck.append(face)
 	deck.shuffle()
 
-	for image_name in deck:
+	for face in deck:
 		var card: MemoryCard = CARD_SCENE.instantiate()
 		_grid.add_child(card)
-		card.setup(image_name, AssetLoader.get_texture(image_name), _back_tex)
+		if face.has("img"):
+			card.setup(face["id"], AssetLoader.get_texture(face["img"]), _back_tex)
+		else:
+			card.setup_glyph(face["id"], face["glyph"], _back_tex, _front_tex)
 		card.card_clicked.connect(_on_card_clicked)
 
 
@@ -191,7 +227,7 @@ func _on_popup_button() -> void:
 
 
 func _go_home() -> void:
-	get_tree().change_scene_to_file(MAIN_MENU)
+	get_tree().change_scene_to_file(MEMORY_MENU)
 
 
 # ---------------------------------------------------------------------------

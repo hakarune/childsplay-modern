@@ -1,4 +1,6 @@
-// memory.js — picture-pairs. Flip two cards; if they match they stay up.
+// memory.js — picture / letter / number pairs. Flip two cards; a match
+// stays up. The `variant` option picks the deck:
+//   pictures | lower | upper | numbers
 // Grid grows 2x2 -> 4x3 -> 4x4 -> 5x4 across levels.
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
@@ -11,24 +13,40 @@ const LEVELS = [
   { name: 'Hard',    cols: 5, rows: 4 },
 ];
 
-const PICS = Array.from({ length: 21 }, (_, i) => {
-  const names = ['01_cat', '02_pig', '03_bear', '04_hippopotamus', '05_penguin',
-    '06_cow', '07_sheep', '08_turtle', '09_panda', '10_chicken', '11_redbird',
-    '12_wolf', '13_monkey', '14_fox', '15_bluebirds', '16_elephant', '17_lion',
-    '18_gnu', '19_bluebaby', '20_greenbaby', '21_frog'];
-  return `memory/${names[i]}.png`;
-});
+const PIC_NAMES = ['01_cat', '02_pig', '03_bear', '04_hippopotamus', '05_penguin',
+  '06_cow', '07_sheep', '08_turtle', '09_panda', '10_chicken', '11_redbird',
+  '12_wolf', '13_monkey', '14_fox', '15_bluebirds', '16_elephant', '17_lion',
+  '18_gnu', '19_bluebaby', '20_greenbaby', '21_frog'];
+
 const BACK = 'memory/CP_cardback.png';
+const FRONT = 'memory/CP_cardfront.png';
+
+const VARIANT_LABEL = { pictures: 'Pictures', lower: 'lowercase', upper: 'UPPERCASE', numbers: 'Numbers' };
 
 const SND_FLIP = 'sfx/dealcard1.wav';
 const SND_MATCH = 'sfx/good.ogg';
 const SND_MISMATCH = 'sfx/wrong.ogg';
 const SND_WIN = 'sfx/winner.ogg';
 
+function deckFor(variant) {
+  switch (variant) {
+    case 'lower':
+      return 'abcdefghijklmnopqrstuvwxyz'.split('').map((c) => ({ id: c, text: c }));
+    case 'upper':
+      return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((c) => ({ id: c, text: c }));
+    case 'numbers':
+      return '0123456789'.split('').map((c) => ({ id: c, text: c }));
+    default:
+      return PIC_NAMES.map((n) => ({ id: n, img: `memory/${n}.png` }));
+  }
+}
+
 export default class MemoryGame extends Scene {
   constructor(game, opts = {}) {
     super(game);
     this._exit = opts.onExit || (() => {});
+    this._variant = VARIANT_LABEL[opts.variant] ? opts.variant : 'pictures';
+    this._deck = deckFor(this._variant);
     this._overlay = new Overlay();
     this._level = 0;
     this._startLevel(0);
@@ -37,7 +55,7 @@ export default class MemoryGame extends Scene {
   _startLevel(n) {
     this._level = Math.max(0, Math.min(n, LEVELS.length - 1));
     const lv = LEVELS[this._level];
-    this._pairs = (lv.cols * lv.rows) >> 1;
+    this._pairs = Math.min((lv.cols * lv.rows) >> 1, this._deck.length);
     this._flips = 0;
     this._matched = 0;
     this._open = [];
@@ -45,8 +63,8 @@ export default class MemoryGame extends Scene {
     this._after = null;
     this._overlay.hide();
 
-    const deck = shuffle(PICS.slice()).slice(0, this._pairs);
-    const cells = shuffle(deck.concat(deck));
+    const faces = shuffle(this._deck.slice()).slice(0, this._pairs);
+    const cells = shuffle(faces.concat(faces));
 
     const marginX = 60;
     const top = 90;
@@ -60,10 +78,8 @@ export default class MemoryGame extends Scene {
     const ox = (VIEW_W - (size * lv.cols + gap * (lv.cols - 1))) / 2;
     const oy = top + (gh - (size * lv.rows + gap * (lv.rows - 1))) / 2;
 
-    this._cards = cells.map((pic, i) => ({
-      pic,
-      col: i % lv.cols,
-      row: (i / lv.cols) | 0,
+    this._cards = cells.map((face, i) => ({
+      face,
       x: ox + (i % lv.cols) * (size + gap),
       y: oy + ((i / lv.cols) | 0) * (size + gap),
       s: size,
@@ -113,7 +129,7 @@ export default class MemoryGame extends Scene {
   _resolve() {
     this._flips++;
     const [a, b] = this._open;
-    if (a.pic === b.pic) {
+    if (a.face.id === b.face.id) {
       this._cool = 0.4;
       this._after = () => {
         a.matched = b.matched = true;
@@ -152,10 +168,13 @@ export default class MemoryGame extends Scene {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`Flips ${this._flips}    Pairs ${this._matched}/${this._pairs}`, VIEW_W / 2, 35);
+    ctx.textAlign = 'left';
+    ctx.fillText(`Memory - ${VARIANT_LABEL[this._variant]}`, 220, 35);
     ctx.textAlign = 'right';
-    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}  -  ${LEVELS[this._level].name}`, VIEW_W - 24, 35);
+    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}`, VIEW_W - 24, 35);
 
     const back = img(BACK);
+    const front = img(FRONT);
     for (const c of this._cards) {
       const sx = Math.abs(1 - 2 * c.t);       // 1 -> 0 -> 1
       const showFront = c.t > 0.5;
@@ -168,8 +187,24 @@ export default class MemoryGame extends Scene {
       ctx.fillStyle = c.matched ? '#3f7d52' : '#33405a';
       ctx.fill();
       ctx.clip();
-      const face = showFront ? img(c.pic) : back;
-      if (face && w > 2) drawImageFit(ctx, face, -w / 2 + 6, 6, w - 12, c.s - 12);
+
+      if (w > 2) {
+        if (!showFront) {
+          drawImageFit(ctx, back, -w / 2 + 6, 6, w - 12, c.s - 12);
+        } else if (c.face.img) {
+          drawImageFit(ctx, img(c.face.img), -w / 2 + 6, 6, w - 12, c.s - 12);
+        } else {
+          drawImageFit(ctx, front, -w / 2 + 6, 6, w - 12, c.s - 12);
+          ctx.save();
+          ctx.scale(sx, 1);            // squish the glyph with the flip
+          ctx.fillStyle = '#1b2333';
+          ctx.font = `700 ${Math.round(c.s * 0.5)}px system-ui, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(c.face.text, 0, c.s / 2 + 2);
+          ctx.restore();
+        }
+      }
       ctx.restore();
 
       if (c.matched) {

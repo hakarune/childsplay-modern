@@ -50,14 +50,14 @@ childsplay-modern/
 │   ├── project.godot       1280x720, canvas_items/keep stretch, Compatibility renderer
 │   ├── default_bus_layout.tres  Master / Music / SFX / Voice audio buses
 │   ├── sync-assets.sh      Mirrors ../assets into desktop-godot/assets (res://)
-│   ├── scenes/             MainMenu.tscn dashboard + minigame scenes
-│   └── scripts/            AssetLoader (autoload), MainMenu, MinigameBase
+│   ├── scenes/             MainMenu.tscn + MemoryMenu.tscn + games/*.tscn
+│   └── scripts/            AssetLoader & GameContext (autoloads), menus, games/*
 ├── web-canvas/          HTML5 / JS / Canvas implementation
 │   ├── index.html          Responsive full-viewport kiosk canvas
 │   ├── css/                Layout + HUD + splash styling
 │   ├── assets/             Web-sized subset of /assets (built by sync-assets.sh)
 │   ├── sync-assets.sh      (Re)builds web-canvas/assets/ from ../assets
-│   └── js/                 engine.js, assets.js, menu.js, main.js, games/*
+│   └── js/                 engine.js, util.js, menu.js, main.js, games/*
 ├── build-deb.sh         Wrapper -> desktop-godot/build-deb.sh (export + .deb)
 ├── legacy-sources/      Upstream checkout (not tracked; see below)
 ├── docs/GAME-STATUS.md  Per-activity conversion tracker (legacy -> Godot / Web)
@@ -143,8 +143,9 @@ Chromebooks all get a clean, un-distorted layout.
 | `js/util.js` | `roundRect`, `shuffle`, `clamp`, `drawImageFit`, and a shared win/game-over `Overlay` with canvas buttons. |
 | `js/menu.js` | The `MainMenu` state — a reflowing grid of icon tiles. |
 | `js/main.js` | Bootstrap: registers MainMenu, lazily `import()`s + re-instantiates a game module per launch (fresh reset), drives the Back HUD, unlocks audio on first tap. |
-| `js/games/index.js` | Registry: id → name → icon → dynamic `import()`. |
-| `js/games/{memory,fallingletter,soundmemory,packid,billiards}.js` | Standalone Canvas games. Each default-exports `new GameScene(game, { onExit })`: flip/match, falling balloons + on-screen keyboard, audio pairs, tilemap maze with swipe/arrow steering, 2D ball physics with drag-aim and pockets. |
+| `js/games/index.js` | Two lists: `GAMES` (loadable modules) and `MENU` (the 4 dashboard tiles). |
+| `js/games/memory-menu.js` | The **Memory** tile opens this: pick a deck — Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
+| `js/games/{memory,fallingletter,soundmemory,packid,billiards}.js` | Standalone Canvas games. Each default-exports `new GameScene(game, { onExit, ... })`: flip/match (Memory takes a `variant`), falling balloons + on-screen QWERTY keyboard, audio pairs, tilemap maze with swipe/arrow steering, 2D ball physics with drag-aim and pockets. |
 | `serve.sh` | `python3 -m http.server` (or `npx serve`) on port 8080. |
 
 Each game module is downloaded only when first opened.

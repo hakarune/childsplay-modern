@@ -1,17 +1,25 @@
-// games/index.js — the launcher registry.
+// games/index.js — two lists.
 //
-// id / display name / launcher icon (under web-canvas/assets/) / a lazy
-// import of the module. Every module's default export is a Scene subclass
-// with the signature  new GameScene(game, { onExit })  — main.js registers
-// it with the engine on first launch and re-instantiates it (a clean
-// reset) each time the tile is tapped.
+// GAMES  — every loadable game module (default export is a Scene subclass
+//          `new GameScene(game, opts)`). main.js lazy-imports + registers
+//          these on demand.
+// MENU   — what the main dashboard shows. The `memory` tile is special:
+//          it opens the Memory sub-menu (memory-menu.js) instead of a
+//          game, which then picks a variant / Sound Memory.
 
 export const GAMES = [
-  { id: 'memory',        name: 'Memory',         icon: 'icons/memory.png',        load: () => import('./memory.js') },
-  { id: 'fallingletter', name: 'Falling Letter', icon: 'icons/fallingletter.png', load: () => import('./fallingletter.js') },
-  { id: 'soundmemory',   name: 'Sound Memory',   icon: 'icons/soundmemory.png',   load: () => import('./soundmemory.js') },
-  { id: 'packid',        name: 'Packid',         icon: 'icons/packid.png',        load: () => import('./packid.js') },
-  { id: 'billiards',     name: 'Billiards',      icon: 'icons/billiards.png',     load: () => import('./billiards.js') },
+  { id: 'memory',        name: 'Memory',         load: () => import('./memory.js') },
+  { id: 'fallingletter', name: 'Falling Letter', load: () => import('./fallingletter.js') },
+  { id: 'soundmemory',   name: 'Sound Memory',   load: () => import('./soundmemory.js') },
+  { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
+  { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
+];
+
+export const MENU = [
+  { id: 'memory',        name: 'Memory',         icon: 'icons/memory.png',        submenu: true },
+  { id: 'fallingletter', name: 'Falling Letter', icon: 'icons/fallingletter.png' },
+  { id: 'packid',        name: 'Packid',         icon: 'icons/packid.png' },
+  { id: 'billiards',     name: 'Billiards',      icon: 'icons/billiards.png' },
 ];
 
 export function getGame(id) {

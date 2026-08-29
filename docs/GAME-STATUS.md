@@ -22,10 +22,19 @@ Update this file in the same commit that adds or finishes a game.
 
 | Target | ✅ Done | 🟡 Partial | ⬜ Not started |
 | --- | --- | --- | --- |
-| Godot (of the 13 classic activities) | 4 | 1 | 8 |
-| Web (of the 13 classic activities)   | 4 | 1 | 8 |
+| Godot (of the classic-activity rows below) | 8 | 0 | 6 |
+| Web (of the classic-activity rows below)   | 8 | 0 | 6 |
 
-Both targets are at feature parity: the same five game scenes exist on each.
+Both targets are at feature parity.
+
+### Menu structure
+
+The main dashboard has **4 tiles**: Memory, Falling Letter, Packid, Billiards.
+The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
+with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
+routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
+`SoundMemory.tscn`/`soundmemory.js`. Sound Memory no longer has its own
+top-level tile.
 
 ---
 
@@ -36,11 +45,11 @@ is committed to porting first.
 
 | Game | Legacy module | Godot | Web | Notes |
 | --- | --- | :---: | :---: | --- |
-| **Memory** (pictures) | `memory_sp.py` | ✅ | ✅ | Flip/match, grids 2×2 → 5×4, win + next-level flow. Uses the `tileset_2` animal deck. |
-| **Lower Case Memory** | `memory_sp.py` (letters deck) | 🟡 | 🟡 | Same engine as Memory — needs a lowercase a–z card deck + a "letters" level set. Small addition. |
-| **Upper Case Memory** | `memory_sp.py` (letters deck) | 🟡 | 🟡 | Same engine — uppercase A–Z deck. |
-| **Numbers Memory** | `memory_sp.py` (digits deck) | 🟡 | 🟡 | Same engine — 0–9 (and beyond) digit deck. |
-| **Sound Memory** | `soundmemory.py` | ✅ | ✅ | `?`-tiles play a clip; match by audio id; a match reveals the picture. Grids 2×2 → 4×3. |
+| **Memory — Pictures** | `memory_sp.py` | ✅ | ✅ | Flip/match, grids 2×2 → 5×4, win + next-level flow. `tileset_2` animal deck. Memory sub-menu → "Pictures". |
+| **Memory — Lower Case** | `memory_sp.py` | ✅ | ✅ | Same engine, a–z glyph cards drawn on `CP_cardfront`. Memory sub-menu → "lowercase". |
+| **Memory — Upper Case** | `memory_sp.py` | ✅ | ✅ | Same engine, A–Z glyph cards. Memory sub-menu → "UPPERCASE". |
+| **Memory — Numbers** | `memory_sp.py` | ✅ | ✅ | Same engine, 0–9 glyph cards (10 pairs = the largest grid). Memory sub-menu → "Numbers". |
+| **Sound Memory** | `soundmemory.py` | ✅ | ✅ | `?`-tiles play a clip; match by audio id; a match reveals the picture. Grids 2×2 → 4×3. Reached via the Memory sub-menu → "Sounds". |
 | **Fishtank** | `fishtank.py` | ⬜ | ⬜ | Click the fish to clear the tank; timed. Assets in `assets/graphics/lib/CPData/FishtankData` + `assets/audio/.../FishtankData`. |
 | **Find Characters** | `findit_sp.py` | ⬜ | ⬜ | Spot the differences between two near-identical pictures. Assets under `Findit_spData`. |
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type (physical or on-screen QWERTY keyboard) the letter on each balloon before it hits the danger line; 3 lives; difficulty ramps with score. |
@@ -53,13 +62,11 @@ is committed to porting first.
 
 ### What's next (priority order)
 
-1. **Memory content decks** — lowercase / uppercase / numbers modes on the
-   existing Memory scene (add a deck picker; low effort, closes 3 rows).
-2. **Find Sound** — assets are already vendored; simple click-the-picture loop.
-3. **Puzzle** — drag-and-drop; tilesets already present.
-4. **Fishtank** — click-to-clear; quick to build.
-5. **Pong** — small; physics shared with Billiard.
-6. **Find Characters**, **Flashcards** — need more content wrangling.
+1. **Find Sound** — assets are already vendored; simple click-the-picture loop.
+2. **Puzzle** — drag-and-drop; tilesets already present.
+3. **Fishtank** — click-to-clear; quick to build.
+4. **Pong** — small; physics shared with Billiard.
+5. **Find Characters**, **Flashcards** — need more content wrangling.
 
 ---
 
@@ -93,6 +100,7 @@ The original also ships these. None are converted; listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — 5 game scenes live on both targets (Memory,
-Falling Letters, Sound Memory, PackId, Billiard); Memory's letter/number
-decks and everything else still to do._
+_Last updated: 2026-08-29 — Memory now has Pictures / lowercase / UPPERCASE
+/ Numbers decks and a sub-menu that also hosts Sound Memory; 8 of the
+classic activities done on both targets. Still to do: Find Sound, Puzzle,
+Fishtank, Pong, Find Characters, Flashcards (+ the extended catalogue)._
