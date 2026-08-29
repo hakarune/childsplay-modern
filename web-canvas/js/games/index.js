@@ -20,6 +20,7 @@ export const GAMES = [
   { id: 'flashcards',    name: 'Flashcards',     load: () => import('./flashcards.js') },
   { id: 'blockbreaker',  name: 'Block Breaker',  load: () => import('./blockbreaker.js') },
   { id: 'simon',         name: 'Simon',          load: () => import('./simon.js') },
+  { id: 'electro',       name: 'Electro',        load: () => import('./electro.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
 ];
@@ -36,6 +37,7 @@ export const MENU = [
   { id: 'flashcards',    name: 'Flashcards',    icon: 'icons/flashcards.png' },
   { id: 'blockbreaker',  name: 'Block Breaker', icon: 'icons/blockbreaker.png' },
   { id: 'simon',         name: 'Simon',        icon: 'icons/simon.png' },
+  { id: 'electro',       name: 'Electro',      icon: 'icons/electro.png' },
   { id: 'packid',        name: 'Packid',        icon: 'icons/packid.png' },
   { id: 'billiards',     name: 'Billiards',     icon: 'icons/billiards.png' },
 ];

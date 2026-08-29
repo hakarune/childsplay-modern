@@ -41,6 +41,7 @@ cp "$ICONS/fourrow.icon.png"        "$DST/icons/fourrow.png"
 cp "$ICONS/flashcards.icon.png"     "$DST/icons/flashcards.png"
 cp "$ICONS/BlockBreaker.icon.png"   "$DST/icons/blockbreaker.png"
 cp "$ICONS/simon_sp.icon.png"      "$DST/icons/simon.png"
+cp "$ICONS/electro_sp.icon.png"    "$DST/icons/electro.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"

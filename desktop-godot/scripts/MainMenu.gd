@@ -73,6 +73,11 @@ const GAMES := [
 		"icon": "simon_sp.icon.png", "hover": "simon_sp_ro.icon.png",
 		"scene": "res://scenes/games/Simon.tscn",
 	},
+	{
+		"id": "electro", "title": "Electro",
+		"icon": "electro_sp.icon.png", "hover": "electro_sp_ro.icon.png",
+		"scene": "res://scenes/games/Electro.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"
