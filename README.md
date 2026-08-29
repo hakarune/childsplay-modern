@@ -60,6 +60,7 @@ childsplay-modern/
 │   └── js/                 engine.js, assets.js, menu.js, main.js, games/*
 ├── build-deb.sh         Wrapper -> desktop-godot/build-deb.sh (export + .deb)
 ├── legacy-sources/      Upstream checkout (not tracked; see below)
+├── docs/GAME-STATUS.md  Per-activity conversion tracker (legacy -> Godot / Web)
 ├── LICENSE              GPL-3.0
 └── README.md
 ```
@@ -172,9 +173,13 @@ is playable with either a pointer or a touchscreen.
 | **Memory** | Visual memory | The classic picture-pairs game with the original Childsplay tilesets. |
 | **Billiards** | Aim, fine motor | Drag back from the cue ball to set direction and power, then release to strike. |
 
-More of the original activities (Numbers, Puzzle, Fourrow, Electro, …) can be
+More of the original activities (Puzzle, Find Sound, Fishtank, Pong, …) can be
 added as new scenes in `desktop-godot/scenes/games/` and matching modules
 in `web-canvas/js/games/` plus a line in each registry.
+
+**Conversion progress for every legacy activity is tracked in
+[`docs/GAME-STATUS.md`](docs/GAME-STATUS.md)** — update it in the same commit
+that adds or finishes a game.
 
 ## Assets & attribution
 
