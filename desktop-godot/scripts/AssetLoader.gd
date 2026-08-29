@@ -215,6 +215,18 @@ func stop_music() -> void:
 	_music_player.stop()
 
 
+## Stop EVERY sound this autoload is playing, plus any active speech.
+## Called on every scene change so nothing outlives its game (Policy §E.1).
+func stop_all() -> void:
+	for p in _sfx_pool:
+		if is_instance_valid(p):
+			p.stop()
+	if is_instance_valid(_music_player):
+		_music_player.stop()
+	if DisplayServer.has_method("tts_stop"):
+		DisplayServer.tts_stop()
+
+
 func _bus_for_path(path: String) -> String:
 	var p := path.to_lower()
 	if p.contains("alphabetsounds") or p.contains("flashcards") \

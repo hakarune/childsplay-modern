@@ -1,5 +1,7 @@
 // util.js — small shared helpers for the canvas games.
 
+import { theme, DARK } from './theme.js';
+
 export const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 export const lerp = (a, b, t) => a + (b - a) * t;
 export const rand = (lo, hi) => lo + Math.random() * (hi - lo);
@@ -13,6 +15,82 @@ export function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// --- colour helpers (Design Policy §D.4) ------------------------------
+function _lum(hex) {
+  const m = String(hex).replace('#', '').match(/../g);
+  if (!m) return 0;
+  const [r, g, b] = m.map((h) => {
+    const c = parseInt(h, 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG contrast ratio between two #rrggbb colours (1 … 21). */
+export function contrastRatio(a, b) {
+  const la = _lum(a);
+  const lb = _lum(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/** Mix a #rrggbb colour toward white (amt>0) or black (amt<0), |amt| 0..1. */
+export function tint(hex, amt) {
+  const m = String(hex).replace('#', '').match(/../g);
+  if (!m) return hex;
+  const t = amt < 0 ? 0 : 255;
+  const k = Math.abs(amt);
+  const out = m.map((h) => {
+    const v = parseInt(h, 16);
+    return Math.round(v + (t - v) * k).toString(16).padStart(2, '0');
+  });
+  return `#${out.join('')}`;
+}
+
+// --- Bag: draw-without-replacement with auto-reshuffle (Design Policy §B) ---
+export class Bag {
+  constructor(items = []) {
+    this._all = items.slice();
+    this._pool = [];
+    this.filter = null;         // optional (x) => boolean
+  }
+
+  _refill() {
+    let src = this.filter ? this._all.filter(this.filter) : this._all;
+    if (!src.length) src = this._all.slice();
+    this._pool = shuffle(src.slice());
+  }
+
+  draw() {
+    if (!this._pool.length) this._refill();
+    return this._pool.pop();
+  }
+
+  drawN(n) {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      if (!this._pool.length) this._refill();
+      out.push(this._pool.pop());
+    }
+    return out;
+  }
+}
+
+// Session-scoped bag registry. Keys prefixed `<gameId>:` are cleared when
+// that game (re)launches; unprefixed keys (e.g. `backgrounds:med`, shared by
+// Puzzle + Wipe) persist for the whole session.
+const _bags = new Map();
+
+export function bag(key, items) {
+  let b = _bags.get(key);
+  if (!b) { b = new Bag(items); _bags.set(key, b); }
+  return b;
+}
+
+export function resetBags(prefix) {
+  if (!prefix) { _bags.clear(); return; }
+  for (const k of [..._bags.keys()]) if (k.startsWith(prefix)) _bags.delete(k);
 }
 
 export function roundRect(ctx, x, y, w, h, r) {
@@ -38,9 +116,9 @@ export function drawImageFit(ctx, img, x, y, w, h) {
 // --- canvas buttons for the win / game-over overlays -------------------
 export function drawButton(ctx, b, hover) {
   roundRect(ctx, b.x, b.y, b.w, b.h, 14);
-  ctx.fillStyle = hover ? '#5b8cff' : '#4c7dff';
+  ctx.fillStyle = hover ? tint(theme.accent, 0.16) : theme.accent;
   ctx.fill();
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = '#ffffff';
   ctx.font = '600 26px system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -102,10 +180,11 @@ export class Overlay {
 
   render(ctx, w, h) {
     if (!this.visible) return;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillStyle = theme.overlay_scrim;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.fillStyle = '#eef2f7';
+    // overlay chrome sits on the (always-dark) scrim in both themes
+    ctx.fillStyle = DARK.text;
     ctx.font = '700 46px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

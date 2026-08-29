@@ -114,11 +114,27 @@ const CLICK_SOUND := "wahoo.wav"
 
 
 func _ready() -> void:
+	# Nothing from the game we just left may still be sounding (Policy §E.1).
+	AssetLoader.stop_all()
+
 	_wire_grid()
 
 	_audio_toggle.toggled.connect(_on_audio_toggled)
 	_audio_toggle.button_pressed = AssetLoader.is_master_muted()
 	_refresh_audio_toggle_text()
+
+	# light / dark toggle, sits next to the audio toggle
+	var theme_btn := Button.new()
+	theme_btn.name = "ThemeToggle"
+	theme_btn.custom_minimum_size = Vector2(150, 44)
+	theme_btn.focus_mode = Control.FOCUS_ALL
+	theme_btn.text = "Theme: Dark" if GameContext.theme_mode == "dark" else "Theme: Light"
+	theme_btn.pressed.connect(func() -> void:
+		GameContext.toggle_theme()
+		theme_btn.text = "Theme: Dark" if GameContext.theme_mode == "dark" else "Theme: Light"
+		_play_hover())
+	_audio_toggle.get_parent().add_child(theme_btn)
+	_audio_toggle.get_parent().move_child(theme_btn, _audio_toggle.get_index())
 
 	_exit_button.pressed.connect(_on_exit_pressed)
 	_exit_button.mouse_entered.connect(_play_hover)
@@ -208,6 +224,8 @@ func _load_minigame(id: String) -> void:
 	var scene_path: String = game["scene"]
 	if ResourceLoader.exists(scene_path):
 		print("[MainMenu] launching %s -> %s" % [id, scene_path])
+		AssetLoader.stop_all()
+		GameContext.reset_pools(id + ":")   # fresh no-repeat bags for this game (§B.2)
 		get_tree().change_scene_to_file(scene_path)
 	else:
 		print("[MainMenu] (stub) would launch '%s' from %s" % [id, scene_path])

@@ -6,10 +6,12 @@
 //
 // Games are lazy-imported and re-instantiated per launch (a clean reset).
 
-import { Game } from './engine.js';
+import { Game, loadManifest, setMuted, isMuted } from './engine.js';
 import { MainMenu } from './menu.js';
 import { MemoryMenu } from './games/memory-menu.js';
 import { getGame } from './games/index.js';
+import { resetBags } from './util.js';
+import { initTheme, toggleTheme, getTheme } from './theme.js';
 
 const canvas = document.getElementById('game-canvas');
 const hud = document.getElementById('hud');
@@ -17,6 +19,38 @@ const backBtn = document.getElementById('back-btn');
 const title = document.getElementById('activity-name');
 const splash = document.getElementById('splash');
 const fsBtn = document.getElementById('fs-btn');
+const themeBtn = document.getElementById('theme-btn');
+const muteBtn = document.getElementById('mute-btn');
+const mutePop = document.getElementById('mute-pop');
+
+// --- theme toggle --------------------------------------------------------
+initTheme();
+const syncThemeBtn = () => { themeBtn.textContent = getTheme() === 'light' ? '☾' : '☀'; };
+syncThemeBtn();
+themeBtn.addEventListener('click', () => { toggleTheme(); syncThemeBtn(); });
+
+// --- mute popover (music / sfx / voice, independent) --------------------
+for (const cb of mutePop.querySelectorAll('input[data-ch]')) {
+  const ch = cb.dataset.ch;
+  let saved = false;
+  try { saved = localStorage.getItem(`cp:mute:${ch}`) === '1'; } catch { /* */ }
+  cb.checked = saved;
+  setMuted(ch, saved);
+  cb.addEventListener('change', () => {
+    setMuted(ch, cb.checked);
+    try { localStorage.setItem(`cp:mute:${ch}`, cb.checked ? '1' : '0'); } catch { /* */ }
+    syncMuteBtn();
+  });
+}
+function syncMuteBtn() {
+  const anyOn = ['music', 'sfx', 'voice'].some((c) => isMuted(c));
+  muteBtn.textContent = anyOn ? '🔇' : '🔊';
+}
+syncMuteBtn();
+muteBtn.addEventListener('click', (e) => { e.stopPropagation(); mutePop.hidden = !mutePop.hidden; });
+window.addEventListener('pointerdown', (e) => {
+  if (!mutePop.hidden && !mutePop.contains(e.target) && e.target !== muteBtn) mutePop.hidden = true;
+});
 
 // --- fullscreen toggle -----------------------------------------------------
 const fsEl = document.documentElement;
@@ -80,6 +114,7 @@ async function launch(id, opts, back) {
     ? `${entry.name} – ${opts.variant}`
     : entry.name;
   backHandler = back;
+  resetBags(`${id}:`);             // fresh no-repeat bags for this game (Policy §B.2)
   setHud(true);
   try {
     const mod = await entry.load();
@@ -103,6 +138,9 @@ window.addEventListener('pointerdown', () => {
   const Ctx = window.AudioContext || window.webkitAudioContext;
   if (Ctx && !window.__spAudio) window.__spAudio = new Ctx();
 }, { once: true });
+
+// resolveImage() needs the manifest before the first frame draws pool art
+await loadManifest();
 
 game.setState('MainMenu');
 game.start();

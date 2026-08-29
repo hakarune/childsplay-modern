@@ -111,4 +111,26 @@ for lang in de nl fr es; do
   done
 done
 
+# --- image manifest: stem -> best available file (svg > png > jpg > …) ---
+# engine.resolveImage() reads this so a game can reference `backgrounds/castle`
+# with no extension and get the highest-priority file that exists (Policy §C.2).
+python3 - "$DST" > "$DST/manifest.json" <<'PY'
+import os, sys, json
+dst = sys.argv[1]
+PRIO = {".svg": 0, ".png": 1, ".jpg": 2, ".jpeg": 3, ".webp": 4}
+best = {}
+for root, _dirs, files in os.walk(dst):
+    for f in files:
+        stem, ext = os.path.splitext(f)
+        ext = ext.lower()
+        if ext not in PRIO:
+            continue
+        rel = os.path.relpath(os.path.join(root, f), dst).replace(os.sep, "/")
+        key = os.path.splitext(rel)[0]
+        cur = best.get(key)
+        if cur is None or PRIO[ext] < PRIO[os.path.splitext(cur)[1].lower()]:
+            best[key] = rel
+print(json.dumps(best, separators=(",", ":"), sort_keys=True))
+PY
+
 echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)"

@@ -23,8 +23,17 @@
       <span id="activity-name"></span>
     </header>
 
-    <!-- always-available fullscreen toggle (top-right) -->
-    <button id="fs-btn" type="button" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+    <!-- always-available chrome (top-right): theme, mute, fullscreen -->
+    <div id="chrome">
+      <button id="theme-btn" type="button" aria-label="Toggle light/dark" title="Light / dark">&#x263D;</button>
+      <button id="mute-btn" type="button" aria-label="Sound options" title="Sound">&#x1F50A;</button>
+      <button id="fs-btn" type="button" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+      <div id="mute-pop" hidden>
+        <label><input type="checkbox" data-ch="music" /> Music</label>
+        <label><input type="checkbox" data-ch="sfx" /> Sound effects</label>
+        <label><input type="checkbox" data-ch="voice" /> Voice</label>
+      </div>
+    </div>
 
     <!-- one dynamic canvas; engine.js flexes the world to the viewport in
          landscape and fits a fixed 16:9 to the width in portrait. -->

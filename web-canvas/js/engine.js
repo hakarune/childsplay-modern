@@ -26,7 +26,8 @@ const MAX_ASPECT = 2.00;   // ~18:9 — wide laptops, split view
 const REF_ASPECT = 16 / 9; // portrait / fallback world shape
 
 const ASSET_ROOT = new URL('../assets/', import.meta.url).href;
-const isImage = (p) => /\.(png|jpe?g|svg|webp|gif)$/i.test(p);
+const HAS_EXT = /\.(png|jpe?g|svg|webp|gif)$/i;
+const isImage = (p) => HAS_EXT.test(p);
 
 // ---------------------------------------------------------------------------
 // Asset + audio manager
@@ -37,19 +38,44 @@ const _imgReady = new Map();   // path -> HTMLImageElement (once loaded)
 const _sndPromises = new Map();
 const _sndReady = new Map();
 
+// stem -> "best" file, written by sync-assets.sh. Lets a game reference an
+// image by pool path with NO extension and get svg > png > jpg (Policy §C.2).
+let _manifest = null;
+
+export async function loadManifest() {
+  if (_manifest) return _manifest;
+  try {
+    const r = await fetch(assetURL('manifest.json'));
+    _manifest = r.ok ? await r.json() : {};
+  } catch {
+    _manifest = {};
+  }
+  return _manifest;
+}
+
+/** Resolve an extension-less pool path (`backgrounds/castle`) to a real file
+ *  via the manifest; a path that already has an extension is returned as-is. */
+export function resolveImage(base) {
+  const s = String(base);
+  if (HAS_EXT.test(s)) return s;
+  const m = _manifest || {};
+  return m[s] || `${s}.png`;
+}
+
 export function assetURL(path) {
   return ASSET_ROOT + String(path).replace(/^\/+/, '');
 }
 
 export function loadImage(path) {
-  if (_imgPromises.has(path)) return _imgPromises.get(path);
+  const rp = resolveImage(path);
+  if (_imgPromises.has(rp)) return _imgPromises.get(rp);
   const p = new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => { _imgReady.set(path, img); resolve(img); };
-    img.onerror = () => { console.warn(`[assets] missing image: ${path}`); resolve(img); };
-    img.src = assetURL(path);
+    img.onload = () => { _imgReady.set(rp, img); resolve(img); };
+    img.onerror = () => { console.warn(`[assets] missing image: ${rp}`); resolve(img); };
+    img.src = assetURL(rp);
   });
-  _imgPromises.set(path, p);
+  _imgPromises.set(rp, p);
   return p;
 }
 
@@ -75,23 +101,75 @@ export function preload(paths) {
 /** Synchronous cache accessor for render loops: kicks off a load on first
  *  use and returns the element once ready, otherwise null. */
 export function img(path) {
-  if (!_imgReady.has(path) && !_imgPromises.has(path)) loadImage(path);
-  return _imgReady.get(path) || null;
+  const rp = resolveImage(path);
+  if (!_imgReady.has(rp) && !_imgPromises.has(rp)) loadImage(rp);
+  return _imgReady.get(rp) || null;
+}
+
+// --- audio manager (Design Policy §E) --------------------------------------
+// Every playing element is tracked so it can be killed on scene exit; the
+// three logical channels can be muted independently from the menu.
+
+const _live = new Set();                 // active <audio> one-shots + loops
+const _muted = { sfx: false, voice: false, music: false };
+
+export function setMuted(channel, on) {
+  if (channel in _muted) _muted[channel] = !!on;
+  if (on) {
+    for (const a of _live) {
+      if (a.__cpChannel === channel) { try { a.pause(); a.currentTime = 0; } catch { /* */ } _live.delete(a); }
+    }
+  }
+}
+export function isMuted(channel) { return !!_muted[channel]; }
+
+/** Stop every sound this session started, plus any speech. Called by the
+ *  engine on every scene change so nothing outlives its game. */
+export function stopAllAudio() {
+  for (const a of _live) { try { a.pause(); a.currentTime = 0; } catch { /* */ } }
+  _live.clear();
+  // belt & braces for games not yet migrated to playLoop()
+  for (const a of _sndReady.values()) { try { if (!a.paused) { a.pause(); a.currentTime = 0; } } catch { /* */ } }
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch { /* */ }
 }
 
 /** Overlapping one-shot playback. Safe to call before the first user
  *  gesture (the play() rejection is swallowed). */
-export function playSound(path, { volume = 1, rate = 1 } = {}) {
+export function playSound(path, { volume = 1, rate = 1, channel = 'sfx' } = {}) {
+  if (_muted[channel]) return;
   loadSound(path).then((base) => {
     try {
       const shot = base.cloneNode(true);
+      shot.__cpChannel = channel;
       shot.volume = volume;
       shot.playbackRate = rate;
+      _live.add(shot);
+      shot.addEventListener('ended', () => _live.delete(shot), { once: true });
       shot.play().catch(() => {});
     } catch {
       /* ignore */
     }
   });
+}
+
+/** Looping playback (ambient beds, BGM). Returns a handle with .stop(); the
+ *  engine also force-stops it on scene exit whether or not the game keeps it. */
+export function playLoop(path, { volume = 1, channel = 'music' } = {}) {
+  const a = new Audio();
+  a.src = assetURL(path);
+  a.loop = true;
+  a.volume = volume;
+  a.__cpChannel = channel;
+  const handle = {
+    _a: a,
+    setVolume(v) { a.volume = v; },
+    stop() { try { a.pause(); a.currentTime = 0; } catch { /* */ } _live.delete(a); },
+  };
+  if (!_muted[channel]) {
+    _live.add(a);
+    a.play().catch(() => {});
+  }
+  return handle;
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +224,7 @@ export class Game {
     const factory = this._states.get(name);
     if (!factory) { console.error(`[engine] unknown state "${name}"`); return; }
     if (this.scene && this.scene.exit) this.scene.exit();
+    stopAllAudio();                 // no sound outlives its scene (Policy §E.1)
     this.stateName = name;
     this.scene = factory(this, opts);
     this.scene.game = this;
