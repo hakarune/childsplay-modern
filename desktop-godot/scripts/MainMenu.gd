@@ -58,6 +58,11 @@ const GAMES := [
 		"icon": "fourrow.icon.png", "hover": "fourrow_ro.icon.png",
 		"scene": "res://scenes/games/FourRow.tscn",
 	},
+	{
+		"id": "flashcards", "title": "Flashcards",
+		"icon": "flashcards.icon.png", "hover": "flashcards_ro.icon.png",
+		"scene": "res://scenes/games/Flashcards.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

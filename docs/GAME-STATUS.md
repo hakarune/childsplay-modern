@@ -22,16 +22,17 @@ Update this file in the same commit that adds or finishes a game.
 
 | Target | ✅ Done | 🟡 Partial | ⬜ Not started |
 | --- | --- | --- | --- |
-| Godot (of the classic-activity rows below) | 12 | 0 | 2 |
-| Web (of the classic-activity rows below)   | 12 | 0 | 2 |
+| Godot (of the classic-activity rows below) | 14 | 0 | 0 |
+| Web (of the classic-activity rows below)   | 14 | 0 | 0 |
 
-(Plus **Four in a Row** from the extended catalogue — done on both.)
+**Every classic Childsplay activity is now ported on both targets** (plus
+**Four in a Row** from the extended catalogue).
 
 Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **10 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Packid, Billiards.
+The main dashboard has **11 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -57,17 +58,17 @@ is committed to porting first.
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type (physical or on-screen QWERTY keyboard) the letter on each balloon before it hits the danger line; 3 lives; difficulty ramps with score. |
 | **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **6 levels**: 2x2 / 3x3 / 4x4 regular grids, then 3 harder levels cut into 6 / 9 / 12 **different-sized rectangles** by recursive random splits. Source art: GPL paintings from `WipeData`. `Puzzle.tscn` / `puzzle.js`. |
 | **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; 6 themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. `FindSound.tscn` / `findsound.js`. |
-| **Flashcards** | `flashcards.py` | ⬜ | ⬜ | Blocked: the card images live in the legacy content DB (not vendored) and there is no English `FlashCardsSounds` pack (only de/nl/fr/…). Needs a curated image+word+audio set before it can be built. |
+| **Flashcards** | `flashcards.py` | ✅ | ✅ | Picture + word cards for 12 animals (reusing Memory / Find Sound art). **English is spoken by OS / browser text-to-speech** (`DisplayServer.tts_*` / `speechSynthesis`); **Deutsch / Nederlands / Français / Español** play the recorded Childsplay clips we ship, with a TTS fallback in that language. No audio at all → the card still shows the picture + word. `Flashcards.tscn` / `flashcards.js`. |
 | **Pong** | `pong.py` | ✅ | ✅ | Bat and ball versus a gentle AI paddle; first to 5; 3 levels of AI speed. Pointer / arrow-key paddle, ball speeds up per hit with spin from the contact point. `Pong.tscn` / `pong.js`. |
 | **PackId** | `packid.py` | ✅ | ✅ | Open pillar maze, grid-snapped player, fruit "ghosts" with non-reversing AI, arrow **and** swipe steering, cherry pickup, friendly bump→reset (no game over), 3 sizes. |
 | **Billiard** | `billiard.py` | ✅ | ✅ | 2D ball physics (damping, elastic ball-ball, cushion restitution), drag-to-aim with a power line, 6 pockets, cue-scratch respawn, 3/6/10-ball racks. Godot uses `RigidBody2D`; web uses a substepped custom solver. |
 
-### What's next (priority order)
+### What's next
 
-1. **Flashcards** — blocked on assets (see the row above); needs a curated
-   image + word + spoken-audio set first.
-2. Extended catalogue — Tic Tac Toe, Simon, Numbers (counting), Electro,
-   Block Breaker … are all small and unblocked.
+The classic 13 are all done. Remaining work is the **extended catalogue**
+below — Tic Tac Toe, Simon, Numbers (counting), Electro, Block Breaker,
+Image Changer, Wipe, Synonyms and the Quiz decks — all small and
+unblocked.
 
 ---
 
@@ -101,7 +102,7 @@ The original also ships these. None are converted; listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — Pong, Find It (spot the difference) and Four
-in a Row added on both targets. 12 of the classic activities done + Four
-in a Row from the extended set. Flashcards is asset-blocked; the extended
-catalogue is otherwise open._
+_Last updated: 2026-08-29 — Flashcards added on both targets (TTS for
+English + recorded de/nl/fr/es packs). **All 13 classic Childsplay
+activities are now ported**, plus Four in a Row. Next up: the extended
+catalogue._

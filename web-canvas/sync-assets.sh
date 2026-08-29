@@ -24,6 +24,7 @@ A="$SRC/audio/lib/CPData"
 
 rm -rf "$DST"
 mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,aquarium,soundmemory/img,soundmemory/snd,sfx}
+mkdir -p "$DST"/flashcards/{de,nl,fr,es}
 
 # --- launcher icons (renamed to our game ids) ---------------------------
 cp "$ICONS/packid.icon.png"         "$DST/icons/packid.png"
@@ -37,6 +38,7 @@ cp "$ICONS/fishtank.icon.png"       "$DST/icons/aquarium.png"
 cp "$ICONS/pong.icon.png"           "$DST/icons/pong.png"
 cp "$ICONS/findit_sp.icon.png"      "$DST/icons/findit.png"
 cp "$ICONS/fourrow.icon.png"        "$DST/icons/fourrow.png"
+cp "$ICONS/flashcards.icon.png"     "$DST/icons/flashcards.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
@@ -91,5 +93,13 @@ cp "$A/good.ogg" "$A/wrong.ogg" "$A/wahoo.wav" "$A/bummer.wav" \
 cp "$A/FishtankData/sounds/glockenschmoutz.ogg" "$DST/sfx/aqua_ambient.ogg"
 cp "$A/FourrowData/won.ogg"  "$DST/sfx/fourrow_win.ogg"
 cp "$A/FourrowData/loss.ogg" "$DST/sfx/fourrow_loss.ogg"
+
+# --- Flashcards: recorded animal-name clips (de / nl / fr / es) -------
+for lang in de nl fr es; do
+  for w in bear cow dog elephant fox frog hippopotamus horse lion pig penguin rooster; do
+    src="$SRC/audio/alphabet-sounds/alphabet-sounds_$lang/FlashCardsSounds/$lang/$w.ogg"
+    [ -f "$src" ] && cp "$src" "$DST/flashcards/$lang/$w.ogg"
+  done
+done
 
 echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)"
