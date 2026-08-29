@@ -1,65 +1,147 @@
-// engine.js — minimal canvas engine for Childsplay-Modern (web target).
+// engine.js — the web-canvas engine.
 //
-// Responsibilities:
-//   * own the <canvas> and its 2D context
-//   * keep a fixed 1280x720 internal resolution, letterbox-scaled to the
-//     viewport (handles phones, tablets, Chromebooks + device pixel ratio)
-//   * run a single requestAnimationFrame loop
-//   * dispatch normalised pointer events (mouse + touch) in game coords
-//   * manage one active Scene at a time
+//   * state machine  — MainMenu + the five games, registered by name
+//   * asset loader    — images & sounds under web-canvas/assets/, cached
+//   * audio manager   — preload, cache, overlapping one-shot playback
+//   * game loop        — rAF, fixed 1280x720 world, aspect-fit scaling,
+//                        pointer/touch/key event normalisation
+//
+// Games are modules whose default export is (game, opts) => Scene.
 
 export const VIEW_W = 1280;
 export const VIEW_H = 720;
 
-/**
- * A Scene is any object with optional lifecycle hooks:
- *   enter(engine)      — called once when the scene becomes active
- *   exit()             — called once when it is replaced
- *   update(dt)         — per-frame logic, dt in seconds
- *   render(ctx)        — per-frame drawing
- *   pointerdown/move/up(x, y) — input in 1280x720 space
- */
-export class Scene {
-  enter() {}
-  exit() {}
-  update() {}
-  render() {}
-  pointerdown() {}
-  pointermove() {}
-  pointerup() {}
+const ASSET_ROOT = new URL('../assets/', import.meta.url).href;
+const isImage = (p) => /\.(png|jpe?g|svg|webp|gif)$/i.test(p);
+
+// ---------------------------------------------------------------------------
+// Asset + audio manager
+// ---------------------------------------------------------------------------
+
+const _imgPromises = new Map();
+const _imgReady = new Map();   // path -> HTMLImageElement (once loaded)
+const _sndPromises = new Map();
+const _sndReady = new Map();
+
+export function assetURL(path) {
+  return ASSET_ROOT + String(path).replace(/^\/+/, '');
 }
 
-export class Engine {
+export function loadImage(path) {
+  if (_imgPromises.has(path)) return _imgPromises.get(path);
+  const p = new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => { _imgReady.set(path, img); resolve(img); };
+    img.onerror = () => { console.warn(`[assets] missing image: ${path}`); resolve(img); };
+    img.src = assetURL(path);
+  });
+  _imgPromises.set(path, p);
+  return p;
+}
+
+export function loadSound(path) {
+  if (_sndPromises.has(path)) return _sndPromises.get(path);
+  const p = new Promise((resolve) => {
+    const a = new Audio();
+    a.preload = 'auto';
+    const done = () => { _sndReady.set(path, a); resolve(a); };
+    a.addEventListener('canplaythrough', done, { once: true });
+    a.addEventListener('error', () => { console.warn(`[assets] missing audio: ${path}`); resolve(a); }, { once: true });
+    a.src = assetURL(path);
+    a.load();
+  });
+  _sndPromises.set(path, p);
+  return p;
+}
+
+export function preload(paths) {
+  return Promise.all(paths.map((p) => (isImage(p) ? loadImage(p) : loadSound(p))));
+}
+
+/** Synchronous cache accessor for render loops: kicks off a load on first
+ *  use and returns the element once ready, otherwise null. */
+export function img(path) {
+  if (!_imgReady.has(path) && !_imgPromises.has(path)) loadImage(path);
+  return _imgReady.get(path) || null;
+}
+
+/** Overlapping one-shot playback. Safe to call before the first user
+ *  gesture (the play() rejection is swallowed). */
+export function playSound(path, { volume = 1, rate = 1 } = {}) {
+  loadSound(path).then((base) => {
+    try {
+      const shot = base.cloneNode(true);
+      shot.volume = volume;
+      shot.playbackRate = rate;
+      shot.play().catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Scene base
+// ---------------------------------------------------------------------------
+
+export class Scene {
+  constructor(game) { this.game = game; }
+  enter() {}
+  exit() {}
+  update(_dt) {}
+  render(_ctx) {}
+  pointerdown(_x, _y) {}
+  pointermove(_x, _y) {}
+  pointerup(_x, _y) {}
+  keydown(_e) {}
+  keyup(_e) {}
+  resize() {}
+}
+
+// ---------------------------------------------------------------------------
+// Game — loop, states, input
+// ---------------------------------------------------------------------------
+
+export class Game {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.scene = null;
+    this.stateName = null;
+    this._states = new Map();
+    this._scale = 1;
     this._last = 0;
     this._raf = 0;
-    this._scale = 1;
-    this._offsetX = 0;
-    this._offsetY = 0;
+    this.pointer = { x: 0, y: 0, down: false };
 
-    this._onResize = this._onResize.bind(this);
-    this._frame = this._frame.bind(this);
-
-    window.addEventListener('resize', this._onResize);
-    window.addEventListener('orientationchange', this._onResize);
-    this._bindPointer();
-    this._onResize();
+    this._loop = this._loop.bind(this);
+    this._resize = this._resize.bind(this);
+    this._bindInput();
+    window.addEventListener('resize', this._resize);
+    window.addEventListener('orientationchange', this._resize);
+    this._resize();
   }
 
-  /** Swap the active scene, running exit/enter hooks. */
-  setScene(scene) {
+  /** register(name, (game, opts) => Scene) */
+  register(name, factory) {
+    this._states.set(name, factory);
+    return this;
+  }
+
+  setState(name, opts = {}) {
+    const factory = this._states.get(name);
+    if (!factory) { console.error(`[engine] unknown state "${name}"`); return; }
     if (this.scene && this.scene.exit) this.scene.exit();
-    this.scene = scene;
-    if (scene && scene.enter) scene.enter(this);
+    this.stateName = name;
+    this.scene = factory(this, opts);
+    this.scene.game = this;
+    if (this.scene.enter) this.scene.enter();
   }
 
   start() {
     if (this._raf) return;
     this._last = performance.now();
-    this._raf = requestAnimationFrame(this._frame);
+    this._raf = requestAnimationFrame(this._loop);
   }
 
   stop() {
@@ -67,30 +149,26 @@ export class Engine {
     this._raf = 0;
   }
 
-  _frame(now) {
+  _loop(now) {
     const dt = Math.min((now - this._last) / 1000, 0.05);
     this._last = now;
 
-    if (this.scene) {
-      if (this.scene.update) this.scene.update(dt);
-      const { ctx } = this;
-      ctx.save();
-      ctx.setTransform(this._scale, 0, 0, this._scale, this._offsetX, this._offsetY);
-      ctx.clearRect(0, 0, VIEW_W, VIEW_H);
-      if (this.scene.render) this.scene.render(ctx);
-      ctx.restore();
-    }
+    const s = this.scene;
+    if (s && s.update) s.update(dt);
 
-    this._raf = requestAnimationFrame(this._frame);
+    const c = this.ctx;
+    c.save();
+    c.setTransform(this._scale, 0, 0, this._scale, 0, 0);
+    c.clearRect(0, 0, VIEW_W, VIEW_H);
+    if (s && s.render) s.render(c);
+    c.restore();
+
+    this._raf = requestAnimationFrame(this._loop);
   }
 
-  _onResize() {
+  _resize() {
     const dpr = window.devicePixelRatio || 1;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    // Fit 1280x720 inside the viewport, preserving aspect ratio.
-    const scale = Math.min(vw / VIEW_W, vh / VIEW_H);
+    const scale = Math.min(window.innerWidth / VIEW_W, window.innerHeight / VIEW_H);
     const cssW = Math.round(VIEW_W * scale);
     const cssH = Math.round(VIEW_H * scale);
 
@@ -98,42 +176,57 @@ export class Engine {
     this.canvas.style.height = cssH + 'px';
     this.canvas.width = Math.round(cssW * dpr);
     this.canvas.height = Math.round(cssH * dpr);
-
+    this.ctx.imageSmoothingEnabled = true;
     this._scale = scale * dpr;
-    this._offsetX = 0;
-    this._offsetY = 0;
+
+    if (this.scene && this.scene.resize) this.scene.resize();
   }
 
-  /** Convert a DOM event position into 1280x720 game coordinates. */
-  _toGameCoords(clientX, clientY) {
-    const rect = this.canvas.getBoundingClientRect();
-    const x = (clientX - rect.left) / rect.width * VIEW_W;
-    const y = (clientY - rect.top) / rect.height * VIEW_H;
-    return [x, y];
+  _toWorld(clientX, clientY) {
+    const r = this.canvas.getBoundingClientRect();
+    return [
+      ((clientX - r.left) / r.width) * VIEW_W,
+      ((clientY - r.top) / r.height) * VIEW_H,
+    ];
   }
 
-  _bindPointer() {
-    const fwd = (type, ev) => {
-      if (!this.scene || !this.scene[type]) return;
-      const src = ev.touches && ev.touches[0] ? ev.touches[0]
-                : ev.changedTouches && ev.changedTouches[0] ? ev.changedTouches[0]
-                : ev;
-      const [x, y] = this._toGameCoords(src.clientX, src.clientY);
-      this.scene[type](x, y);
+  _bindInput() {
+    const fwd = (type, clientX, clientY) => {
+      const [x, y] = this._toWorld(clientX, clientY);
+      this.pointer.x = x;
+      this.pointer.y = y;
+      if (type === 'pointerdown') this.pointer.down = true;
+      if (type === 'pointerup') this.pointer.down = false;
+      const s = this.scene;
+      if (s && s[type]) s[type](x, y);
     };
 
-    this.canvas.addEventListener('mousedown', (e) => fwd('pointerdown', e));
-    this.canvas.addEventListener('mousemove', (e) => fwd('pointermove', e));
-    window.addEventListener('mouseup', (e) => fwd('pointerup', e));
+    const cv = this.canvas;
+    cv.addEventListener('mousedown', (e) => fwd('pointerdown', e.clientX, e.clientY));
+    cv.addEventListener('mousemove', (e) => fwd('pointermove', e.clientX, e.clientY));
+    window.addEventListener('mouseup', (e) => fwd('pointerup', e.clientX, e.clientY));
 
-    this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); fwd('pointerdown', e); }, { passive: false });
-    this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); fwd('pointermove', e); }, { passive: false });
-    this.canvas.addEventListener('touchend', (e) => { e.preventDefault(); fwd('pointerup', e); }, { passive: false });
-  }
+    cv.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      fwd('pointerdown', t.clientX, t.clientY);
+    }, { passive: false });
+    cv.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      fwd('pointermove', t.clientX, t.clientY);
+    }, { passive: false });
+    cv.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      fwd('pointerup', t.clientX, t.clientY);
+    }, { passive: false });
 
-  destroy() {
-    this.stop();
-    window.removeEventListener('resize', this._onResize);
-    window.removeEventListener('orientationchange', this._onResize);
+    window.addEventListener('keydown', (e) => {
+      if (this.scene && this.scene.keydown) this.scene.keydown(e);
+    });
+    window.addEventListener('keyup', (e) => {
+      if (this.scene && this.scene.keyup) this.scene.keyup(e);
+    });
   }
 }

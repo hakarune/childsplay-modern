@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#
+# sync-assets.sh - (re)build web-canvas/assets/ as a small, web-sized
+# subset of the shared ../assets/ pool (itself extracted from
+# legacy-sources/). The full pool is ~50 MB; the web target only ships
+# what the launcher and the five games actually use (~3 MB), flattened
+# into friendly paths.
+#
+# Run after cloning or whenever ../assets/ changes. The result is checked
+# in so `web-canvas/` deploys as-is, but this script is the source of
+# truth for what belongs there.
+#
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SRC="$HERE/../assets"
+DST="$HERE/assets"
+
+[ -d "$SRC" ] || { echo "error: $SRC not found" >&2; exit 1; }
+
+G="$SRC/graphics/lib/CPData"
+ICONS="$SRC/graphics/lib/SPData/themes/childsplay/menuicons"
+A="$SRC/audio/lib/CPData"
+
+rm -rf "$DST"
+mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,soundmemory/img,soundmemory/snd,sfx}
+
+# --- launcher icons (renamed to our game ids) ---------------------------
+cp "$ICONS/packid.icon.png"         "$DST/icons/packid.png"
+cp "$ICONS/fallingletters.icon.png" "$DST/icons/fallingletter.png"
+cp "$ICONS/soundmemory.icon.png"    "$DST/icons/soundmemory.png"
+cp "$ICONS/memory_sp.icon.png"      "$DST/icons/memory.png"
+cp "$ICONS/billiard.icon.png"       "$DST/icons/billiards.png"
+
+# --- UI font -----------------------------------------------------------
+cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
+
+# --- Memory: tileset_2 pictures + card back ---------------------------
+cp "$G/Memory_spData/tileset_2/childsplay/"*.png "$DST/memory/"
+
+# --- Packid: sprites, wall + cherry tiles, fruit "ghosts" ------------
+cp "$G/PackidData/"pac_*.png "$G/PackidData/brick.png" \
+   "$G/PackidData/kers.png" "$G/PackidData/appel.png" \
+   "$G/PackidData/banaan.png" "$G/PackidData/citroen.png" \
+   "$G/PackidData/peer.png" "$DST/packid/"
+
+# --- Billiards: balls, pocket, cue ---------------------------------
+cp "$G/BilliardData/ball1.png" "$G/BilliardData/ball2.png" \
+   "$G/BilliardData/hole.png" "$G/BilliardData/stick.png" "$DST/billiards/"
+
+# --- Sound Memory: reveal pictures + the sound clips -----------------
+# Some names repeat across level folders; first one wins.
+for f in "$G/FindsoundData/Images/"level*/*.png; do
+  cp -n "$f" "$DST/soundmemory/img/"
+done
+cp "$A/SoundmemoryData/Sounds/"*.ogg "$DST/soundmemory/snd/"
+
+# --- shared sound effects ------------------------------------------
+cp "$A/good.ogg" "$A/wrong.ogg" "$A/wahoo.wav" "$A/bummer.wav" \
+   "$A/dealcard1.wav" "$A/volumecheck.wav" "$A/button_hover.wav" \
+   "$A/PackidData/eat.wav" "$A/PackidData/waka.wav" "$A/PackidData/finlevel.wav" \
+   "$A/PongData/winner.ogg" "$A/PongData/bump.wav" "$A/PongData/pick.wav" \
+   "$A/BilliardData/sndh.wav" "$A/BilliardData/sndt.wav" \
+   "$DST/sfx/"
+
+echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)"

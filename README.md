@@ -53,9 +53,11 @@ childsplay-modern/
 │   ├── scenes/             MainMenu.tscn dashboard + minigame scenes
 │   └── scripts/            AssetLoader (autoload), MainMenu, MinigameBase
 ├── web-canvas/          HTML5 / JS / Canvas implementation
-│   ├── index.html          Responsive full-viewport canvas
-│   ├── css/                Layout + HUD styling
-│   └── js/                 engine.js, menu.js, main.js, minigames/*
+│   ├── index.html          Responsive full-viewport kiosk canvas
+│   ├── css/                Layout + HUD + splash styling
+│   ├── assets/             Web-sized subset of /assets (built by sync-assets.sh)
+│   ├── sync-assets.sh      (Re)builds web-canvas/assets/ from ../assets
+│   └── js/                 engine.js, assets.js, menu.js, main.js, games/*
 ├── build-deb.sh         Wrapper -> desktop-godot/build-deb.sh (export + .deb)
 ├── legacy-sources/      Upstream checkout (not tracked; see below)
 ├── LICENSE              GPL-3.0
@@ -122,24 +124,29 @@ require `http://`, not `file://`):
 
 ```sh
 cd web-canvas
-python3 -m http.server 8000
-# open http://localhost:8000
+./sync-assets.sh          # first run: build web-canvas/assets/ (~3 MB)
+./serve.sh                # -> http://localhost:8080  (pass a port to change)
 ```
 
-Deploy by copying `web-canvas/` (and the `assets/` it references) to any
-static host — GitHub Pages, Netlify, an S3 bucket, a classroom intranet.
+`web-canvas/assets/` is committed, so deploying is just copying `web-canvas/`
+to any static host — GitHub Pages, Netlify, an S3 bucket, a classroom
+intranet. All five games are implemented as Canvas modules. The engine
+aspect-fits a fixed 1280×720 world into any screen, so phones, tablets and
+Chromebooks all get a clean, un-distorted layout.
 
 `js/` layout:
 
 | File | Role |
 | --- | --- |
-| `js/engine.js` | Canvas engine: fixed 1280x720 internal resolution, aspect-fit scaling with devicePixelRatio, single rAF loop, unified mouse/touch input, one active `Scene`. |
-| `js/menu.js` | The dashboard `Scene` — draws one tile per activity. |
-| `js/main.js` | Bootstrap: wires engine + menu, lazy-loads the chosen minigame, drives the back-button HUD. |
-| `js/minigames/index.js` | Registry mapping activity id → name → dynamic `import()`. |
-| `js/minigames/*.js` | One module per activity, each exporting a `(engine, { onFinished }) => Scene` factory. |
+| `js/engine.js` | The engine: named state machine (MainMenu + 5 games), image/sound loader + cache, overlapping one-shot audio, rAF loop, fixed 1280×720 world with aspect-fit scaling, pointer/touch/key normalisation. |
+| `js/util.js` | `roundRect`, `shuffle`, `clamp`, `drawImageFit`, and a shared win/game-over `Overlay` with canvas buttons. |
+| `js/menu.js` | The `MainMenu` state — a reflowing grid of icon tiles. |
+| `js/main.js` | Bootstrap: registers MainMenu, lazily `import()`s + re-instantiates a game module per launch (fresh reset), drives the Back HUD, unlocks audio on first tap. |
+| `js/games/index.js` | Registry: id → name → icon → dynamic `import()`. |
+| `js/games/{memory,fallingletter,soundmemory,packid,billiards}.js` | Standalone Canvas games. Each default-exports `new GameScene(game, { onExit })`: flip/match, falling balloons + on-screen keyboard, audio pairs, tilemap maze with swipe/arrow steering, 2D ball physics with drag-aim and pockets. |
+| `serve.sh` | `python3 -m http.server` (or `npx serve`) on port 8080. |
 
-Each minigame is downloaded only when first opened.
+Each game module is downloaded only when first opened.
 
 ## Controls
 
@@ -166,8 +173,8 @@ is playable with either a pointer or a touchscreen.
 | **Billiards** | Aim, fine motor | Drag back from the cue ball to set direction and power, then release to strike. |
 
 More of the original activities (Numbers, Puzzle, Fourrow, Electro, …) can be
-added as new scenes in `desktop-godot/scenes/minigames/` and matching modules
-in `web-canvas/js/minigames/` plus a line in each registry.
+added as new scenes in `desktop-godot/scenes/games/` and matching modules
+in `web-canvas/js/games/` plus a line in each registry.
 
 ## Assets & attribution
 

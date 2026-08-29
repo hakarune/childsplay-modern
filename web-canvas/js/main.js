@@ -1,43 +1,50 @@
-// main.js — bootstrap for the Childsplay-Modern web target.
-//
-// Wires the engine, the menu scene and the lazily-loaded minigames
-// together, and manages the small HUD (back button + activity name).
+// main.js — bootstrap. Creates the engine, registers the MainMenu, and
+// lazily loads / (re)instantiates a game module when its launcher tile is
+// tapped. Re-registering + setState() gives every launch a fresh, reset
+// game object.
 
-import { Engine } from './engine.js';
-import { MenuScene } from './menu.js';
-import { getMinigame } from './minigames/index.js';
+import { Game } from './engine.js';
+import { MainMenu } from './menu.js';
+import { getGame } from './games/index.js';
 
-const canvas = document.getElementById('stage');
+const canvas = document.getElementById('game-canvas');
 const hud = document.getElementById('hud');
 const backBtn = document.getElementById('back-btn');
-const activityName = document.getElementById('activity-name');
+const title = document.getElementById('activity-name');
+const splash = document.getElementById('splash');
 
-const engine = new Engine(canvas);
+const game = new Game(canvas);
+game.register('MainMenu', (g) => new MainMenu(g, { onSelect: launch }));
 
-function showMenu() {
-  hud.hidden = true;
-  activityName.textContent = '';
-  engine.setScene(new MenuScene({ onSelect: launchMinigame }));
-}
-
-async function launchMinigame(id) {
-  const entry = getMinigame(id);
+async function launch(id) {
+  const entry = getGame(id);
   if (!entry) return;
-
-  activityName.textContent = entry.name;
+  title.textContent = entry.name;
   hud.hidden = false;
-
   try {
     const mod = await entry.load();
-    const createScene = mod.default;
-    engine.setScene(createScene(engine, { onFinished: showMenu }));
+    game.register(id, (g) => new mod.default(g, { onExit: toMenu }));
+    game.setState(id);
   } catch (err) {
-    console.error(`Failed to load minigame "${id}"`, err);
-    showMenu();
+    console.error(`Failed to load game "${id}"`, err);
+    toMenu();
   }
 }
 
-backBtn.addEventListener('click', showMenu);
+function toMenu() {
+  hud.hidden = true;
+  title.textContent = '';
+  game.setState('MainMenu');
+}
 
-showMenu();
-engine.start();
+backBtn.addEventListener('click', toMenu);
+
+// Satisfy the mobile autoplay policy on the first tap anywhere.
+window.addEventListener('pointerdown', () => {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (Ctx && !window.__spAudio) window.__spAudio = new Ctx();
+}, { once: true });
+
+game.setState('MainMenu');
+game.start();
+if (splash) splash.remove();

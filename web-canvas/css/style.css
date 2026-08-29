@@ -1,18 +1,28 @@
-/* Childsplay-Modern — web-canvas base styles
-   Goal: a single canvas that fills the viewport on phones, tablets and
-   Chromebooks without introducing scrollbars or letterbox jitter. */
+/* Childsplay — web-canvas kiosk styles.
+   One canvas, aspect-fit into any viewport, no scrollbars, no zoom,
+   no rubber-band. The body ground colour matches the canvas world so
+   the letterbox bands on odd screen ratios read as intentional. */
 
 * { box-sizing: border-box; }
+
+:root {
+  --ground: #1b2333;
+  --accent: #4c7dff;
+  --accent-press: #3a63d0;
+}
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: #222b3d;
+  overscroll-behavior: none;
+  background: var(--ground);
   color: #eef2f7;
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
   touch-action: none;
 }
 
@@ -20,58 +30,67 @@ html, body {
   position: fixed;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-/* The canvas is sized in JS (see js/engine.js -> resize()), but these
-   rules stop the browser from stretching the bitmap or overflowing. */
+/* Pixel size is set by engine.js (_onResize); these rules just keep the
+   bitmap crisp and stop it overflowing the viewport. */
 #stage {
   display: block;
-  max-width: 100%;
-  max-height: 100%;
-  background: #1a2230;
-  image-rendering: -webkit-optimize-contrast;
+  max-width: 100vw;
+  max-height: 100vh;
+  background: var(--ground);
   touch-action: none;
 }
 
+/* --- top HUD (only visible inside a game) --- */
 #hud {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset: 0 0 auto 0;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
   padding-top: calc(8px + env(safe-area-inset-top, 0px));
-  background: rgba(20, 26, 38, 0.85);
+  padding-left: calc(12px + env(safe-area-inset-left, 0px));
+  background: rgba(16, 21, 32, 0.82);
   backdrop-filter: blur(4px);
   z-index: 10;
 }
-
 #hud[hidden] { display: none; }
 
 #back-btn {
   font: inherit;
-  padding: 8px 16px;
-  min-height: 44px; /* touch target */
+  font-weight: 600;
+  padding: 10px 18px;
+  min-height: 44px;          /* comfortable touch target */
   border: 0;
-  border-radius: 8px;
-  background: #4c7dff;
+  border-radius: 10px;
+  background: var(--accent);
   color: #fff;
   cursor: pointer;
 }
+#back-btn:active { background: var(--accent-press); }
 
-#back-btn:active { background: #3a63d0; }
+#activity-name { font-weight: 600; letter-spacing: 0.02em; }
 
-#activity-name {
-  font-weight: 600;
-  letter-spacing: 0.02em;
+/* --- loading splash, removed by main.js once the engine starts --- */
+#splash {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ground);
+  z-index: 20;
 }
-
-.fallback {
-  padding: 2rem;
-  text-align: center;
+#splash span {
+  font-size: clamp(28px, 6vw, 56px);
+  font-weight: 700;
+  opacity: 0.85;
+  animation: pulse 1.4s ease-in-out infinite;
 }
+@keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.95; } }
+
+.fallback { padding: 2rem; text-align: center; }

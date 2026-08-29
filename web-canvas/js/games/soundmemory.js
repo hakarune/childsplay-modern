@@ -1,0 +1,166 @@
+// soundmemory.js — the cards hide sounds, not pictures. Tap a card to
+// hear its clip; find the two that sound the same. A match reveals the
+// matching picture.
+
+import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow } from '../util.js';
+
+const LEVELS = [
+  { name: 'Toddler', cols: 2, rows: 2 },
+  { name: 'Easy',    cols: 4, rows: 2 },
+  { name: 'Medium',  cols: 4, rows: 3 },
+];
+
+const POOL = ['alarm', 'banjo', 'bird', 'boat', 'bubbles', 'car', 'carhorn',
+  'cello', 'chiken', 'chimes', 'clang', 'clarinette', 'cow', 'didjeridu', 'dog',
+  'drum', 'duck2', 'elephant', 'flute', 'foghorn', 'frog', 'frogs', 'guitar',
+  'harp', 'hey', 'horse', 'lion', 'piano', 'plane', 'police', 'rocket',
+  'rooster', 'sheep', 'shenai', 'violin', 'zap'];
+
+const SND_MATCH = 'sfx/good.ogg';
+const SND_MISMATCH = 'sfx/wrong.ogg';
+const SND_WIN = 'sfx/winner.ogg';
+
+export default class SoundMemoryGame extends Scene {
+  constructor(game, opts = {}) {
+    super(game);
+    this._exit = opts.onExit || (() => {});
+    this._overlay = new Overlay();
+    this._level = 0;
+    this._startLevel(0);
+  }
+
+  _startLevel(n) {
+    this._level = Math.max(0, Math.min(n, LEVELS.length - 1));
+    const lv = LEVELS[this._level];
+    this._pairs = (lv.cols * lv.rows) >> 1;
+    this._tries = 0;
+    this._matched = 0;
+    this._first = null;
+    this._second = null;
+    this._cool = 0;
+    this._pulse = 0;
+    this._overlay.hide();
+
+    const ids = shuffle(POOL.slice()).slice(0, this._pairs);
+    const cells = shuffle(ids.concat(ids));
+
+    const top = 90;
+    const gw = VIEW_W - 120;
+    const gh = VIEW_H - top - 40;
+    const gap = 20;
+    const cw = (gw - gap * (lv.cols - 1)) / lv.cols;
+    const chh = (gh - gap * (lv.rows - 1)) / lv.rows;
+    const size = Math.min(cw, chh, 240);
+    const ox = (VIEW_W - (size * lv.cols + gap * (lv.cols - 1))) / 2;
+    const oy = top + (gh - (size * lv.rows + gap * (lv.rows - 1))) / 2;
+
+    this._cards = cells.map((id, i) => ({
+      id,
+      x: ox + (i % lv.cols) * (size + gap),
+      y: oy + ((i / lv.cols) | 0) * (size + gap),
+      s: size,
+      matched: false,
+    }));
+  }
+
+  update(dt) {
+    this._pulse += dt;
+    if (this._cool > 0) {
+      this._cool -= dt;
+      if (this._cool <= 0) this._compare();
+    }
+  }
+
+  _cardAt(x, y) {
+    return this._cards.find((c) => !c.matched && inRect({ x: c.x, y: c.y, w: c.s, h: c.s }, x, y));
+  }
+
+  pointermove(x, y) { this._overlay.pointermove(x, y); }
+
+  pointerup(x, y) {
+    if (this._overlay.visible) {
+      const act = this._overlay.pointerup(x, y);
+      if (act === 'next') this._startLevel(this._level + 1);
+      else if (act === 'menu') this._exit();
+      return;
+    }
+    if (this._cool > 0) return;
+    const c = this._cardAt(x, y);
+    if (!c || c === this._first) return;
+
+    playSound(`soundmemory/snd/${c.id}.ogg`);
+    this._playing = c;
+    this._pulse = 0;
+
+    if (!this._first) { this._first = c; return; }
+    this._second = c;
+    this._tries++;
+    this._cool = 1.0;               // let both clips be heard
+  }
+
+  _compare() {
+    const a = this._first;
+    const b = this._second;
+    if (a && b && a.id === b.id) {
+      a.matched = b.matched = true;
+      this._matched++;
+      playSound(SND_MATCH);
+      if (this._matched === this._pairs) this._win();
+    } else {
+      playSound(SND_MISMATCH);
+    }
+    this._first = this._second = null;
+    this._playing = null;
+  }
+
+  _win() {
+    playSound(SND_WIN);
+    const last = this._level >= LEVELS.length - 1;
+    const btns = last
+      ? buttonRow([['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20)
+      : buttonRow([['Next Level', 'next'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20);
+    this._overlay.show(`Wonderful listening!\n${this._tries} tries`, btns);
+  }
+
+  render(ctx) {
+    ctx.fillStyle = '#222b3d';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillRect(0, 0, VIEW_W, 70);
+    ctx.fillStyle = '#eef2f7';
+    ctx.font = '600 24px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Tries ${this._tries}    Pairs ${this._matched}/${this._pairs}`, VIEW_W / 2, 35);
+    ctx.textAlign = 'right';
+    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}`, VIEW_W - 24, 35);
+
+    for (const c of this._cards) {
+      const first = c === this._first;
+      const playing = c === this._playing && this._pulse < 0.6;
+
+      roundRect(ctx, c.x, c.y, c.s, c.s, 16);
+      ctx.fillStyle = c.matched ? '#4a9d5b' : first ? '#e0a021' : '#3b6ea5';
+      ctx.fill();
+
+      if (c.matched) {
+        drawImageFit(ctx, img(`soundmemory/img/${c.id}.png`), c.x + 12, c.y + 12, c.s - 24, c.s - 24);
+      } else {
+        const wob = playing ? 1 + 0.12 * Math.sin(this._pulse * 22) : 1;
+        ctx.save();
+        ctx.translate(c.x + c.s / 2, c.y + c.s / 2);
+        ctx.scale(wob, wob);
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.font = `700 ${Math.round(c.s * 0.4)}px system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(playing ? '♪' : '?', 0, 4);
+        ctx.restore();
+      }
+    }
+
+    this._overlay.render(ctx, VIEW_W, VIEW_H);
+  }
+}
