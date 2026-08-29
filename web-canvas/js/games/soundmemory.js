@@ -125,7 +125,7 @@ export default class SoundMemoryGame extends Scene {
   }
 
   _win() {
-    playSound(SND_WIN);
+    playSound(SND_WIN, { channel: 'music' });
     const last = this._level >= LEVELS.length - 1;
     const btns = last
       ? buttonRow([['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20)

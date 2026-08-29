@@ -29,22 +29,23 @@ const syncThemeBtn = () => { themeBtn.textContent = getTheme() === 'light' ? '�
 syncThemeBtn();
 themeBtn.addEventListener('click', () => { toggleTheme(); syncThemeBtn(); });
 
-// --- mute popover (music / sfx / voice, independent) --------------------
+// --- sound popover (music / sfx / voice, independent) ------------------
+// A checkbox is CHECKED when that channel is ON (audible).
 for (const cb of mutePop.querySelectorAll('input[data-ch]')) {
   const ch = cb.dataset.ch;
-  let saved = false;
-  try { saved = localStorage.getItem(`cp:mute:${ch}`) === '1'; } catch { /* */ }
-  cb.checked = saved;
-  setMuted(ch, saved);
+  let on = true;
+  try { on = localStorage.getItem(`cp:snd:${ch}`) !== '0'; } catch { /* */ }
+  cb.checked = on;
+  setMuted(ch, !on);
   cb.addEventListener('change', () => {
-    setMuted(ch, cb.checked);
-    try { localStorage.setItem(`cp:mute:${ch}`, cb.checked ? '1' : '0'); } catch { /* */ }
+    setMuted(ch, !cb.checked);
+    try { localStorage.setItem(`cp:snd:${ch}`, cb.checked ? '1' : '0'); } catch { /* */ }
     syncMuteBtn();
   });
 }
 function syncMuteBtn() {
-  const anyOn = ['music', 'sfx', 'voice'].some((c) => isMuted(c));
-  muteBtn.textContent = anyOn ? '🔇' : '🔊';
+  const anyOff = ['music', 'sfx', 'voice'].some((c) => isMuted(c));
+  muteBtn.textContent = anyOff ? '🔇' : '🔊';
 }
 syncMuteBtn();
 muteBtn.addEventListener('click', (e) => { e.stopPropagation(); mutePop.hidden = !mutePop.hidden; });

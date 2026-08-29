@@ -192,7 +192,7 @@ export default class SimonGame extends Scene {
     this._phase = 'idle';
     this._lit = -1;
     if (last) {
-      playSound(SND_WIN);
+      playSound(SND_WIN, { channel: 'music' });
       this._overlay.show(
         'You matched every sequence!',
         buttonRow([['Play Again', 'replay'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20),

@@ -288,13 +288,13 @@ export default class BlockBreakerGame extends Scene {
     const last = this._level >= LEVELS.length - 1;
     if (last) {
       this._won = true;
-      playSound(SND_WIN);
+      playSound(SND_WIN, { channel: 'music' });
       this._overlay.show(
         'You cleared every wall!',
         buttonRow([['Play Again', 'replay'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20),
       );
     } else {
-      playSound(SND_CLEAR);
+      playSound(SND_CLEAR, { channel: 'music' });
       this._overlay.show(
         `Wall ${this._level + 1} cleared!`,
         buttonRow([['Next Wall', 'next'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20),

@@ -110,7 +110,7 @@ export default class PongGame extends Scene {
 
   _finish() {
     this._over = true;
-    playSound(SND_WIN);
+    playSound(SND_WIN, { channel: 'music' });
     const won = this._you > this._cpu;
     const last = this._level >= LEVELS.length - 1;
     const rows = [['Replay', 'replay'], ['Menu', 'menu']];

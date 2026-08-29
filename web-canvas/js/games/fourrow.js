@@ -132,7 +132,7 @@ export default class FourRowGame extends Scene {
     this._over = true;
     this._winLine = line;
     const youWon = who === RED;
-    playSound(youWon ? SND_WIN : SND_LOSS);
+    playSound(youWon ? SND_WIN : SND_LOSS, { channel: 'music' });
     const last = this._level >= LEVELS.length - 1;
     const rows = [['Play Again', 'replay'], ['Menu', 'menu']];
     if (youWon && !last) rows.unshift(['Next Level', 'next']);

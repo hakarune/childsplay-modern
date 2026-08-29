@@ -123,11 +123,11 @@ export default class WordMakerGame extends Scene {
   _levelDone() {
     const last = this._level >= LEVELS.length - 1;
     if (last) {
-      playSound(SND_WIN);
+      playSound(SND_WIN, { channel: 'music' });
       this._overlay.show('You are a word maker!',
         buttonRow([['Play Again', 'replay'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20));
     } else {
-      playSound(SND_WIN, { volume: 0.6 });
+      playSound(SND_WIN, { volume: 0.6, channel: 'music' });
       this._overlay.show(`Level ${this._level + 1} done!`,
         buttonRow([['Next Level', 'next'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20));
     }

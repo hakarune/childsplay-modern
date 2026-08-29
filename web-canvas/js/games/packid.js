@@ -212,7 +212,7 @@ export default class PackidGame extends Scene {
   }
 
   _win() {
-    playSound(SND_WIN);
+    playSound(SND_WIN, { channel: 'music' });
     const last = this._level >= LEVELS.length - 1;
     const rows = [['Replay', 'replay'], ['Menu', 'menu']];
     if (!last) rows.unshift(['Next Level', 'next']);

@@ -126,7 +126,7 @@ export default class WipeGame extends Scene {
     if (this._done) return;
     this._done = true;
     this._cover.fill(0);            // sweep the rest away
-    playSound(SND_WIN);
+    playSound(SND_WIN, { channel: 'music' });
     const last = this._level >= LEVELS.length - 1;
     this._overlay.show(
       last ? 'Every painting uncovered!' : 'Nice wiping!',

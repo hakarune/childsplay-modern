@@ -149,7 +149,7 @@ export default class TicTacToeGame extends Scene {
 
     if (w.who === X) {
       // player won
-      playSound(SND_WIN);
+      playSound(SND_WIN, { channel: 'music' });
       if (last) {
         this._overlay.show('You beat the champion!',
           buttonRow([['Play Again', 'replay'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20));
@@ -164,7 +164,7 @@ export default class TicTacToeGame extends Scene {
     } else {
       // draw
       if (last) {
-        playSound(SND_WIN);
+        playSound(SND_WIN, { channel: 'music' });
         this._overlay.show('Draw — you held the champion!',
           buttonRow([['Play Again', 'replay'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20));
       } else {

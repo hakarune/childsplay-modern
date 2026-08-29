@@ -2,7 +2,7 @@
 // poke one to hear a bubble + see its name, or tap the water to drop food
 // the nearby fish swim over to.
 
-import { Scene, VIEW_W, VIEW_H, img, loadImage, loadSound, playSound } from '../engine.js';
+import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, playLoop } from '../engine.js';
 import { rand, clamp, shuffle } from '../util.js';
 
 const TANKS = ['aquarium/tank1.jpg', 'aquarium/tank2.jpg'];
@@ -71,16 +71,11 @@ export default class AquariumGame extends Scene {
 
   _startAmbient() {
     if (this._ambient) return;
-    loadSound(AMBIENT).then((a) => {
-      this._ambient = a;
-      a.loop = true;
-      a.volume = 0.25;
-      a.play().catch(() => {});
-    });
+    this._ambient = playLoop(AMBIENT, { volume: 0.25, channel: 'music' });
   }
 
   exit() {
-    if (this._ambient) { try { this._ambient.pause(); } catch { /* */ } }
+    if (this._ambient) { this._ambient.stop(); this._ambient = null; }
   }
 
   // --- helpers ---

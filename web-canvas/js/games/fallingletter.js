@@ -125,7 +125,7 @@ export default class FallingLetterGame extends Scene {
 
   _gameOver() {
     this._over = true;
-    playSound(SND_END);
+    playSound(SND_END, { channel: 'music' });
     this._overlay.show(
       `Nice typing!\nyou caught ${this._score} letter${this._score === 1 ? '' : 's'}`,
       buttonRow([['Play Again', 'again'], ['Menu', 'menu']], VIEW_W / 2, VIEW_H / 2 + 20)

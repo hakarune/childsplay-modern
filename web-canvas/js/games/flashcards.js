@@ -64,7 +64,7 @@ export default class FlashcardsGame extends Scene {
     if (L.code === 'en') return this._tts(card.word, L.bcp);
     // recorded clip; fall back to TTS if it can't be played
     loadSound(`flashcards/${L.code}/${card.word}.ogg`).then((a) => {
-      if (a && (a.duration > 0 || a.readyState >= 2)) playSound(`flashcards/${L.code}/${card.word}.ogg`);
+      if (a && (a.duration > 0 || a.readyState >= 2)) playSound(`flashcards/${L.code}/${card.word}.ogg`, { channel: 'voice' });
       else this._tts(card.word, L.bcp);
     });
   }
