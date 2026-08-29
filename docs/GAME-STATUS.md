@@ -22,14 +22,14 @@ Update this file in the same commit that adds or finishes a game.
 
 | Target | ✅ Done | 🟡 Partial | ⬜ Not started |
 | --- | --- | --- | --- |
-| Godot (of the classic-activity rows below) | 10 | 0 | 4 |
-| Web (of the classic-activity rows below)   | 10 | 0 | 4 |
+| Godot (of the classic-activity rows below) | 11 | 0 | 3 |
+| Web (of the classic-activity rows below)   | 11 | 0 | 3 |
 
 Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **6 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Packid, Billiards.
+The main dashboard has **7 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Aquarium, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -50,7 +50,7 @@ is committed to porting first.
 | **Memory — Upper Case** | `memory_sp.py` | ✅ | ✅ | Same engine, A–Z glyph cards. Memory sub-menu → "UPPERCASE". |
 | **Memory — Numbers** | `memory_sp.py` | ✅ | ✅ | Same engine, 0–9 glyph cards (10 pairs = the largest grid). Memory sub-menu → "Numbers". |
 | **Sound Memory** | `soundmemory.py` | ✅ | ✅ | `?`-tiles play a clip; match by audio id; a match reveals the picture. Grids 2×2 → 4×3. Reached via the Memory sub-menu → "Sounds". |
-| **Fishtank** | `fishtank.py` | ⬜ | ⬜ | Click the fish to clear the tank; timed. Assets in `assets/graphics/lib/CPData/FishtankData` + `assets/audio/.../FishtankData`. |
+| **Fishtank** / Aquarium | `fishtank.py` | ✅ | ✅ | Reinterpreted as a calm **Aquarium** toy (no score): ~12 fish with a 2-frame swim cycle wander + bob + bounce; poke a fish for a bubble sound + its floating name + a dart/flip; tap the water for a ripple + food pellet the nearest fish steer toward. Godot uses `GPUParticles2D` bubbles + a looping ambient track. `Aquarium.tscn` + `AquariumFish.tscn` / `aquarium.js`. |
 | **Find Characters** | `findit_sp.py` | ⬜ | ⬜ | Spot the differences between two near-identical pictures. Assets under `Findit_spData`. |
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type (physical or on-screen QWERTY keyboard) the letter on each balloon before it hits the danger line; 3 lives; difficulty ramps with score. |
 | **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **6 levels**: 2x2 / 3x3 / 4x4 regular grids, then 3 harder levels cut into 6 / 9 / 12 **different-sized rectangles** by recursive random splits. Source art: GPL paintings from `WipeData`. `Puzzle.tscn` / `puzzle.js`. |
@@ -62,9 +62,9 @@ is committed to porting first.
 
 ### What's next (priority order)
 
-1. **Fishtank** — click-to-clear; quick to build (needs its art added to assets/).
-2. **Pong** — small; physics shared with Billiard.
-3. **Find Characters**, **Flashcards** — need more content wrangling.
+1. **Pong** — small; ball physics shared with Billiard, needs a gentle AI paddle.
+2. **Find Characters** — spot-the-difference; needs image pairs.
+3. **Flashcards** — needs the `alphabet-sounds/` voice packs.
 
 ---
 
@@ -98,7 +98,6 @@ The original also ships these. None are converted; listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — Puzzle added on both targets, incl. 3 extra
-"different-shaped pieces" levels (recursive rectangle splits). 10 of the
-classic activities done. Still to do: Fishtank, Pong, Find Characters,
-Flashcards (+ the extended catalogue)._
+_Last updated: 2026-08-29 — Aquarium (Fishtank) added on both targets as
+a calm interactive fish tank. 11 of the classic activities done. Still to
+do: Pong, Find Characters, Flashcards (+ the extended catalogue)._

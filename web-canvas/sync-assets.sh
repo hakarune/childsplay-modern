@@ -23,7 +23,7 @@ ICONS="$SRC/graphics/lib/SPData/themes/childsplay/menuicons"
 A="$SRC/audio/lib/CPData"
 
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,soundmemory/img,soundmemory/snd,sfx}
+mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,aquarium,soundmemory/img,soundmemory/snd,sfx}
 
 # --- launcher icons (renamed to our game ids) ---------------------------
 cp "$ICONS/packid.icon.png"         "$DST/icons/packid.png"
@@ -33,6 +33,7 @@ cp "$ICONS/memory_sp.icon.png"      "$DST/icons/memory.png"
 cp "$ICONS/billiard.icon.png"       "$DST/icons/billiards.png"
 cp "$ICONS/findsound.icon.png"      "$DST/icons/findsound.png"
 cp "$ICONS/puzzle.icon.png"         "$DST/icons/puzzle.png"
+cp "$ICONS/fishtank.icon.png"       "$DST/icons/aquarium.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
@@ -41,6 +42,18 @@ cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
 mkdir -p "$DST/puzzle"
 for n in renoir0 monet0 bruegel0 gogh0 pieck0 vermeer1; do
   cp "$G/WipeData/tileset_1/$n.jpg" "$DST/puzzle/$n.jpg"
+done
+
+# --- Aquarium: tank backgrounds, fish swim frames, bubble sprite ------
+FT="$G/FishtankData"
+mkdir -p "$DST/aquarium"
+cp "$FT/backgrounds/childsplay/1.jpg"  "$DST/aquarium/tank1.jpg"
+cp "$FT/backgrounds/childsplay/6.jpg"  "$DST/aquarium/tank2.jpg"
+cp "$FT/backgrounds/childsplay/blub0.png" "$DST/aquarium/bubble.png"
+for n in shark1 manta eel discus2 QueenAngel butfish blueking2 collaris \
+         six_barred cichlid1 newf1 f01 f04 f06 f09 f13; do
+  cp "$FT/${n}_0.png" "$DST/aquarium/${n}_0.png"
+  cp "$FT/${n}_1.png" "$DST/aquarium/${n}_1.png"
 done
 
 # --- Memory: tileset_2 pictures + card back ---------------------------
@@ -69,6 +82,8 @@ cp "$A/good.ogg" "$A/wrong.ogg" "$A/wahoo.wav" "$A/bummer.wav" \
    "$A/PackidData/eat.wav" "$A/PackidData/waka.wav" "$A/PackidData/finlevel.wav" \
    "$A/PongData/winner.ogg" "$A/PongData/bump.wav" "$A/PongData/pick.wav" \
    "$A/BilliardData/sndh.wav" "$A/BilliardData/sndt.wav" \
+   "$A/FishtankData/sounds/blub0.wav" "$A/FishtankData/sounds/poolsplash.wav" \
    "$DST/sfx/"
+cp "$A/FishtankData/sounds/glockenschmoutz.ogg" "$DST/sfx/aqua_ambient.ogg"
 
 echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)"

@@ -38,6 +38,11 @@ const GAMES := [
 		"icon": "puzzle.icon.png", "hover": "puzzle_ro.icon.png",
 		"scene": "res://scenes/games/Puzzle.tscn",
 	},
+	{
+		"id": "aquarium", "title": "Aquarium",
+		"icon": "fishtank.icon.png", "hover": "fishtank_ro.icon.png",
+		"scene": "res://scenes/games/Aquarium.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"
