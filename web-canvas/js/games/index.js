@@ -19,6 +19,7 @@ export const GAMES = [
   { id: 'fourrow',       name: 'Four in a Row',  load: () => import('./fourrow.js') },
   { id: 'flashcards',    name: 'Flashcards',     load: () => import('./flashcards.js') },
   { id: 'blockbreaker',  name: 'Block Breaker',  load: () => import('./blockbreaker.js') },
+  { id: 'simon',         name: 'Simon',          load: () => import('./simon.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
 ];
@@ -34,6 +35,7 @@ export const MENU = [
   { id: 'fourrow',       name: 'Four in a Row', icon: 'icons/fourrow.png' },
   { id: 'flashcards',    name: 'Flashcards',    icon: 'icons/flashcards.png' },
   { id: 'blockbreaker',  name: 'Block Breaker', icon: 'icons/blockbreaker.png' },
+  { id: 'simon',         name: 'Simon',        icon: 'icons/simon.png' },
   { id: 'packid',        name: 'Packid',        icon: 'icons/packid.png' },
   { id: 'billiards',     name: 'Billiards',     icon: 'icons/billiards.png' },
 ];

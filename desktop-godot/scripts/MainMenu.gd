@@ -68,6 +68,11 @@ const GAMES := [
 		"icon": "BlockBreaker.icon.png", "hover": "BlockBreaker_ro.icon.png",
 		"scene": "res://scenes/games/BlockBreaker.tscn",
 	},
+	{
+		"id": "simon", "title": "Simon",
+		"icon": "simon_sp.icon.png", "hover": "simon_sp_ro.icon.png",
+		"scene": "res://scenes/games/Simon.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **12 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Packid, Billiards.
+The main dashboard has **13 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,15 +66,15 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Tic Tac Toe, Simon, Numbers (counting), Electro, Image Changer,
-Wipe, Synonyms and the Quiz decks.
+below — Tic Tac Toe, Numbers (counting), Electro, Image Changer, Wipe,
+Synonyms and the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
-The original also ships these. **Four in a Row** and **Block Breaker** are
-converted so far; the rest are listed so nothing is lost.
+The original also ships these. **Four in a Row**, **Block Breaker** and
+**Simon** are converted so far; the rest are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
@@ -83,7 +83,7 @@ converted so far; the rest are listed so nothing is lost.
 | Electro | `electro_sp.py` | ⬜ | ⬜ | Match pairs of pictures with wires (a Memory variant). |
 | Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
 | Tic Tac Toe | `TicTacToe.py` | ⬜ | ⬜ | Noughts and crosses. |
-| Simon | `simon_sp.py` | ⬜ | ⬜ | Repeat the growing sequence of sounds/colours. |
+| Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; six levels, target length 2→7. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
 | Image Changer | `ichanger.py` | ⬜ | ⬜ | Memorise images, then spot which one changed. |
 | Photo Album | `photoalbum.py` | ⬜ | ⬜ | Browse a themed set of photos. |
@@ -103,7 +103,6 @@ converted so far; the rest are listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — web canvas made fully responsive (world
-width now follows the viewport; portrait phones get a rotate hint;
-fullscreen button). **Block Breaker** ported on both targets — first of
-the extended-catalogue standalone activities._
+_Last updated: 2026-08-29 — in-game HUD strip is now reserved (no longer
+covers each game's score bar); portrait plays fit-to-width instead of a
+rotate gate. **Simon** ported on both targets (synthesised tones)._
