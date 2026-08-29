@@ -88,6 +88,11 @@ const GAMES := [
 		"icon": "wipe.icon.png", "hover": "wipe_ro.icon.png",
 		"scene": "res://scenes/games/Wipe.tscn",
 	},
+	{
+		"id": "ichanger", "title": "Image Changer",
+		"icon": "ichanger.icon.png", "hover": "ichanger_ro.icon.png",
+		"scene": "res://scenes/games/ImageChanger.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

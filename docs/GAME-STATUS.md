@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **16 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Packid, Billiards.
+The main dashboard has **17 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,16 +66,16 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Numbers (counting), Image Changer, Synonyms, Photo Album, Spin
-the Bottle and the Quiz decks.
+below — Numbers (counting), Synonyms, Photo Album, Spin the Bottle and
+the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
 The original also ships these. **Four in a Row**, **Block Breaker**,
-**Simon**, **Electro**, **Tic Tac Toe** and **Wipe** are converted so
-far; the rest are listed so nothing is lost.
+**Simon**, **Electro**, **Tic Tac Toe**, **Wipe** and **Image Changer**
+are converted so far; the rest are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
@@ -86,7 +86,7 @@ far; the rest are listed so nothing is lost.
 | Tic Tac Toe | `TicTacToe.py` | ✅ | ✅ | Noughts and crosses vs the computer. Three opponents: Easy (random), Medium (win / block / centre), Hard (perfect minimax). You are X and move first; beat Easy and Medium to advance, hold the perfect computer to a draw to finish. `TicTacToe.tscn` / `tictactoe.js`. |
 | Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; six levels, target length 2→7. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
-| Image Changer | `ichanger.py` | ⬜ | ⬜ | Memorise images, then spot which one changed. |
+| Image Changer | `ichanger.py` | ✅ | ✅ | Study the row of pictures, press Start; the cards flip down and back and one picture has changed — tap it. Four levels (3 cards, 3 + position shuffle, 4 cards, 4 + shuffle), three rounds each. Reuses the Memory animal art. `ImageChanger.tscn` / `ichanger.js`. |
 | Photo Album | `photoalbum.py` | ⬜ | ⬜ | Browse a themed set of photos. |
 | Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. Clear the target fraction to finish — six paintings (the GPL `WipeData` set), rising target 55→84% and a shrinking sponge. Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
 | Synonyms | `synonyms.py` | ⬜ | ⬜ | Make a word from given letters. |
@@ -104,6 +104,6 @@ far; the rest are listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — **Wipe** ported on both targets (scratch-off
-painting reveal). Extended-catalogue standalone activities done so far:
-Block Breaker, Simon, Electro, Tic Tac Toe, Wipe._
+_Last updated: 2026-08-29 — **Image Changer** ported on both targets
+(spot-the-changed-card). Extended-catalogue standalone activities done so
+far: Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer._
