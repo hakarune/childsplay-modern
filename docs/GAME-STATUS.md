@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **11 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Packid, Billiards.
+The main dashboard has **12 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,16 +66,15 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Tic Tac Toe, Simon, Numbers (counting), Electro, Block Breaker,
-Image Changer, Wipe, Synonyms and the Quiz decks — all small and
-unblocked.
+below — Tic Tac Toe, Simon, Numbers (counting), Electro, Image Changer,
+Wipe, Synonyms and the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
-The original also ships these. Only **Four in a Row** is converted so far;
-the rest are listed so nothing is lost.
+The original also ships these. **Four in a Row** and **Block Breaker** are
+converted so far; the rest are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
@@ -85,7 +84,7 @@ the rest are listed so nothing is lost.
 | Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
 | Tic Tac Toe | `TicTacToe.py` | ⬜ | ⬜ | Noughts and crosses. |
 | Simon | `simon_sp.py` | ⬜ | ⬜ | Repeat the growing sequence of sounds/colours. |
-| Block Breaker | `BlockBreaker.py` | ⬜ | ⬜ | Breakout / Arkanoid. |
+| Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
 | Image Changer | `ichanger.py` | ⬜ | ⬜ | Memorise images, then spot which one changed. |
 | Photo Album | `photoalbum.py` | ⬜ | ⬜ | Browse a themed set of photos. |
 | Wipe | `wipe.py` | ⬜ | ⬜ | "Wipe" the screen to reveal the picture underneath. |
@@ -104,7 +103,7 @@ the rest are listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — Flashcards added on both targets (TTS for
-English + recorded de/nl/fr/es packs). **All 13 classic Childsplay
-activities are now ported**, plus Four in a Row. Next up: the extended
-catalogue._
+_Last updated: 2026-08-29 — web canvas made fully responsive (world
+width now follows the viewport; portrait phones get a rotate hint;
+fullscreen button). **Block Breaker** ported on both targets — first of
+the extended-catalogue standalone activities._
