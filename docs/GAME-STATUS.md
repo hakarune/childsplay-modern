@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **17 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Packid, Billiards.
+The main dashboard has **18 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,21 +66,20 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Numbers (counting), Synonyms, Photo Album, Spin the Bottle and
-the Quiz decks.
+below — Synonyms, Photo Album, Spin the Bottle and the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
 The original also ships these. **Four in a Row**, **Block Breaker**,
-**Simon**, **Electro**, **Tic Tac Toe**, **Wipe** and **Image Changer**
-are converted so far; the rest are listed so nothing is lost.
+**Simon**, **Electro**, **Tic Tac Toe**, **Wipe**, **Image Changer** and
+**Numbers** are converted so far; the rest are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
 | Daily Training | `dltr.py` | ⬜ | ⬜ | Meta-activity — runs a scripted sequence of the other activities. Not a game in itself. |
-| Numbers (counting) | `numbers_sp.py` | ⬜ | ⬜ | Count the objects on screen and pick the number. |
+| Numbers | `numbers_sp.py` | ✅ | ✅ | Numbered tiles scattered on the board; study them, press Start, they go blank, then tap them in order 1→N from memory. A wrong tap flashes red and peeks the whole board for a moment — no progress lost. Six levels, 4→9 tiles. `Numbers.tscn` / `numbers.js`. |
 | Electro | `electro_sp.py` | ✅ | ✅ | The wiring board — animal pictures down the left, their names (shuffled) down the right; drag a wire from each picture to its name. Correct wires lock green, wrong ones buzz and fall away. Six levels, 3→8 pairs. `Electro.tscn` / `electro.js`. |
 | Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
 | Tic Tac Toe | `TicTacToe.py` | ✅ | ✅ | Noughts and crosses vs the computer. Three opponents: Easy (random), Medium (win / block / centre), Hard (perfect minimax). You are X and move first; beat Easy and Medium to advance, hold the perfect computer to a draw to finish. `TicTacToe.tscn` / `tictactoe.js`. |
@@ -104,6 +103,7 @@ are converted so far; the rest are listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — **Image Changer** ported on both targets
-(spot-the-changed-card). Extended-catalogue standalone activities done so
-far: Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer._
+_Last updated: 2026-08-29 — **Numbers** ported on both targets (tap the
+scattered numbers in order from memory). Extended-catalogue standalone
+activities done so far: Block Breaker, Simon, Electro, Tic Tac Toe, Wipe,
+Image Changer, Numbers._

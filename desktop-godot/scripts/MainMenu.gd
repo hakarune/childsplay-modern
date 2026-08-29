@@ -93,6 +93,11 @@ const GAMES := [
 		"icon": "ichanger.icon.png", "hover": "ichanger_ro.icon.png",
 		"scene": "res://scenes/games/ImageChanger.tscn",
 	},
+	{
+		"id": "numbers", "title": "Numbers",
+		"icon": "numbers_sp.icon.png", "hover": "numbers_sp_ro.icon.png",
+		"scene": "res://scenes/games/Numbers.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

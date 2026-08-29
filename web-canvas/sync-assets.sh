@@ -45,6 +45,7 @@ cp "$ICONS/electro_sp.icon.png"    "$DST/icons/electro.png"
 cp "$ICONS/TicTacToe.icon.png"     "$DST/icons/tictactoe.png"
 cp "$ICONS/wipe.icon.png"          "$DST/icons/wipe.png"
 cp "$ICONS/ichanger.icon.png"      "$DST/icons/ichanger.png"
+cp "$ICONS/numbers_sp.icon.png"    "$DST/icons/numbers.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
