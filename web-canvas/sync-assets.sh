@@ -23,7 +23,7 @@ ICONS="$SRC/graphics/lib/SPData/themes/childsplay/menuicons"
 A="$SRC/audio/lib/CPData"
 
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,soundmemory/img,soundmemory/snd,sfx}
+mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,soundmemory/img,soundmemory/snd,sfx}
 
 # --- launcher icons (renamed to our game ids) ---------------------------
 cp "$ICONS/packid.icon.png"         "$DST/icons/packid.png"
@@ -32,9 +32,16 @@ cp "$ICONS/soundmemory.icon.png"    "$DST/icons/soundmemory.png"
 cp "$ICONS/memory_sp.icon.png"      "$DST/icons/memory.png"
 cp "$ICONS/billiard.icon.png"       "$DST/icons/billiards.png"
 cp "$ICONS/findsound.icon.png"      "$DST/icons/findsound.png"
+cp "$ICONS/puzzle.icon.png"         "$DST/icons/puzzle.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
+
+# --- Puzzle: a few GPL paintings from WipeData ------------------------
+mkdir -p "$DST/puzzle"
+for n in renoir0 monet0 bruegel0 gogh0 pieck0 vermeer1; do
+  cp "$G/WipeData/tileset_1/$n.jpg" "$DST/puzzle/$n.jpg"
+done
 
 # --- Memory: tileset_2 pictures + card back ---------------------------
 cp "$G/Memory_spData/tileset_2/childsplay/"*.png "$DST/memory/"

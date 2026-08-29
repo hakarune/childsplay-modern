@@ -33,6 +33,11 @@ const GAMES := [
 		"icon": "findsound.icon.png", "hover": "findsound_ro.icon.png",
 		"scene": "res://scenes/games/FindSound.tscn",
 	},
+	{
+		"id": "puzzle", "title": "Puzzle",
+		"icon": "puzzle.icon.png", "hover": "puzzle_ro.icon.png",
+		"scene": "res://scenes/games/Puzzle.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

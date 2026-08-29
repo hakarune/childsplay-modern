@@ -22,14 +22,14 @@ Update this file in the same commit that adds or finishes a game.
 
 | Target | ✅ Done | 🟡 Partial | ⬜ Not started |
 | --- | --- | --- | --- |
-| Godot (of the classic-activity rows below) | 9 | 0 | 5 |
-| Web (of the classic-activity rows below)   | 9 | 0 | 5 |
+| Godot (of the classic-activity rows below) | 10 | 0 | 4 |
+| Web (of the classic-activity rows below)   | 10 | 0 | 4 |
 
 Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **5 tiles**: Memory, Falling Letter, Find Sound, Packid, Billiards.
+The main dashboard has **6 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -53,7 +53,7 @@ is committed to porting first.
 | **Fishtank** | `fishtank.py` | ⬜ | ⬜ | Click the fish to clear the tank; timed. Assets in `assets/graphics/lib/CPData/FishtankData` + `assets/audio/.../FishtankData`. |
 | **Find Characters** | `findit_sp.py` | ⬜ | ⬜ | Spot the differences between two near-identical pictures. Assets under `Findit_spData`. |
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type (physical or on-screen QWERTY keyboard) the letter on each balloon before it hits the danger line; 3 lives; difficulty ramps with score. |
-| **Puzzle** | `puzzle.py` | ⬜ | ⬜ | Drag jigsaw pieces to their slot. Tilesets (`PuzzleData/{childsplay,seniorplay}/tileset_1`) already in `assets/`. |
+| **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **6 levels**: 2x2 / 3x3 / 4x4 regular grids, then 3 harder levels cut into 6 / 9 / 12 **different-sized rectangles** by recursive random splits. Source art: GPL paintings from `WipeData`. `Puzzle.tscn` / `puzzle.js`. |
 | **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; 6 themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. `FindSound.tscn` / `findsound.js`. |
 | **Flashcards** | `flashcards.py` | ⬜ | ⬜ | Show a picture, play/label it in the target language; 5 levels. Needs the `alphabet-sounds/` voice packs. |
 | **Pong** | `pong.py` | ⬜ | ⬜ | Bat-and-ball. `PongData` sounds (`winner.ogg`, `bump.wav`, `pick.wav`) are already used by other games. |
@@ -62,10 +62,9 @@ is committed to porting first.
 
 ### What's next (priority order)
 
-1. **Puzzle** — drag-and-drop; tilesets already present.
-2. **Fishtank** — click-to-clear; quick to build (needs its art added to assets/).
-3. **Pong** — small; physics shared with Billiard.
-4. **Find Characters**, **Flashcards** — need more content wrangling.
+1. **Fishtank** — click-to-clear; quick to build (needs its art added to assets/).
+2. **Pong** — small; physics shared with Billiard.
+3. **Find Characters**, **Flashcards** — need more content wrangling.
 
 ---
 
@@ -99,6 +98,7 @@ The original also ships these. None are converted; listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — Find Sound added on both targets (6 themed
-levels). 9 of the classic activities done. Still to do: Puzzle, Fishtank,
-Pong, Find Characters, Flashcards (+ the extended catalogue)._
+_Last updated: 2026-08-29 — Puzzle added on both targets, incl. 3 extra
+"different-shaped pieces" levels (recursive rectangle splits). 10 of the
+classic activities done. Still to do: Fishtank, Pong, Find Characters,
+Flashcards (+ the extended catalogue)._
