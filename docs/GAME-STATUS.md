@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **14 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Packid, Billiards.
+The main dashboard has **15 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,16 +66,16 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Tic Tac Toe, Numbers (counting), Image Changer, Wipe, Synonyms
-and the Quiz decks.
+below — Numbers (counting), Image Changer, Wipe, Synonyms, Photo Album,
+Spin the Bottle and the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
 The original also ships these. **Four in a Row**, **Block Breaker**,
-**Simon** and **Electro** are converted so far; the rest are listed so
-nothing is lost.
+**Simon**, **Electro** and **Tic Tac Toe** are converted so far; the rest
+are listed so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
@@ -83,7 +83,7 @@ nothing is lost.
 | Numbers (counting) | `numbers_sp.py` | ⬜ | ⬜ | Count the objects on screen and pick the number. |
 | Electro | `electro_sp.py` | ✅ | ✅ | The wiring board — animal pictures down the left, their names (shuffled) down the right; drag a wire from each picture to its name. Correct wires lock green, wrong ones buzz and fall away. Six levels, 3→8 pairs. `Electro.tscn` / `electro.js`. |
 | Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
-| Tic Tac Toe | `TicTacToe.py` | ⬜ | ⬜ | Noughts and crosses. |
+| Tic Tac Toe | `TicTacToe.py` | ✅ | ✅ | Noughts and crosses vs the computer. Three opponents: Easy (random), Medium (win / block / centre), Hard (perfect minimax). You are X and move first; beat Easy and Medium to advance, hold the perfect computer to a draw to finish. `TicTacToe.tscn` / `tictactoe.js`. |
 | Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; six levels, target length 2→7. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
 | Image Changer | `ichanger.py` | ⬜ | ⬜ | Memorise images, then spot which one changed. |
@@ -104,6 +104,6 @@ nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — **Electro** ported on both targets (picture-to-name
-wiring board). Extended-catalogue standalone activities done so far: Block
-Breaker, Simon, Electro._
+_Last updated: 2026-08-29 — **Tic Tac Toe** ported on both targets
+(random / heuristic / minimax opponents). Extended-catalogue standalone
+activities done so far: Block Breaker, Simon, Electro, Tic Tac Toe._

@@ -139,13 +139,13 @@ Chromebooks all get a clean, un-distorted layout.
 
 | File | Role |
 | --- | --- |
-| `js/engine.js` | The engine: named state machine (MainMenu, MemoryMenu + 15 games), image/sound loader + cache, overlapping one-shot audio, rAF loop, fixed 1280×720 world with aspect-fit scaling, pointer/touch/key normalisation. |
+| `js/engine.js` | The engine: named state machine (MainMenu, MemoryMenu + 16 games), image/sound loader + cache, overlapping one-shot audio, rAF loop, fixed 1280×720 world with aspect-fit scaling, pointer/touch/key normalisation. |
 | `js/util.js` | `roundRect`, `shuffle`, `clamp`, `drawImageFit`, and a shared win/game-over `Overlay` with canvas buttons. |
 | `js/menu.js` | The `MainMenu` state — a reflowing grid of icon tiles. |
 | `js/main.js` | Bootstrap: registers MainMenu, lazily `import()`s + re-instantiates a game module per launch (fresh reset), drives the Back HUD, unlocks audio on first tap. |
-| `js/games/index.js` | Two lists: `GAMES` (loadable modules) and `MENU` (the 14 dashboard tiles). |
+| `js/games/index.js` | Two lists: `GAMES` (loadable modules) and `MENU` (the 15 dashboard tiles). |
 | `js/games/memory-menu.js` | The **Memory** tile opens this: pick a deck — Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
-| `js/games/{memory,fallingletter,soundmemory,findsound,puzzle,findit,aquarium,pong,fourrow,flashcards,blockbreaker,simon,electro,packid,billiards}.js` | Standalone Canvas games. Each default-exports `new GameScene(game, { onExit, ... })`: flip/match (Memory takes a `variant`), falling balloons + on-screen QWERTY keyboard, audio pairs, hear-and-tap picture rounds, drag-the-pieces jigsaw (grid + irregular cuts), a calm interactive fish tank, bat-and-ball, spot-the-difference, Connect Four, picture+word flashcards (browser TTS), Breakout, Simon, picture-to-name wiring, tilemap maze with swipe/arrow steering, 2D ball physics with drag-aim and pockets. |
+| `js/games/{memory,fallingletter,soundmemory,findsound,puzzle,findit,aquarium,pong,fourrow,flashcards,blockbreaker,simon,electro,tictactoe,packid,billiards}.js` | Standalone Canvas games. Each default-exports `new GameScene(game, { onExit, ... })`: flip/match (Memory takes a `variant`), falling balloons + on-screen QWERTY keyboard, audio pairs, hear-and-tap picture rounds, drag-the-pieces jigsaw (grid + irregular cuts), a calm interactive fish tank, bat-and-ball, spot-the-difference, Connect Four, picture+word flashcards (browser TTS), Breakout, Simon, picture-to-name wiring, Tic Tac Toe, tilemap maze with swipe/arrow steering, 2D ball physics with drag-aim and pockets. |
 | `serve.sh` | `python3 -m http.server` (or `npx serve`) on port 8080. |
 
 Each game module is downloaded only when first opened.
