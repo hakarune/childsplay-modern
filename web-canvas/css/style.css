@@ -9,6 +9,8 @@
   --ground: #1b2333;
   --accent: #4c7dff;
   --accent-press: #3a63d0;
+  /* height of the top HUD strip reserved inside a game */
+  --hud-h: 52px;
 }
 
 html, body {
@@ -32,6 +34,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Inside a game, reserve the top strip for the HUD so it never covers the
+   game's own on-canvas score/level bar. engine._resize() fits the canvas
+   into whatever box #app ends up being. */
+body.in-game #app {
+  top: calc(var(--hud-h) + env(safe-area-inset-top, 0px));
 }
 
 /* Pixel size is set by engine.js (_resize); these rules just keep the
@@ -66,50 +75,19 @@ html, body {
 /* hidden by the browser when the API is unavailable (set in main.js) */
 #fs-btn[hidden] { display: none; }
 
-/* --- "please rotate" overlay for portrait phones --- */
-#rotate-hint { display: none; }
-body.portrait-lock #rotate-hint {
-  display: flex;
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background: var(--ground);
-  text-align: center;
-}
-body.portrait-lock #hud,
-body.portrait-lock #fs-btn { display: none; }
-.rotate-hint__box { max-width: 22rem; }
-.rotate-hint__icon {
-  display: block;
-  font-size: clamp(56px, 18vw, 96px);
-  transform: rotate(90deg);
-  animation: rot 2.2s ease-in-out infinite;
-}
-.rotate-hint__box p {
-  margin: 1.2rem 0 0;
-  font-size: clamp(18px, 5vw, 24px);
-  font-weight: 600;
-  opacity: 0.9;
-}
-@keyframes rot {
-  0%, 40% { transform: rotate(0deg); }
-  60%, 100% { transform: rotate(90deg); }
-}
-
-/* --- top HUD (only visible inside a game) --- */
+/* --- top HUD strip (only visible inside a game) --- */
 #hud {
   position: fixed;
   inset: 0 0 auto 0;
+  min-height: calc(var(--hud-h) + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  padding: 6px 12px;
+  padding-top: calc(6px + env(safe-area-inset-top, 0px));
   padding-left: calc(12px + env(safe-area-inset-left, 0px));
-  background: rgba(16, 21, 32, 0.82);
+  padding-right: calc(64px + env(safe-area-inset-right, 0px)); /* clear the fs button */
+  background: rgba(16, 21, 32, 0.92);
   backdrop-filter: blur(4px);
   z-index: 10;
 }

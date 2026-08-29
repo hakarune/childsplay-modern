@@ -26,22 +26,14 @@
     <!-- always-available fullscreen toggle (top-right) -->
     <button id="fs-btn" type="button" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
 
-    <!-- one dynamic canvas; engine.js keeps a fixed 1280x720 world and
-         aspect-fits it to any phone / tablet / Chromebook screen. -->
+    <!-- one dynamic canvas; engine.js flexes the world to the viewport in
+         landscape and fits a fixed 16:9 to the width in portrait. -->
     <canvas id="game-canvas" width="1280" height="720"
             role="img" aria-label="Childsplay game canvas">
       This game needs a browser with HTML5 Canvas support.
     </canvas>
 
     <div id="splash" aria-hidden="true"><span>Childsplay</span></div>
-
-    <!-- shown by CSS only while body.portrait-lock is set (engine._resize) -->
-    <div id="rotate-hint" aria-hidden="true">
-      <div class="rotate-hint__box">
-        <span class="rotate-hint__icon">&#x1F4F1;</span>
-        <p>Turn your device sideways to play</p>
-      </div>
-    </div>
 
     <noscript><p class="fallback">Childsplay needs JavaScript enabled.</p></noscript>
   </div>

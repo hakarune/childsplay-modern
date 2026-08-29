@@ -17,10 +17,13 @@
 export let VIEW_W = 1280;
 export const VIEW_H = 720;
 
-// Clamp the world aspect so layouts drawn around 16:9 don't distort on very
-// square or very wide screens (the remainder letter-boxes as before).
+// In landscape the world aspect follows the viewport, clamped so layouts
+// drawn around 16:9 don't distort on very square or very wide screens.
+// In portrait the world stays a fixed 16:9 and is fit to the WIDTH, so the
+// game still plays (letter-boxed top and bottom) without a device turn.
 const MIN_ASPECT = 1.30;   // ~4:3  — iPad, older monitors
 const MAX_ASPECT = 2.00;   // ~18:9 — wide laptops, split view
+const REF_ASPECT = 16 / 9; // portrait / fallback world shape
 
 const ASSET_ROOT = new URL('../assets/', import.meta.url).href;
 const isImage = (p) => /\.(png|jpe?g|svg|webp|gif)$/i.test(p);
@@ -177,24 +180,34 @@ export class Game {
     this._raf = requestAnimationFrame(this._loop);
   }
 
+  /** Re-fit the canvas now (e.g. after a layout class toggled the HUD strip). */
+  relayout() { this._resize(); }
+
   _resize() {
     const dpr = window.devicePixelRatio || 1;
-    const vw = Math.max(1, window.innerWidth);
-    const vh = Math.max(1, window.innerHeight);
 
-    // Portrait phones can't fit a landscape world usefully — ask the player
-    // to turn the device and let main.js show the hint overlay.
-    const portrait = vh > vw;
-    if (typeof document !== 'undefined' && document.body) {
-      document.body.classList.toggle('portrait-lock', portrait);
+    // Available area = the canvas's container box, so CSS (the reserved HUD
+    // strip, safe-area insets) decides how much room the game gets. Fall
+    // back to the raw viewport when there's no layout yet.
+    let availW = Math.max(1, window.innerWidth);
+    let availH = Math.max(1, window.innerHeight);
+    const host = this.canvas.parentElement;
+    if (host && host.getBoundingClientRect) {
+      const r = host.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) { availW = r.width; availH = r.height; }
     }
 
-    // World width tracks the viewport aspect (clamped), so the aspect-fit
-    // scale below leaves little or no letter-box on ordinary screens.
-    const aspect = Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, vw / vh));
-    VIEW_W = Math.round(VIEW_H * aspect);
+    if (availW >= availH) {
+      // landscape: world width tracks the viewport aspect (clamped) so the
+      // aspect-fit below leaves little or no letter-box.
+      const aspect = Math.min(MAX_ASPECT, Math.max(MIN_ASPECT, availW / availH));
+      VIEW_W = Math.round(VIEW_H * aspect);
+    } else {
+      // portrait: keep a fixed 16:9 world, fit to width, letter-box vertically.
+      VIEW_W = Math.round(VIEW_H * REF_ASPECT);
+    }
 
-    const scale = Math.min(vw / VIEW_W, vh / VIEW_H);
+    const scale = Math.min(availW / VIEW_W, availH / VIEW_H);
     const cssW = Math.round(VIEW_W * scale);
     const cssH = Math.round(VIEW_H * scale);
 

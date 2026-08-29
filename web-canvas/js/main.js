@@ -53,10 +53,19 @@ function onSelect(id) {
   launch(id, {}, toMainMenu);
 }
 
+// Show/hide the top HUD strip. `body.in-game` reserves that strip in the
+// layout (CSS) so the game's own on-canvas HUD isn't covered; relayout()
+// re-fits the canvas into the new box.
+function setHud(visible) {
+  hud.hidden = !visible;
+  document.body.classList.toggle('in-game', visible);
+  game.relayout();
+}
+
 function openMemoryMenu() {
   title.textContent = 'Memory';
-  hud.hidden = false;
   backHandler = toMainMenu;
+  setHud(true);
   game.setState('MemoryMenu');
 }
 
@@ -70,8 +79,8 @@ async function launch(id, opts, back) {
   title.textContent = opts.variant
     ? `${entry.name} – ${opts.variant}`
     : entry.name;
-  hud.hidden = false;
   backHandler = back;
+  setHud(true);
   try {
     const mod = await entry.load();
     game.register(id, (g) => new mod.default(g, { ...opts, onExit: back }));
@@ -83,9 +92,9 @@ async function launch(id, opts, back) {
 }
 
 function toMainMenu() {
-  hud.hidden = true;
   title.textContent = '';
   backHandler = toMainMenu;
+  setHud(false);
   game.setState('MainMenu');
 }
 
