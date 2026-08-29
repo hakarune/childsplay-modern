@@ -22,14 +22,14 @@ Update this file in the same commit that adds or finishes a game.
 
 | Target | ✅ Done | 🟡 Partial | ⬜ Not started |
 | --- | --- | --- | --- |
-| Godot (of the classic-activity rows below) | 8 | 0 | 6 |
-| Web (of the classic-activity rows below)   | 8 | 0 | 6 |
+| Godot (of the classic-activity rows below) | 9 | 0 | 5 |
+| Web (of the classic-activity rows below)   | 9 | 0 | 5 |
 
 Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **4 tiles**: Memory, Falling Letter, Packid, Billiards.
+The main dashboard has **5 tiles**: Memory, Falling Letter, Find Sound, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -54,7 +54,7 @@ is committed to porting first.
 | **Find Characters** | `findit_sp.py` | ⬜ | ⬜ | Spot the differences between two near-identical pictures. Assets under `Findit_spData`. |
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type (physical or on-screen QWERTY keyboard) the letter on each balloon before it hits the danger line; 3 lives; difficulty ramps with score. |
 | **Puzzle** | `puzzle.py` | ⬜ | ⬜ | Drag jigsaw pieces to their slot. Tilesets (`PuzzleData/{childsplay,seniorplay}/tileset_1`) already in `assets/`. |
-| **Find Sound** | `findsound.py` | ⬜ | ⬜ | Hear a sound, click the picture it belongs to. Clips + images (`FindsoundData`) are already vendored — the web build reuses them for Sound Memory. 6 levels in the original. |
+| **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; 6 themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. `FindSound.tscn` / `findsound.js`. |
 | **Flashcards** | `flashcards.py` | ⬜ | ⬜ | Show a picture, play/label it in the target language; 5 levels. Needs the `alphabet-sounds/` voice packs. |
 | **Pong** | `pong.py` | ⬜ | ⬜ | Bat-and-ball. `PongData` sounds (`winner.ogg`, `bump.wav`, `pick.wav`) are already used by other games. |
 | **PackId** | `packid.py` | ✅ | ✅ | Open pillar maze, grid-snapped player, fruit "ghosts" with non-reversing AI, arrow **and** swipe steering, cherry pickup, friendly bump→reset (no game over), 3 sizes. |
@@ -62,11 +62,10 @@ is committed to porting first.
 
 ### What's next (priority order)
 
-1. **Find Sound** — assets are already vendored; simple click-the-picture loop.
-2. **Puzzle** — drag-and-drop; tilesets already present.
-3. **Fishtank** — click-to-clear; quick to build.
-4. **Pong** — small; physics shared with Billiard.
-5. **Find Characters**, **Flashcards** — need more content wrangling.
+1. **Puzzle** — drag-and-drop; tilesets already present.
+2. **Fishtank** — click-to-clear; quick to build (needs its art added to assets/).
+3. **Pong** — small; physics shared with Billiard.
+4. **Find Characters**, **Flashcards** — need more content wrangling.
 
 ---
 
@@ -100,7 +99,6 @@ The original also ships these. None are converted; listed so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — Memory now has Pictures / lowercase / UPPERCASE
-/ Numbers decks and a sub-menu that also hosts Sound Memory; 8 of the
-classic activities done on both targets. Still to do: Find Sound, Puzzle,
-Fishtank, Pong, Find Characters, Flashcards (+ the extended catalogue)._
+_Last updated: 2026-08-29 — Find Sound added on both targets (6 themed
+levels). 9 of the classic activities done. Still to do: Puzzle, Fishtank,
+Pong, Find Characters, Flashcards (+ the extended catalogue)._

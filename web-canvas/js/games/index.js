@@ -11,6 +11,7 @@ export const GAMES = [
   { id: 'memory',        name: 'Memory',         load: () => import('./memory.js') },
   { id: 'fallingletter', name: 'Falling Letter', load: () => import('./fallingletter.js') },
   { id: 'soundmemory',   name: 'Sound Memory',   load: () => import('./soundmemory.js') },
+  { id: 'findsound',     name: 'Find Sound',     load: () => import('./findsound.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
 ];
@@ -18,6 +19,7 @@ export const GAMES = [
 export const MENU = [
   { id: 'memory',        name: 'Memory',         icon: 'icons/memory.png',        submenu: true },
   { id: 'fallingletter', name: 'Falling Letter', icon: 'icons/fallingletter.png' },
+  { id: 'findsound',     name: 'Find Sound',     icon: 'icons/findsound.png' },
   { id: 'packid',        name: 'Packid',         icon: 'icons/packid.png' },
   { id: 'billiards',     name: 'Billiards',      icon: 'icons/billiards.png' },
 ];

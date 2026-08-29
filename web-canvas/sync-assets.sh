@@ -31,6 +31,7 @@ cp "$ICONS/fallingletters.icon.png" "$DST/icons/fallingletter.png"
 cp "$ICONS/soundmemory.icon.png"    "$DST/icons/soundmemory.png"
 cp "$ICONS/memory_sp.icon.png"      "$DST/icons/memory.png"
 cp "$ICONS/billiard.icon.png"       "$DST/icons/billiards.png"
+cp "$ICONS/findsound.icon.png"      "$DST/icons/findsound.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"

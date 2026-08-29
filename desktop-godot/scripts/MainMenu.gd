@@ -28,6 +28,11 @@ const GAMES := [
 		"icon": "billiard.icon.png", "hover": "billiard_ro.icon.png",
 		"scene": "res://scenes/games/Billiards.tscn",
 	},
+	{
+		"id": "findsound", "title": "Find Sound",
+		"icon": "findsound.icon.png", "hover": "findsound_ro.icon.png",
+		"scene": "res://scenes/games/FindSound.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"
