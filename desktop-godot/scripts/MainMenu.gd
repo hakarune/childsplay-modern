@@ -98,6 +98,11 @@ const GAMES := [
 		"icon": "numbers_sp.icon.png", "hover": "numbers_sp_ro.icon.png",
 		"scene": "res://scenes/games/Numbers.tscn",
 	},
+	{
+		"id": "synonyms", "title": "Word Maker",
+		"icon": "synonyms.icon.png", "hover": "synonyms_ro.icon.png",
+		"scene": "res://scenes/games/WordMaker.tscn",
+	},
 ]
 
 const HOVER_SOUND := "button_hover.wav"

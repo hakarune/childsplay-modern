@@ -32,7 +32,7 @@ Both targets are at feature parity.
 
 ### Menu structure
 
-The main dashboard has **18 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Packid, Billiards.
+The main dashboard has **19 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Word Maker, Packid, Billiards.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -66,15 +66,16 @@ is committed to porting first.
 ### What's next
 
 The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Synonyms, Photo Album, Spin the Bottle and the Quiz decks.
+below — Photo Album, Spin the Bottle and the Quiz decks.
 
 ---
 
 ## Extended legacy catalogue (not committed, tracked for completeness)
 
 The original also ships these. **Four in a Row**, **Block Breaker**,
-**Simon**, **Electro**, **Tic Tac Toe**, **Wipe**, **Image Changer** and
-**Numbers** are converted so far; the rest are listed so nothing is lost.
+**Simon**, **Electro**, **Tic Tac Toe**, **Wipe**, **Image Changer**,
+**Numbers** and **Word Maker** are converted so far; the rest are listed
+so nothing is lost.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
@@ -88,7 +89,7 @@ The original also ships these. **Four in a Row**, **Block Breaker**,
 | Image Changer | `ichanger.py` | ✅ | ✅ | Study the row of pictures, press Start; the cards flip down and back and one picture has changed — tap it. Four levels (3 cards, 3 + position shuffle, 4 cards, 4 + shuffle), three rounds each. Reuses the Memory animal art. `ImageChanger.tscn` / `ichanger.js`. |
 | Photo Album | `photoalbum.py` | ⬜ | ⬜ | Browse a themed set of photos. |
 | Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. Clear the target fraction to finish — six paintings (the GPL `WipeData` set), rising target 55→84% and a shrinking sponge. Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
-| Synonyms | `synonyms.py` | ⬜ | ⬜ | Make a word from given letters. |
+| Word Maker | `synonyms.py` | ✅ | ✅ | Adapted from the senior `synonyms` drill for young English readers: given a starting letter, build words with the on-screen keyboard (or type). Real words from a built-in kid-word list score; find the target count to clear the level. Five letters (S/B/C/T/P), 2→5 words. `WordMaker.tscn` / `synonyms.js`. |
 | Spin the Bottle | `spinbottle.py` | ⬜ | ⬜ | Word game — name something starting with a letter. |
 | Quiz engine | `quizengine.py` / `quiz.py` | ⬜ | ⬜ | Multiple-choice quiz framework. |
 | Quiz: General | `quiz_general.py` | ⬜ | ⬜ | Trivia deck. |
@@ -103,7 +104,7 @@ The original also ships these. **Four in a Row**, **Block Breaker**,
 
 ---
 
-_Last updated: 2026-08-29 — **Numbers** ported on both targets (tap the
-scattered numbers in order from memory). Extended-catalogue standalone
-activities done so far: Block Breaker, Simon, Electro, Tic Tac Toe, Wipe,
-Image Changer, Numbers._
+_Last updated: 2026-08-29 — **Word Maker** (from `synonyms`) ported on
+both targets. Extended-catalogue standalone activities done: Block
+Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Word
+Maker. Left: Photo Album, Spin the Bottle, the quiz family._

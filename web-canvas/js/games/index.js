@@ -25,6 +25,7 @@ export const GAMES = [
   { id: 'wipe',          name: 'Wipe',           load: () => import('./wipe.js') },
   { id: 'ichanger',      name: 'Image Changer',  load: () => import('./ichanger.js') },
   { id: 'numbers',       name: 'Numbers',        load: () => import('./numbers.js') },
+  { id: 'synonyms',      name: 'Word Maker',     load: () => import('./synonyms.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
 ];
@@ -46,6 +47,7 @@ export const MENU = [
   { id: 'wipe',          name: 'Wipe',         icon: 'icons/wipe.png' },
   { id: 'ichanger',      name: 'Image Changer', icon: 'icons/ichanger.png' },
   { id: 'numbers',       name: 'Numbers',      icon: 'icons/numbers.png' },
+  { id: 'synonyms',      name: 'Word Maker',   icon: 'icons/synonyms.png' },
   { id: 'packid',        name: 'Packid',        icon: 'icons/packid.png' },
   { id: 'billiards',     name: 'Billiards',     icon: 'icons/billiards.png' },
 ];

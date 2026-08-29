@@ -20,6 +20,7 @@ DST="$HERE/assets"
 
 G="$SRC/graphics/lib/CPData"
 ICONS="$SRC/graphics/lib/SPData/themes/childsplay/menuicons"
+SICONS="$SRC/graphics/lib/SPData/themes/seniorplay/menuicons"
 A="$SRC/audio/lib/CPData"
 
 rm -rf "$DST"
@@ -46,6 +47,7 @@ cp "$ICONS/TicTacToe.icon.png"     "$DST/icons/tictactoe.png"
 cp "$ICONS/wipe.icon.png"          "$DST/icons/wipe.png"
 cp "$ICONS/ichanger.icon.png"      "$DST/icons/ichanger.png"
 cp "$ICONS/numbers_sp.icon.png"    "$DST/icons/numbers.png"
+cp "$SICONS/synonyms.icon.png"     "$DST/icons/synonyms.png"
 
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
