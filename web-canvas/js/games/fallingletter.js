@@ -18,7 +18,7 @@ const START_SPAWN = 1.9;
 const SPAWN_PER = 0.045;
 const MIN_SPAWN = 0.7;
 
-const KB_ROWS = ['ABCDEFGHI', 'JKLMNOPQR', 'STUVWXYZ'];
+const KB_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 const SND_SPAWN = 'sfx/pick.wav';
 const SND_POP = 'sfx/wahoo.wav';
@@ -45,7 +45,7 @@ export default class FallingLetterGame extends Scene {
   }
 
   _buildKeyboard() {
-    const keyW = 116;
+    const keyW = 112;             // 10-wide QWERTY top row fits 1280 with margin
     const keyH = 42;
     const gap = 8;
     const bottom = VIEW_H - 24;
