@@ -709,12 +709,13 @@ toggle (§C)**, `loadData` / `load_json`, **`tierBag` / `draw_tiered` (§B)**.
 Web menu rebuilt to §F; **Godot menu rebuilt to §F** (square tiles,
 responsive + paginated grid, pool icons, light/dark + artwork + sound
 chrome). Remaining per-game rows below still open except where struck:
-~~fallingletter H/I.3~~ (LEVELS table + dual keyboard done),
-~~synonyms I.3~~ (dual keyboard done), ~~puzzle B/H~~ (10 levels + tier
-tags), ~~wipe B/H~~ (tier tags + wide pool), ~~pong D.5~~ (era themes both
-targets), ~~aquarium names~~ (all fish named; modern parallax backdrop),
-~~numbers G~~ (one-row HUD). Every game now has a
-`docs/assets/<id>.assets.md` (§A.7).
+~~fallingletter H/I.3~~ (LEVELS + on-screen keyboard + ⌨ toggle, **both
+targets**), ~~synonyms I.3~~ (⌨ toggle, both targets), ~~puzzle B/H~~
+(10 levels + tier tags), ~~wipe B/H~~ (tier tags + wide pool),
+~~pong D.5~~ (era themes both targets), ~~aquarium names~~ (all fish named;
+modern parallax backdrop), ~~numbers G~~ (one-row HUD),
+~~electro I.2~~ (snap-to-nearest + finger halo, both targets). Every game
+has a `docs/assets/<id>.assets.md` (§A.7).
 
 | Game | Must change |
 | --- | --- |
