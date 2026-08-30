@@ -24,7 +24,7 @@ A="$SRC/audio/lib/CPData"
 [ -d "$POOLS" ] || { echo "error: $POOLS not found — run tools/migrate-assets.sh" >&2; exit 1; }
 
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,soundpics,sfx,voice}
+mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,soundpics,sfx,voice,data}
 mkdir -p "$DST"/sprites/{packid,billiards,aquarium}
 mkdir -p "$DST"/soundmemory/snd
 mkdir -p "$DST"/flashcards/{de,nl,fr,es}
@@ -35,6 +35,7 @@ cp "$POOLS/animals/"*           "$DST/animals/"
 cp "$POOLS/ui/"*                "$DST/ui/"
 cp "$POOLS/soundpics/"*         "$DST/soundpics/"
 cp "$POOLS/icons/"*             "$DST/icons/"
+cp "$SRC/data/"*.json           "$DST/data/" 2>/dev/null || true
 cp "$POOLS/sprites/packid/"*    "$DST/sprites/packid/"
 cp "$POOLS/sprites/billiards/"* "$DST/sprites/billiards/"
 cp "$POOLS/sprites/aquarium/"*  "$DST/sprites/aquarium/"

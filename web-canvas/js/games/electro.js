@@ -3,7 +3,7 @@
 // to its name. Right connections lock in green; wrong ones just buzz and
 // fall away. Connect every pair to clear the level. Six levels, 3 → 8 pairs.
 
-import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
+import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, assetURL } from '../engine.js';
 import { clamp, roundRect, shuffle, dist, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 import { theme } from '../theme.js';
 
@@ -11,12 +11,15 @@ const HUD = 64;
 const SIDE = 44;
 const PAIRS = [3, 4, 5, 6, 7, 8];
 
-const ANIMALS = [
+// Fallback pairs if data/electro.json can't be loaded. The live list is
+// hand-editable — see assets/data/electro.json.
+const FALLBACK_PAIRS = [
   '01_cat', '02_pig', '03_bear', '06_cow', '07_sheep', '09_panda',
   '14_fox', '17_lion', '21_frog', '12_wolf', '13_monkey', '16_elephant',
   '05_penguin', '08_turtle',
-];
-const label = (id) => id.replace(/^\d+_/, '').replace(/^\w/, (c) => c.toUpperCase());
+].map((img) => ({ img, say: img.replace(/^\d+_/, '') }));
+
+const cap = (s) => s.replace(/^\w/, (c) => c.toUpperCase());
 
 const SND_PICK = 'sfx/dealcard1.wav';
 const SND_GOOD = 'sfx/good.ogg';
@@ -30,13 +33,34 @@ export default class ElectroGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
+    this._setPairs(FALLBACK_PAIRS);
     this._startLevel(0);
+    this._loadPairs();
+  }
+
+  // pairs come from a hand-editable data file (assets/data/electro.json);
+  // fall back to the baked-in list if the fetch fails.
+  _loadPairs() {
+    fetch(assetURL('data/electro.json'))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const pairs = d && Array.isArray(d.pairs) ? d.pairs.filter((p) => p && p.img) : null;
+        if (!pairs || !pairs.length) return;
+        this._setPairs(pairs);
+        if (this._solved.size === 0) this._startLevel(this._level);
+      })
+      .catch(() => {});
+  }
+
+  _setPairs(pairs) {
+    this._pairs = pairs.map((p) => ({ id: p.img, name: cap(p.say || p.img.replace(/^\d+_/, '')) }));
+    this._nameById = new Map(this._pairs.map((p) => [p.id, p.name]));
   }
 
   _startLevel(n) {
     this._level = clamp(n, 0, PAIRS.length - 1);
-    const count = PAIRS[this._level];
-    const ids = shuffle(ANIMALS.slice()).slice(0, count);
+    const count = Math.min(PAIRS[this._level], this._pairs.length);
+    const ids = shuffle(this._pairs.map((p) => p.id)).slice(0, count);
     this._ids = ids.slice();
     this._rightIds = shuffle(ids.slice());
     for (const id of ids) loadImage(`animals/${id}`);
@@ -120,7 +144,7 @@ export default class ElectroGame extends Scene {
     if (hit.id === d.id) {
       this._solved.add(d.id);
       playSound(SND_GOOD);
-      if (this._solved.size >= PAIRS[this._level]) this._levelDone();
+      if (this._solved.size >= this._ids.length) this._levelDone();
     } else {
       this._wrong = { a: d.id, b: hit.id, t: 0 };
       playSound(SND_WRONG);
@@ -187,7 +211,7 @@ export default class ElectroGame extends Scene {
         buzz ? theme.bad : done ? theme.good : theme.surface);
       ctx.fillStyle = done ? theme.bg : theme.text;
       ctx.textAlign = 'center';
-      ctx.fillText(label(id), this._rightX + this._tileW / 2 + 8, y + this._tileH / 2);
+      ctx.fillText(this._nameById.get(id) || id, this._rightX + this._tileW / 2 + 8, y + this._tileH / 2);
       this._drawNode(ctx, this._rightNode(i), done);
     }
 

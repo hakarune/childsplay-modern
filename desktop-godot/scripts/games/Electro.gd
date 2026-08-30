@@ -10,6 +10,10 @@ const SIDE := 44.0
 const NODE_R := 13.0
 const PAIRS := [3, 4, 5, 6, 7, 8]
 
+const PAIRS_FILE := "res://assets/data/electro.json"
+
+# Fallback if the data file can't be read. The live list is hand-editable —
+# see assets/data/electro.json.
 const ANIMALS := [
 	"01_cat", "02_pig", "03_bear", "06_cow", "07_sheep", "09_panda",
 	"14_fox", "17_lion", "21_frog", "12_wolf", "13_monkey", "16_elephant",
@@ -20,6 +24,9 @@ const SND_PICK := "dealcard1.wav"
 const SND_GOOD := "good.ogg"
 const SND_WRONG := "wrong.ogg"
 const SND_WIN := "winner.ogg"
+
+var _ids_pool: Array[String] = []
+var _name_by_id: Dictionary = {}
 
 var _level := 0
 var _ids: Array[String] = []
@@ -61,7 +68,33 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level + 1))
 	_popup.visible = false
 	resized.connect(_geo)
+	_load_pairs()
 	_start_level(0)
+
+
+# Pair list comes from a hand-editable data file; fall back to ANIMALS.
+func _load_pairs() -> void:
+	_ids_pool.clear()
+	_name_by_id.clear()
+	var txt := ""
+	if FileAccess.file_exists(PAIRS_FILE):
+		txt = FileAccess.get_file_as_string(PAIRS_FILE)
+	var data: Variant = JSON.parse_string(txt) if txt != "" else null
+	if data is Dictionary and data.has("pairs"):
+		for p in data["pairs"]:
+			if p is Dictionary and p.has("img"):
+				var id := str(p["img"])
+				_ids_pool.append(id)
+				var say := str(p.get("say", "")).strip_edges()
+				_name_by_id[id] = _cap(say) if say != "" else _label(id)
+	if _ids_pool.is_empty():
+		for id in ANIMALS:
+			_ids_pool.append(id)
+			_name_by_id[id] = _label(id)
+
+
+func _cap(s: String) -> String:
+	return s.substr(0, 1).to_upper() + s.substr(1) if s != "" else s
 
 
 func _label(id: String) -> String:
@@ -78,8 +111,8 @@ func _tex(id: String) -> Texture2D:
 
 func _start_level(n: int) -> void:
 	_level = clampi(n, 0, PAIRS.size() - 1)
-	var count: int = PAIRS[_level]
-	var pool := ANIMALS.duplicate()
+	var count: int = mini(int(PAIRS[_level]), _ids_pool.size())
+	var pool := _ids_pool.duplicate()
 	pool.shuffle()
 	_ids.assign(pool.slice(0, count))
 	_right_ids.assign(_ids.duplicate())
@@ -94,7 +127,7 @@ func _start_level(n: int) -> void:
 
 
 func _geo() -> void:
-	var count: int = PAIRS[_level]
+	var count: int = maxi(1, _ids.size())
 	_tile_w = clampf(size.x * 0.30, 200.0, 340.0)
 	var avail_h := size.y - HUD - 56.0
 	_tile_h = minf(94.0, (avail_h - _gap * (count - 1)) / count)
@@ -175,7 +208,7 @@ func _end_drag(p: Vector2) -> void:
 	if hit["id"] == d["id"]:
 		_solved[d["id"]] = true
 		_play(_sfx_good)
-		if _solved.size() >= int(PAIRS[_level]):
+		if _solved.size() >= _ids.size():
 			_level_done()
 	else:
 		_wrong = { "a": d["id"], "b": hit["id"], "t": 0.0 }
@@ -244,7 +277,7 @@ func _draw() -> void:
 		var buzz := id in wrong_ids
 		var fill := GameContext.c("bad") if buzz else (GameContext.c("good") if done else GameContext.c("surface"))
 		draw_rect(Rect2(_right_x(), y, _tile_w, _tile_h), fill)
-		var txt := _label(id)
+		var txt := str(_name_by_id.get(id, _label(id)))
 		var fs := 24
 		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, Vector2(_right_x() + _tile_w / 2.0 - tw / 2.0 + 8.0, y + _tile_h / 2.0 + fs * 0.35),
@@ -276,7 +309,7 @@ func _draw_node(n: Vector2, done: bool) -> void:
 
 func _update_hud() -> void:
 	_info.text = "Level %d/%d   ·   %d/%d wired" % [
-		_level + 1, PAIRS.size(), _solved.size(), int(PAIRS[_level])
+		_level + 1, PAIRS.size(), _solved.size(), _ids.size()
 	]
 
 
