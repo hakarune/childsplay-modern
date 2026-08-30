@@ -1,46 +1,37 @@
 // synonyms.js — "Word Maker" (legacy `synonyms`, adapted for young English
 // readers). You are given a starting letter; tap the on-screen keyboard
-// (or type) to build words that begin with it. Real words from the built-in
-// list score; find enough to clear the level. Five letters, 2 → 6 words.
+// (or type) to build words that begin with it. Real words from a bundled
+// ~1200-word kid dictionary (assets/data/wordlist.json) score. Each level
+// gives you two hints. Five letters, 3 → 5 words.
 
-import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
-import { clamp, roundRect, inRect, Overlay, buttonRow } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, playSound, assetURL } from '../engine.js';
+import {
+  clamp, roundRect, inRect, Overlay, buttonRow,
+  hudSpeakButton, hudSpeakHit, speakHud,
+} from '../util.js';
 import { theme } from '../theme.js';
+import { say } from '../tts.js';
 
 const HUD = 56;
 
-// small, kid-friendly word list grouped by the five level letters
-const WORDS = new Set([
-  // s
-  'sun', 'sit', 'sad', 'sea', 'see', 'sock', 'sing', 'snake', 'star', 'stop',
-  'six', 'sky', 'soap', 'soup', 'sand', 'seed', 'ship', 'shop', 'snow', 'spin',
-  'swim', 'sheep', 'spider', 'sock', 'seal', 'sock', 'song', 'sofa',
-  // b
-  'bat', 'bad', 'bed', 'bee', 'big', 'bus', 'bug', 'box', 'boy', 'bird',
-  'blue', 'boat', 'book', 'ball', 'bell', 'bear', 'bone', 'bump', 'band', 'barn',
-  'best', 'bath', 'bake', 'bread', 'brush', 'brown',
-  // c
-  'cat', 'cap', 'car', 'cow', 'cub', 'cup', 'can', 'cot', 'cake', 'corn',
-  'coat', 'cave', 'coin', 'cold', 'clap', 'club', 'crab', 'crow', 'cube', 'camp',
-  'card', 'care', 'cart', 'clock', 'cloud', 'chair',
-  // t
-  'top', 'tap', 'ten', 'toe', 'tub', 'tan', 'tag', 'tin', 'toy', 'tree',
-  'time', 'town', 'tail', 'tape', 'team', 'tent', 'test', 'tick', 'tide', 'tiny',
-  'toad', 'tool', 'tour', 'trap', 'train', 'truck',
-  // p
-  'pan', 'pen', 'pig', 'pit', 'pot', 'pup', 'pat', 'paw', 'pin', 'park',
-  'pink', 'play', 'plum', 'pond', 'pool', 'pull', 'push', 'pear', 'peas', 'plan',
-  'plus', 'prize', 'print', 'path', 'plane', 'plant',
-]);
+// Fallback if assets/data/wordlist.json can't be loaded.
+const FALLBACK_WORDS = [
+  'sun', 'sit', 'sea', 'six', 'sky', 'sock', 'sing', 'star', 'stop', 'snake', 'sheep', 'spider',
+  'bat', 'bed', 'bee', 'big', 'bus', 'bug', 'box', 'boy', 'bird', 'blue', 'boat', 'book', 'ball', 'bear',
+  'cat', 'cap', 'car', 'cow', 'cup', 'can', 'cake', 'coat', 'cave', 'clap', 'crab', 'clock', 'cloud',
+  'top', 'tap', 'ten', 'toe', 'toy', 'tree', 'time', 'tail', 'tent', 'train', 'truck', 'tiger',
+  'pan', 'pen', 'pig', 'pot', 'pup', 'pin', 'park', 'pink', 'play', 'pond', 'pear', 'plane', 'plant',
+];
 
 const LEVELS = [
-  { letter: 's', target: 2 },
-  { letter: 'b', target: 3 },
+  { letter: 's', target: 3 },
+  { letter: 'b', target: 4 },
   { letter: 'c', target: 4 },
-  { letter: 't', target: 4 },
+  { letter: 't', target: 5 },
   { letter: 'p', target: 5 },
 ];
 
+const HINTS_PER_LEVEL = 2;
 const KB_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 const SND_KEY = 'sfx/pick.wav';
@@ -53,8 +44,28 @@ export default class WordMakerGame extends Scene {
     super(game);
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
+    this._dict = new Set(FALLBACK_WORDS);
     this._level = 0;
     this._startLevel(0);
+    this._loadDict();
+  }
+
+  _loadDict() {
+    fetch(assetURL('data/wordlist.json'))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const words = d && Array.isArray(d.words) ? d.words : null;
+        if (words && words.length) this._dict = new Set(words);
+      })
+      .catch(() => {});
+  }
+
+  enter() { this._announce(); }
+
+  _announce() {
+    const lv = LEVELS[this._level];
+    say(`make words that start with ${lv.letter.toUpperCase()}`);
+    setTimeout(() => say('tap letters, then Enter'), 1500);
   }
 
   _startLevel(n) {
@@ -62,6 +73,8 @@ export default class WordMakerGame extends Scene {
     this._word = '';
     this._found = [];
     this._shake = 0;
+    this._hintsLeft = HINTS_PER_LEVEL;
+    this._hint = null;              // { word, t }
     this._overlay.hide();
     this._geo();
   }
@@ -86,6 +99,8 @@ export default class WordMakerGame extends Scene {
     this._delKey = { ch: '\b', label: '⌫', x: VIEW_W / 2 - aw - gap / 2, y: ay, w: aw, h: kh };
     this._okKey = { ch: '\n', label: 'Enter', x: VIEW_W / 2 + gap / 2, y: ay, w: aw, h: kh };
     this._kw = kw;
+    // hint pill sits above the tray, right-aligned
+    this._hintBtn = { x: VIEW_W / 2 + Math.min(280, VIEW_W / 2 - 60) - 150, y: HUD + 12, w: 150, h: 44 };
   }
 
   resize() {
@@ -104,21 +119,41 @@ export default class WordMakerGame extends Scene {
     this._word = this._word.slice(0, -1);
   }
 
+  _valid(w) {
+    const lv = LEVELS[this._level];
+    return w.length >= 3 && w[0] === lv.letter && this._dict.has(w);
+  }
+
   _submit() {
     if (this._overlay.visible) return;
     const w = this._word.toLowerCase();
-    const lv = LEVELS[this._level];
-    const okWord = w.length >= 3 && w[0] === lv.letter && WORDS.has(w) && !this._found.includes(w);
-    if (okWord) {
+    if (this._valid(w) && !this._found.includes(w)) {
       this._found.push(w);
       this._word = '';
       playSound(SND_GOOD);
-      if (this._found.length >= lv.target) this._levelDone();
+      say('that is a word');
+      if (this._found.length >= LEVELS[this._level].target) this._levelDone();
     } else {
       this._shake = 0.4;
       playSound(SND_WRONG);
+      if (w.length >= 3) say('not a word, try again');
       this._word = '';
     }
+  }
+
+  _useHint() {
+    if (this._overlay.visible || this._hintsLeft <= 0) return;
+    const lv = LEVELS[this._level];
+    const pick = [];
+    for (const w of this._dict) {
+      if (w[0] === lv.letter && w.length >= 3 && w.length <= 6 && !this._found.includes(w)) pick.push(w);
+    }
+    if (!pick.length) return;
+    const word = pick[(Math.random() * pick.length) | 0];
+    this._hint = { word, t: 0 };
+    this._hintsLeft -= 1;
+    say('here is a word you could make');
+    setTimeout(() => say(word), 1400);
   }
 
   _levelDone() {
@@ -136,6 +171,7 @@ export default class WordMakerGame extends Scene {
 
   update(dt) {
     if (this._shake > 0) this._shake = Math.max(0, this._shake - dt);
+    if (this._hint) { this._hint.t += dt; if (this._hint.t > 4.5) this._hint = null; }
   }
 
   keydown(e) {
@@ -146,13 +182,15 @@ export default class WordMakerGame extends Scene {
   }
 
   pointerup(x, y) {
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
-      if (act === 'next') this._startLevel(this._level + 1);
-      else if (act === 'replay') this._startLevel(this._level);
+      if (act === 'next') { this._startLevel(this._level + 1); this._announce(); }
+      else if (act === 'replay') { this._startLevel(this._level); this._announce(); }
       else if (act === 'menu') this._exit();
       return;
     }
+    if (inRect(this._hintBtn, x, y)) return this._useHint();
     if (inRect(this._delKey, x, y)) return this._backspace();
     if (inRect(this._okKey, x, y)) return this._submit();
     const k = this._keys.find((kk) => inRect(kk, x, y));
@@ -188,15 +226,37 @@ export default class WordMakerGame extends Scene {
     ctx.font = '700 44px ui-monospace, monospace';
     ctx.fillText(this._word.toUpperCase() || '…', VIEW_W / 2 + sh, trayY + 38);
 
+    // hint pill
+    const hb = this._hintBtn;
+    roundRect(ctx, hb.x, hb.y, hb.w, hb.h, 12);
+    ctx.fillStyle = this._hintsLeft > 0 ? theme.accent : theme.surface;
+    ctx.fill();
+    ctx.fillStyle = this._hintsLeft > 0 ? '#fff' : theme.text_muted;
+    ctx.font = '600 20px system-ui, sans-serif';
+    ctx.fillText(`Hint (${this._hintsLeft})`, hb.x + hb.w / 2, hb.y + hb.h / 2 + 1);
+
+    // active hint
+    if (this._hint) {
+      const a = clamp(1 - (this._hint.t - 3) / 1.5, 0, 1);
+      ctx.globalAlpha = a;
+      roundRect(ctx, VIEW_W / 2 - 180, trayY + 84, 360, 44, 12);
+      ctx.fillStyle = theme.warn;
+      ctx.fill();
+      ctx.fillStyle = theme.card_ink;
+      ctx.font = '700 24px system-ui, sans-serif';
+      ctx.fillText(`try:  ${this._hint.word.toUpperCase()}`, VIEW_W / 2, trayY + 106);
+      ctx.globalAlpha = 1;
+    }
+
     // found words
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.fillStyle = theme.good;
     this._found.forEach((w, i) => {
-      ctx.fillText(w, VIEW_W / 2, trayY + 100 + i * 30);
+      ctx.fillText(w, VIEW_W / 2, trayY + 146 + i * 30);
     });
     ctx.fillStyle = theme.text_muted;
     ctx.font = '500 18px system-ui, sans-serif';
-    ctx.fillText(`${this._found.length} / ${lv.target}`, VIEW_W / 2, trayY + 100 + this._found.length * 30 + 6);
+    ctx.fillText(`${this._found.length} / ${lv.target}`, VIEW_W / 2, trayY + 146 + this._found.length * 30 + 6);
 
     // keyboard
     const drawKey = (k, big) => {
@@ -226,6 +286,7 @@ export default class WordMakerGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = theme.hud_muted;
     ctx.fillText('tap letters, then Enter', VIEW_W / 2, HUD / 2);
+    hudSpeakButton(ctx, `make words that start with ${lv.letter.toUpperCase()}`, VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

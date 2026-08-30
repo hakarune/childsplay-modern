@@ -6,7 +6,11 @@ extends Control
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
+const WORDLIST_FILE := "res://assets/data/wordlist.json"
+const HINTS_PER_LEVEL := 2
 
+# Fallback if wordlist.json can't be read. The live ~1200-word dictionary
+# is bundled at assets/data/wordlist.json (edit tools/gen-wordlist.py).
 const WORD_LIST := [
 	"sun", "sit", "sad", "sea", "see", "sock", "sing", "snake", "star", "stop",
 	"six", "sky", "soap", "soup", "sand", "seed", "ship", "shop", "snow", "spin",
@@ -26,10 +30,10 @@ const WORD_LIST := [
 ]
 
 const LEVELS := [
-	{ "letter": "s", "target": 2 },
-	{ "letter": "b", "target": 3 },
+	{ "letter": "s", "target": 3 },
+	{ "letter": "b", "target": 4 },
 	{ "letter": "c", "target": 4 },
-	{ "letter": "t", "target": 4 },
+	{ "letter": "t", "target": 5 },
 	{ "letter": "p", "target": 5 },
 ]
 
@@ -45,9 +49,12 @@ var _word := ""
 var _found: Array[String] = []
 var _shake := 0.0
 var _words: Dictionary = {}
+var _hints_left := HINTS_PER_LEVEL
+var _hint := {}                   # { word, t } or {}
 var _keys: Array = []             # { ch, x, y, w, h }
 var _del_key := {}
 var _ok_key := {}
+var _hint_btn := {}
 
 @onready var _info: Label = %InfoLabel
 @onready var _status: Label = %StatusLabel
@@ -65,8 +72,7 @@ var _ok_key := {}
 
 func _ready() -> void:
 	GameContext.theme_changed.connect(queue_redraw)
-	for w in WORD_LIST:
-		_words[w] = true
+	_load_dict()
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_key.stream = al.get_stream(SND_KEY)
@@ -82,15 +88,40 @@ func _ready() -> void:
 	_start_level(0)
 
 
+# ~1200-word kid dictionary from a bundled JSON; fall back to WORD_LIST.
+func _load_dict() -> void:
+	_words.clear()
+	var txt := ""
+	if FileAccess.file_exists(WORDLIST_FILE):
+		txt = FileAccess.get_file_as_string(WORDLIST_FILE)
+	var data: Variant = JSON.parse_string(txt) if txt != "" else null
+	if data is Dictionary and data.has("words"):
+		for w in data["words"]:
+			_words[str(w)] = true
+	if _words.is_empty():
+		for w in WORD_LIST:
+			_words[w] = true
+
+
+func _announce() -> void:
+	var letter: String = String(LEVELS[_level]["letter"]).to_upper()
+	GameContext.speak("make words that start with %s" % letter)
+	await get_tree().create_timer(1.5).timeout
+	GameContext.speak("tap letters, then Enter")
+
+
 func _start_level(n: int) -> void:
 	_level = clampi(n, 0, LEVELS.size() - 1)
 	_word = ""
 	_found.clear()
 	_shake = 0.0
+	_hints_left = HINTS_PER_LEVEL
+	_hint = {}
 	_popup.visible = false
 	_geo()
 	_update_hud()
 	queue_redraw()
+	_announce()
 
 
 func _geo() -> void:
@@ -110,6 +141,8 @@ func _geo() -> void:
 	var aw := kw * 4.0 + gap * 3.0
 	_del_key = { "ch": "\b", "label": "DEL", "x": size.x / 2.0 - aw - gap / 2.0, "y": ay, "w": aw, "h": kh }
 	_ok_key = { "ch": "\n", "label": "Enter", "x": size.x / 2.0 + gap / 2.0, "y": ay, "w": aw, "h": kh }
+	var hint_right: float = size.x / 2.0 + minf(280.0, size.x / 2.0 - 60.0)
+	_hint_btn = { "x": hint_right - 150.0, "y": HUD + 12.0, "w": 150.0, "h": 44.0 }
 
 
 func _type(ch: String) -> void:
@@ -142,15 +175,37 @@ func _submit() -> void:
 		_word = ""
 		if _sfx_good.stream != null:
 			_sfx_good.play()
+		GameContext.speak("that is a word")
 		if _found.size() >= int(lv["target"]):
 			_level_done()
 	else:
 		_shake = 0.4
+		if w.length() >= 3:
+			GameContext.speak("not a word, try again")
 		_word = ""
 		if _sfx_wrong.stream != null:
 			_sfx_wrong.play()
 	_update_hud()
 	queue_redraw()
+
+
+func _use_hint() -> void:
+	if _popup.visible or _hints_left <= 0:
+		return
+	var letter: String = LEVELS[_level]["letter"]
+	var pick: Array[String] = []
+	for w in _words.keys():
+		if w.substr(0, 1) == letter and w.length() >= 3 and w.length() <= 6 and not (w in _found):
+			pick.append(w)
+	if pick.is_empty():
+		return
+	var word: String = pick[randi() % pick.size()]
+	_hint = { "word": word, "t": 0.0 }
+	_hints_left -= 1
+	queue_redraw()
+	GameContext.speak("here is a word you could make")
+	await get_tree().create_timer(1.4).timeout
+	GameContext.speak(word)
 
 
 func _level_done() -> void:
@@ -173,6 +228,11 @@ func _process(delta: float) -> void:
 	if _shake > 0.0:
 		_shake = maxf(0.0, _shake - delta)
 		queue_redraw()
+	if not _hint.is_empty():
+		_hint["t"] += delta
+		if _hint["t"] > 4.5:
+			_hint = {}
+		queue_redraw()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -187,6 +247,9 @@ func _gui_input(event: InputEvent) -> void:
 		pos = event.position
 		tapped = true
 	if not tapped:
+		return
+	if Rect2(_hint_btn["x"], _hint_btn["y"], _hint_btn["w"], _hint_btn["h"]).has_point(pos):
+		_use_hint()
 		return
 	if Rect2(_del_key["x"], _del_key["y"], _del_key["w"], _del_key["h"]).has_point(pos):
 		_backspace()
@@ -238,7 +301,22 @@ func _draw() -> void:
 	var tw := font.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, ts).x
 	draw_string(font, Vector2(size.x / 2.0 - tw / 2.0 + sh, tray_y + 52.0), shown, HORIZONTAL_ALIGNMENT_LEFT, -1, ts, GameContext.c("text"))
 
-	var fy := tray_y + 100.0
+	# hint pill
+	var hb := _hint_btn
+	draw_rect(Rect2(hb["x"], hb["y"], hb["w"], hb["h"]), GameContext.c("accent") if _hints_left > 0 else GameContext.c("surface"))
+	var hl := "Hint (%d)" % _hints_left
+	var hlw := font.get_string_size(hl, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+	draw_string(font, Vector2(hb["x"] + hb["w"] / 2.0 - hlw / 2.0, hb["y"] + hb["h"] / 2.0 + 7.0),
+		hl, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE if _hints_left > 0 else GameContext.c("text_muted"))
+
+	# active hint
+	if not _hint.is_empty():
+		draw_rect(Rect2(size.x / 2.0 - 180.0, tray_y + 84.0, 360.0, 44.0), GameContext.c("warn"))
+		var ht := "try:  %s" % String(_hint["word"]).to_upper()
+		var htw := font.get_string_size(ht, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
+		draw_string(font, Vector2(size.x / 2.0 - htw / 2.0, tray_y + 114.0), ht, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, GameContext.c("card_ink"))
+
+	var fy := tray_y + 146.0
 	for w in _found:
 		var fs := 22
 		var fw := font.get_string_size(w, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x

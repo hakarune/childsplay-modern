@@ -22,6 +22,8 @@ const PALETTE_DARK := {
 	"good": Color("6ee38a"), "bad": Color("ff6b6b"), "warn": Color("ffb454"),
 	"line": Color("5a7bb5"), "overlay_scrim": Color(0.016, 0.027, 0.047, 0.66),
 	"p1": Color("ff6b6b"), "p2": Color("ffd93d"),
+	"hud": Color("34435d"), "hud_text": Color("f2f5fa"), "hud_muted": Color("b7c6e0"),
+	"card": Color("f4f6fb"), "card_ink": Color("1a2330"), "board": Color("0a1524"),
 }
 const PALETTE_LIGHT := {
 	"bg": Color("eef1f6"), "surface": Color("ffffff"), "surface_alt": Color("d7e0f2"),
@@ -30,6 +32,8 @@ const PALETTE_LIGHT := {
 	"good": Color("137a37"), "bad": Color("c62f2f"), "warn": Color("9a5b00"),
 	"line": Color("7183a8"), "overlay_scrim": Color(0.047, 0.067, 0.102, 0.55),
 	"p1": Color("c62f2f"), "p2": Color("b07500"),
+	"hud": Color("c6d1e5"), "hud_text": Color("1a2330"), "hud_muted": Color("4a566b"),
+	"card": Color("ffffff"), "card_ink": Color("1a2330"), "board": Color("12314e"),
 }
 
 var theme_mode := "dark"

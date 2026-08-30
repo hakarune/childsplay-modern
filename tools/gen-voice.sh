@@ -70,12 +70,15 @@ PHRASES=(
   # --- numbers game: tap number N ---
   "tap number 1" "tap number 2" "tap number 3" "tap number 4" "tap number 5"
   "tap number 6" "tap number 7" "tap number 8" "tap number 9"
-  # --- Word Maker: starting letters ---
+  # --- Word Maker: starting letters + hint ---
   "make words that start with S"
   "make words that start with B"
   "make words that start with C"
   "make words that start with T"
   "make words that start with P"
+  "here is a word you could make"
+  "that is a word"
+  "not a word, try again"
   # --- animals (Aquarium fish + Flashcards deck) ---
   "shark" "manta ray" "eel" "discus" "angelfish" "butterfly fish" "blue tang"
   "tang" "wrasse" "cichlid" "goldfish" "fish"
