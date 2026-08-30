@@ -4,24 +4,35 @@ A modern re-implementation of **[Childsplay](https://codeberg.org/childsplay/chi
 the classic suite of small educational games for children **ages 2–7**
 (letter and number recognition, memory, listening skills, hand–eye
 coordination). The original is a Python/Pygame application; Childsplay-Modern
-rebuilds the core activities on two independent, self-contained targets.
+rebuilds the core activities on two independent, self-contained targets that
+share one pool of art and audio.
+
+**19 activities**, a **light / dark theme**, **spoken instructions baked in**
+(no text-to-speech engine required), and **per-channel sound** (music /
+effects / voice). Everything runs offline.
+
+* **Play in a browser:** <https://hakarune.github.io/childsplay-modern>
+* **Install on Linux:** grab the `.deb` from
+  [**Releases**](https://github.com/hakarune/childsplay-modern/releases)
+
+---
 
 ## Dual-target architecture
 
-Childsplay-Modern ships the same set of activities through two engines that
-share nothing at runtime but draw from one common pool of art and audio.
+The same set of activities ships through two engines that share nothing at
+runtime but draw from one common `assets/` pool.
 
 | Target | Engine | Runs on | Distribution |
 | --- | --- | --- | --- |
-| **Desktop** | Godot 4 (GL Compatibility renderer) | Native desktop Linux (x86_64) | `.deb` package |
-| **Web** | Hand-written HTML5 `<canvas>` + ES modules, no framework | Any modern browser — phones, tablets, Chromebooks | Static files on any web host |
+| **Desktop** | Godot 4 (GL Compatibility renderer) | Native desktop Linux (x86_64) | `.deb` package (GitHub Releases) |
+| **Web** | Hand-written HTML5 `<canvas>` + ES modules, no framework | Any modern browser — phones, tablets, Chromebooks, desktops | Static files (GitHub Pages) |
 
 ```
-                 assets/  (shared raw PNG/SVG/WAV/OGG/fonts)
+                 assets/  (shared raw PNG/SVG/WAV/OGG, flat "pools", data files)
                    /                              \
         desktop-godot/                        web-canvas/
       Godot 4 project  ->  build-deb.sh        index.html + js/ modules
-      exported binary  ->  childsplay-modern_*.deb    served as static site
+      exported binary  ->  childsplay-modern_*.deb    served as a static site
 ```
 
 Why two implementations instead of one exported everywhere:
@@ -31,162 +42,342 @@ Why two implementations instead of one exported everywhere:
   machines used in schools.
 * The **web** build wants zero install and a tiny download so it loads on a
   locked-down Chromebook or a parent's phone. A stripped hand-written canvas
-  engine keeps the payload far smaller than a WebAssembly engine export and
-  sidesteps mobile-browser quirks around large `.wasm` bundles.
+  engine keeps the payload far smaller than a WebAssembly engine export.
 
-Keeping them separate means each can be optimised for its platform without
-compromise; `assets/` is the single source of truth they both consume.
+`assets/` is the single source of truth they both consume.
+
+---
+
+## Install
+
+### Play in a browser (nothing to install)
+
+Open <https://hakarune.github.io/childsplay-modern>. It works on phones,
+tablets, Chromebooks and desktops, and can be "Added to Home screen" /
+installed from the browser menu for a full-screen, offline-capable app.
+
+### Linux desktop (`.deb`)
+
+Download the latest `childsplay-modern_<version>_amd64.deb` from
+[**Releases**](https://github.com/hakarune/childsplay-modern/releases), then:
+
+```sh
+sudo apt install ./childsplay-modern_0.3.0_amd64.deb
+#   or:  sudo dpkg -i childsplay-modern_0.3.0_amd64.deb && sudo apt -f install
+```
+
+It's an x86_64 build with an embedded data pack (~130 MB installed).
+Dependencies (all standard): `libc6 libgl1 libx11-6 libxcursor1
+libxinerama1 libxrandr2 libxi6`. On Ubuntu 24.04+ the optional
+`libasound2` recommend is named `libasound2t64` — it's only a recommend, so
+the install still succeeds.
+
+Launch it from your desktop menu ("Childsplay Modern") or run
+`childsplay-modern`. Remove with `sudo apt remove childsplay-modern`.
+
+---
 
 ## Repository layout
 
 ```
 childsplay-modern/
-├── assets/              Shared raw assets extracted from the original Childsplay
-│   ├── graphics/          PNG / SVG / JPG / GIF, mirrored from the legacy tree
-│   ├── audio/             WAV / OGG effects and spoken prompts
-│   ├── fonts/             DejaVu Sans Condensed (UI font)
-│   └── icons/             Application / launcher icon
-├── desktop-godot/       Godot 4 engine source
-│   ├── project.godot       1280x720, canvas_items/keep stretch, Compatibility renderer
-│   ├── default_bus_layout.tres  Master / Music / SFX / Voice audio buses
-│   ├── sync-assets.sh      Mirrors ../assets into desktop-godot/assets (res://)
-│   ├── scenes/             MainMenu.tscn + MemoryMenu.tscn + games/*.tscn
-│   └── scripts/            AssetLoader & GameContext (autoloads), menus, games/*
-├── web-canvas/          HTML5 / JS / Canvas implementation
-│   ├── index.html          Responsive full-viewport kiosk canvas
-│   ├── css/                Layout + HUD + splash styling
-│   ├── assets/             Web-sized subset of /assets (built by sync-assets.sh)
-│   ├── sync-assets.sh      (Re)builds web-canvas/assets/ from ../assets
-│   └── js/                 engine.js, util.js, menu.js, main.js, games/*
-├── build-deb.sh         Wrapper -> desktop-godot/build-deb.sh (export + .deb)
-├── legacy-sources/      Upstream checkout (not tracked; see below)
-├── docs/GAME-STATUS.md  Per-activity conversion tracker (legacy -> Godot / Web)
-├── LICENSE              GPL-3.0
+├── assets/                     Shared source assets
+│   ├── graphics/
+│   │   ├── pools/                Flat, purpose-named art the games actually use
+│   │   │   ├── backgrounds/        paintings + aquarium_1..6
+│   │   │   ├── animals/            01_cat.png … 21_frog.png, dog/horse/rooster
+│   │   │   ├── ui/                 card faces, sponge, bubble
+│   │   │   ├── soundpics/          Find Sound / Sound Memory pictures
+│   │   │   ├── icons/              one <game-id>.png per menu tile
+│   │   │   └── sprites/<game>/     packid / billiards / aquarium sprite sheets
+│   │   └── lib/                  Untouched legacy dump (provenance only)
+│   ├── audio/
+│   │   ├── lib/                  Legacy sound tree (effects, clips)
+│   │   └── voice/                Baked spoken lines: v_<slug>.ogg
+│   ├── data/                    Editable game content (see "Customising content")
+│   │   ├── electro.json           Electro picture↔name pairs
+│   │   └── wordlist.json          Word Maker dictionary (~1200 words)
+│   └── fonts/                   DejaVu Sans Condensed (UI font)
+├── desktop-godot/              Godot 4 engine source
+│   ├── project.godot             1280×720, canvas_items/keep stretch, Compatibility
+│   ├── default_bus_layout.tres   Master / Music / SFX / Voice audio buses
+│   ├── sync-assets.sh            Mirror ../assets → desktop-godot/assets (res://)
+│   ├── build-deb.sh             Export + package the .deb
+│   ├── scenes/                   MainMenu.tscn, MemoryMenu.tscn, games/*.tscn
+│   └── scripts/                  AssetLoader + GameContext (autoloads), menus, games/*
+├── web-canvas/                 HTML5 / JS / Canvas implementation
+│   ├── index.html               Responsive full-viewport canvas + chrome buttons
+│   ├── sync-assets.sh           (Re)build web-canvas/assets/ from ../assets
+│   ├── serve.sh                 Local static server for development
+│   ├── assets/                  Web-sized copy of the pools (committed)
+│   └── js/                       engine.js, util.js, theme.js, tts.js, menu.js,
+│                                 main.js, games/*
+├── tools/                      Content generators (see below)
+│   ├── migrate-assets.sh         Build assets/graphics/pools/ from the legacy dump
+│   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg
+│   ├── gen-electro-data.sh       Rebuild assets/data/electro.json from the art
+│   └── gen-wordlist.py           Rebuild assets/data/wordlist.json
+├── build-deb.sh                Thin wrapper → desktop-godot/build-deb.sh
+├── docs/
+│   ├── Design-Policy.md          The cross-cutting rules every game follows (§A–§L)
+│   ├── GAME-STATUS.md            Per-activity conversion tracker + changelog
+│   └── templates/ASSETS.template.md
+├── .github/workflows/deploy-pages.yml   Auto-deploys web-canvas/ to Pages on push
+├── legacy-sources/             Upstream checkout for asset extraction (git-ignored)
+├── LICENSE                     GPL-3.0
 └── README.md
 ```
 
-## Desktop Build
+---
 
-Requirements on the build host:
+## Features
 
-* [Godot 4](https://godotengine.org/) (`godot4` or `godot` on `PATH`, or set
-  `GODOT_BIN`) with the matching **Linux export templates** installed
-* `dpkg-deb` (from `dpkg`); `fakeroot` only if your `dpkg-deb` predates
-  `--root-owner-group`
-* optional: `desktop-file-utils` (the script validates the `.desktop` entry)
+* **Light / dark theme** — a toggle in the top bar (☀ / ☾ on web,
+  "Theme" on desktop). Every screen repaints from a shared 20-role palette
+  (`web-canvas/js/theme.js` / `GameContext.PALETTE_*`); the choice is
+  remembered. Contrast is WCAG-checked in both themes.
+* **Spoken instructions, baked in** — short lines ("drag a wire from each
+  picture to its name", number and animal names, …) are pre-rendered to
+  `assets/audio/voice/v_<slug>.ogg` with `espeak-ng` and ship with both
+  targets, so pre-readers get audio help even with **no TTS engine
+  installed**. Each game's HUD has a 🔊 button that re-speaks the current
+  prompt; live OS/browser TTS is used only as a fallback.
+* **Per-channel sound** — Music / Effects / Voice, each independently
+  muteable. Web: the 🔊 popover in the top bar. Desktop: the **Sound**
+  button opens the same three-way panel. The setting persists
+  (`localStorage` / `user://settings.cfg`).
+* **No-repeat asset pools** — puzzle / memory / wipe / find-it draw
+  pictures from shared "bags" so the same image doesn't recur within a
+  session.
+* **Responsive** — a fixed 1280×720 world is aspect-fit into any screen;
+  portrait phones play fit-to-width with the game ratio preserved.
+* **Local 2-player** — Four in a Row and Tic Tac Toe have a 1P/2P toggle.
 
-Run the project from the editor:
+---
+
+## Customising content
+
+Game content lives in plain files under `assets/`. Edit, regenerate if
+there's a helper, then re-sync the target(s) and commit. All generators
+need only `bash` + `python3` unless noted.
+
+### Electro — picture ↔ name matches
+
+`assets/data/electro.json` — one `{ "img", "say" }` per line:
+
+```json
+{ "pairs": [
+  { "img": "01_cat", "say": "cat" },
+  { "img": "dog",    "say": "dog" }
+] }
+```
+
+* `img` is a filename **stem** in `assets/graphics/pools/animals/` (no
+  extension).
+* `say` is the printed + spoken word.
+* To add a match: drop the picture in `assets/graphics/pools/animals/`, add
+  a line here, and — so it's spoken without live TTS — add the word to the
+  `PHRASES` list in `tools/gen-voice.sh` and re-bake (below).
+* `tools/gen-electro-data.sh` rebuilds this file from **every** picture in
+  the animals pool (strips a leading `NN_`, turns `_` into spaces). Run it
+  after adding art if you want all of it in play; it **overwrites** hand
+  edits.
+
+Both targets fall back to a built-in list if the file is missing.
+
+### Word Maker — the dictionary
+
+The ~1200-word kid dictionary is `assets/data/wordlist.json`. Don't edit the
+JSON directly — edit the `WORDS` blob in **`tools/gen-wordlist.py`** (any
+whitespace/newlines are fine) and run it:
 
 ```sh
-desktop-godot/sync-assets.sh     # first run / after assets change
-godot4 --path desktop-godot
+python3 tools/gen-wordlist.py      # -> assets/data/wordlist.json
 ```
 
-The project boots straight to `res://scenes/MainMenu.tscn`. `AssetLoader`
-(an autoload) indexes everything under `res://assets/` on startup and
-exposes `AssetLoader.get_texture(name)` / `AssetLoader.play_sound(name)`.
+Rules enforced by the generator: lowercased, `a–z` only, length 2–8,
+de-duplicated, sorted. Keep it kid-safe and avoid proper nouns. The
+per-level starting letters and word targets are in `LEVELS` in
+`web-canvas/js/games/synonyms.js` and
+`desktop-godot/scripts/games/WordMaker.gd`.
 
-Produce an installable package:
+### Spoken lines (voice pack)
+
+`assets/audio/voice/v_<slug>.ogg`, produced by **`tools/gen-voice.sh`**
+(needs `espeak-ng` + `ffmpeg`). Add strings to the `PHRASES` array and run:
 
 ```sh
-./build-deb.sh            # -> dist/childsplay-modern_0.1.0_amd64.deb
-./build-deb.sh 0.2.0      # override the version string
-./build-deb.sh --no-export   # re-package an already-exported binary only
+tools/gen-voice.sh
 ```
 
-`desktop-godot/build-deb.sh` runs `sync-assets.sh`, writes an
-`export_presets.cfg` (Linux / `x86_64`, **all resources**, embedded `.pck`)
-if none exists, does a headless `--import` + `--export-release "Linux"` to a
-single self-contained ELF, then stages an FHS layout and packages it:
+The slug is `lowercase, non-alphanumerics → "-", trimmed, 48 chars` — the
+same rule in `tts.js` (`slug()`) and `GameContext._slug()`, so `say("Tap
+number 3")` finds `v_tap-number-3.ogg` automatically. If a clip is missing
+the games fall back to live TTS, then to silence.
 
-```
-usr/bin/childsplay-modern                                  (the game)
-usr/share/applications/childsplay-modern.desktop           (menu entry)
-usr/share/icons/hicolor/scalable/apps/childsplay-modern.svg
-usr/share/doc/childsplay-modern/copyright
-DEBIAN/{control,postinst,postrm}   (postinst/postrm refresh the menu caches)
-```
+### Art pools
 
-Staging happens under `$TMPDIR` (override with `CHILDSPLAY_BUILD_DIR`) so a
-FAT/exFAT checkout can't break the `DEBIAN/` permissions `dpkg-deb` requires.
+`assets/graphics/pools/` is built from the legacy dump by
+**`tools/migrate-assets.sh`** (see `docs/Design-Policy.md` §A for the
+naming rules). To add or swap art, either drop correctly-named files
+straight into a pool folder, or edit `migrate-assets.sh` and re-run it.
 
-Install / remove:
+### After editing anything under `assets/`
 
 ```sh
-sudo apt install ./dist/childsplay-modern_0.1.0_amd64.deb
-sudo apt remove childsplay-modern
+web-canvas/sync-assets.sh          # refresh web-canvas/assets/ + manifest.json
+desktop-godot/sync-assets.sh       # refresh desktop-godot/assets/ (res://)
 ```
 
-## Web Build
+Then commit the changed `assets/**` **and** the regenerated
+`web-canvas/assets/**`. The desktop copy is git-ignored (rebuilt at
+package time), but the web copy is committed because Pages serves it as-is.
 
-The web target is plain static files — there is **no build step and no
-bundler**. Serve `web-canvas/` with any static HTTP server (ES modules
-require `http://`, not `file://`):
+---
+
+## Develop
+
+### Web
+
+No build step, no bundler. Serve `web-canvas/` over HTTP (ES modules need
+`http://`, not `file://`):
 
 ```sh
 cd web-canvas
-./sync-assets.sh          # first run: build web-canvas/assets/ (~3 MB)
-./serve.sh                # -> http://localhost:8080  (pass a port to change)
+./sync-assets.sh        # first run: build web-canvas/assets/ (~9 MB)
+./serve.sh              # -> http://localhost:8080  (pass a port to change)
 ```
 
-`web-canvas/assets/` is committed, so deploying is just copying `web-canvas/`
-to any static host — GitHub Pages, Netlify, an S3 bucket, a classroom
-intranet. All games are implemented as Canvas modules. The engine
-aspect-fits a fixed 1280×720 world into any screen, so phones, tablets and
-Chromebooks all get a clean, un-distorted layout.
+Deploying is just copying `web-canvas/` to any static host; a push to
+`main` that touches `web-canvas/**` auto-deploys to GitHub Pages via
+`.github/workflows/deploy-pages.yml`.
 
 `js/` layout:
 
 | File | Role |
 | --- | --- |
-| `js/engine.js` | The engine: named state machine (MainMenu, MemoryMenu + 20 games), image/sound loader + cache, overlapping one-shot audio, rAF loop, fixed 1280×720 world with aspect-fit scaling, pointer/touch/key normalisation. |
-| `js/util.js` | `roundRect`, `shuffle`, `clamp`, `drawImageFit`, and a shared win/game-over `Overlay` with canvas buttons. |
-| `js/menu.js` | The `MainMenu` state — a reflowing grid of icon tiles. |
-| `js/main.js` | Bootstrap: registers MainMenu, lazily `import()`s + re-instantiates a game module per launch (fresh reset), drives the Back HUD, unlocks audio on first tap. |
-| `js/games/index.js` | Two lists: `GAMES` (loadable modules) and `MENU` (the 19 dashboard tiles). |
-| `js/games/memory-menu.js` | The **Memory** tile opens this: pick a deck — Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
-| `js/games/{memory,fallingletter,soundmemory,findsound,puzzle,findit,aquarium,pong,fourrow,flashcards,blockbreaker,simon,electro,tictactoe,wipe,ichanger,numbers,synonyms,packid,billiards}.js` | Standalone Canvas games. Each default-exports `new GameScene(game, { onExit, ... })`: flip/match (Memory takes a `variant`), falling balloons + on-screen QWERTY keyboard, audio pairs, hear-and-tap picture rounds, drag-the-pieces jigsaw (grid + irregular cuts), a calm interactive fish tank, bat-and-ball, spot-the-difference, Connect Four, picture+word flashcards (browser TTS), Breakout, Simon, picture-to-name wiring, Tic Tac Toe, scratch-to-reveal, spot-the-change, number-order recall, word building, tilemap maze with swipe/arrow steering, 2D ball physics with drag-aim and pockets. |
-| `serve.sh` | `python3 -m http.server` (or `npx serve`) on port 8080. |
+| `js/engine.js` | Named state machine, image/sound loader + cache, channelled audio (`AudioManager`), rAF loop, fixed 1280×720 world with aspect-fit scaling, pointer/touch/key normalisation, `manifest.json` resolution. |
+| `js/theme.js` | The 20-role light/dark palette; `setTheme` / `toggleTheme` / `initTheme`; mirrors roles to `--cp-*` CSS vars for the HTML chrome. |
+| `js/tts.js` | `say(text)` — baked clip → live `speechSynthesis` → silence. |
+| `js/util.js` | `roundRect`, `shuffle`, `clamp`, `drawImageFit`, `Bag` (no-repeat draws), the shared win/game-over `Overlay`, the HUD 🔊 button helpers. |
+| `js/menu.js` | The paginated `MainMenu` grid of square icon tiles. |
+| `js/main.js` | Bootstrap: theme + sound wiring, lazy `import()` of a game per launch, Back HUD, audio unlock on first tap. |
+| `js/games/*.js` | One default-exported Canvas scene per activity. |
 
-Each game module is downloaded only when first opened.
+### Desktop (Godot 4)
+
+```sh
+desktop-godot/sync-assets.sh       # first run / after assets change
+godot4 --path desktop-godot        # boots res://scenes/MainMenu.tscn
+```
+
+`AssetLoader` (autoload) indexes `res://assets/` and exposes
+`get_texture(name)` / `play_sound(name)`. `GameContext` (autoload) owns the
+palette (`c("role")`), the no-repeat pools (`draw_from_pool`), `speak()`,
+and the theme/sound settings.
+
+Build the package:
+
+```sh
+./build-deb.sh                 # -> dist/childsplay-modern_<project version>_amd64.deb
+./build-deb.sh 0.3.0           # override the version string
+./build-deb.sh --no-export     # just re-package the already-exported binary
+```
+
+Requirements: Godot 4 (`godot4`/`godot` on `PATH` or `GODOT_BIN`) with the
+matching **Linux export templates**; `dpkg-deb`; optionally `fakeroot`
+(only if your `dpkg-deb` predates `--root-owner-group`) and
+`desktop-file-utils`. `build-deb.sh` runs `sync-assets.sh`, writes an
+`export_presets.cfg` if none exists (Linux / x86_64 / all resources +
+`*.json` / embedded `.pck`), does a headless `--import` +
+`--export-release`, then stages an FHS tree and packages it. Stage under
+`$TMPDIR` or set `CHILDSPLAY_BUILD_DIR` if your checkout is on FAT/exFAT.
+
+To publish a release: bump `config/version` in `desktop-godot/project.godot`,
+build, then `gh release create v<x.y.z> dist/childsplay-modern_<x.y.z>_amd64.deb`.
+
+---
+
+## Other platforms — is a Windows / Android / Chrome build feasible?
+
+Short version: **Windows is easy, an installable web app (PWA) is easy and
+covers almost everything, Android is medium, macOS builds easily but is
+painful to distribute, and Chrome "apps" are dead.**
+
+| Target | Effort | Notes |
+| --- | --- | --- |
+| **Windows `.exe`** | Easy | Same Godot project, one extra export preset + the Windows export templates: `godot --headless --export-release "Windows Desktop" childsplay-modern.exe`. No code changes. Could be added to `build-deb.sh` as a sibling step. The web build already runs in any Windows browser. |
+| **Installable web app (PWA)** | Easy | Add a `manifest.webmanifest` + a small service worker to `web-canvas/`. The existing site then installs as a full-screen, offline app on **Android, ChromeOS, Windows, macOS and (via "Add to Home Screen") iOS** — one artifact, every platform. This is the highest-value next step. |
+| **Android `.apk`** | Medium | Two routes. (a) Godot Android export — needs the Android SDK + build tools + a keystore; ~30 min one-time setup, then it exports an APK/AAB. (b) Wrap the web build in a **Trusted Web Activity** (a thin APK that points at the Pages URL) — smaller, auto-updates, Play-Store-installable, but needs the PWA above first. |
+| **macOS `.app` / `.dmg`** | Build easy, ship hard | Godot exports it, but Gatekeeper wants an Apple Developer cert + notarization (and a Mac) for anyone else to run it without right-click-Open gymnastics. Fine for personal use unsigned. |
+| **Chrome App** | Don't | Chrome packaged apps were removed from Chrome on every platform except ChromeOS kiosk (itself deprecated). Not worth targeting. |
+| **Chrome Extension** | Low value | You *can* bundle `web-canvas/` in an extension that opens it in a tab, but it gains nothing over just visiting the hosted site or installing the PWA. |
+
+So nothing here needs a rewrite. If you want, the practical additions are:
+a Windows preset in the build script, and a PWA manifest + service worker
+for `web-canvas/` (which also unlocks the light-weight Android TWA route).
+
+---
+
+## Included activities
+
+Full conversion status and per-game notes live in
+[`docs/GAME-STATUS.md`](docs/GAME-STATUS.md). All 19 below are implemented
+on **both** targets.
+
+| Activity | Skill | What you do |
+| --- | --- | --- |
+| **Memory** | Visual memory | Flip-and-match picture pairs. A sub-menu picks the deck: Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
+| **Sound Memory** | Listening, memory | `?`-tiles play a clip; match by ear, a pair reveals the picture. |
+| **Falling Letter** | Letter recognition, keyboard | Type the letter on each balloon (physical keys or the on-screen QWERTY) before it hits the danger line. 3 lives, speed ramps. |
+| **Find Sound** | Listening | Hear a clip, tap the picture it belongs to. Themed levels (animals, vehicles, instruments…). |
+| **Flashcards** | Vocabulary | Picture + word cards for 12 animals; tap to hear the word. English + Deutsch / Nederlands / Français / Español. |
+| **Puzzle** | Spatial reasoning | Drag the pieces of a painting into the frame. 6 levels, from 2×2 grids to 12 irregular rectangles. Random picture per play. |
+| **Find It** | Attention | Spot-the-difference — the painting is shown twice, the right copy has coloured spots added; tap them all. |
+| **Wipe** | Fine motor | Drag a sponge to wipe a grey cover off a hidden painting. Rising target %, shrinking sponge. |
+| **Image Changer** | Attention, memory | Study a row of pictures; the cards flip and one has changed — tap it. |
+| **Aquarium** | Calm play (no score) | A fish tank toy: poke a fish for its name + a bubble, tap the water to drop food. Optional "read the fish names" mode. |
+| **Pong** | Hand–eye | Bat and ball vs a gentle AI; first to 5; 3 speeds. Framed high-contrast court. |
+| **Block Breaker** | Hand–eye | Calm Breakout — slide the paddle, clear six brick walls. Tough bricks take two hits; 3 lives. |
+| **Billiards** | Aim, fine motor | Drag back from the cue ball to aim + set power. 6 pockets, 3/6/10-ball racks. |
+| **Packid** | Planning, coordination | Steer through an open maze eating dots, avoiding fruit "ghosts". Arrow keys or swipe. Friendly bump-reset, no game over. |
+| **Simon** | Sequence memory | Repeat the growing colour-and-tone sequence. 6 levels (length 2→7). Synthesised tones. A miss just replays — no game over. |
+| **Electro** | Matching, vocabulary | Drag a wire from each animal picture to its name. Pairs come from `assets/data/electro.json`. 6 levels, 3→8 pairs. |
+| **Numbers** | Number order, memory | Study numbered tiles, they blank out, tap them 1→N from memory. A wrong tap peeks the board. 6 levels (4→9 tiles). |
+| **Four in a Row** | Planning | Connect Four vs the computer (3 AI levels) or a **local 2-player** toggle. |
+| **Tic Tac Toe** | Planning | Noughts and crosses vs Easy / Medium / perfect-minimax computer, or **local 2-player**. |
+| **Word Maker** | Early literacy | Given a starting letter, build words on the on-screen keyboard (or type). Scored against a ~1200-word dictionary; **2 hints per level**; spoken prompt on open. |
+
+---
 
 ## Controls
 
 | Context | Input | Action |
 | --- | --- | --- |
-| Menu | Mouse click / tap | Select an activity |
-| Any activity | `Esc` (desktop) / **Menu** button (web) | Return to the dashboard |
-| Falling Letter | Letter keys | Match the falling letter |
-| Memory / Sound Memory | Click / tap | Flip a card |
-| Billiards | Click-drag / touch-drag from the ball | Aim and set power; release to shoot |
+| Top bar | ☀ / ☾ (web) · "Theme" (desktop) | Toggle light / dark |
+| Top bar | 🔊 (web) · "Sound" (desktop) | Music / Effects / Voice mute panel |
+| Any activity | 🔊 button in the HUD | Re-speak the current instruction |
+| Any activity | `Esc` (desktop) / **Menu** button (web) | Back to the dashboard |
+| Menu | Click / tap · ← → · swipe | Select · change page |
+| Falling Letter / Word Maker | Letter keys or the on-screen keyboard | Type |
+| Word Maker | **Hint** button | Reveal a word you haven't found (2 per level) |
+| Memory / Sound Memory / Find Sound / Find It / Image Changer | Click / tap | Flip / pick / tap the target |
+| Billiards / Pong / Block Breaker | Click-drag or touch-drag | Aim & power / move the paddle |
 | Packid | Arrow keys / swipe | Move through the maze |
+| Electro | Drag between the dots | Wire a picture to its name |
+| Four in a Row / Tic Tac Toe | 1P / 2P pill (before the first move) | Switch opponent |
 
-The Godot project enables mouse↔touch emulation both ways, so every activity
-is playable with either a pointer or a touchscreen.
+The Godot project enables mouse↔touch emulation both ways, so every
+activity is playable with a pointer or a touchscreen.
 
-## Included Games
-
-| Activity | Skill | Description |
-| --- | --- | --- |
-| **Packid** | Coordination, planning | Steer Packid through a maze, eating every dot while avoiding the ghosts. |
-| **Fallingletter** | Letter recognition, keyboard | Letters drift down the screen; press the matching key before one lands. |
-| **Soundmemory** | Listening, memory | A grid of tiles; flip two at a time to hear their sounds and find matching pairs. |
-| **Memory** | Visual memory | The classic picture-pairs game with the original Childsplay tilesets. |
-| **Billiards** | Aim, fine motor | Drag back from the cue ball to set direction and power, then release to strike. |
-
-More of the original activities (Puzzle, Find Sound, Fishtank, Pong, …) can be
-added as new scenes in `desktop-godot/scenes/games/` and matching modules
-in `web-canvas/js/games/` plus a line in each registry.
-
-**Conversion progress for every legacy activity is tracked in
-[`docs/GAME-STATUS.md`](docs/GAME-STATUS.md)** — update it in the same commit
-that adds or finishes a game.
+---
 
 ## Assets & attribution
 
-All art and audio under `assets/` is extracted verbatim from the original
-Childsplay project and is licensed under the **GPL-3.0**, same as the
-original code (`legacy-sources/childsplay-legacy/COPYING`). Upstream project:
+All art and audio under `assets/` is derived from the original Childsplay
+project and is licensed under the **GPL-3.0**, same as the original code
+(`legacy-sources/childsplay-legacy/COPYING`). The baked voice clips in
+`assets/audio/voice/` are generated locally with `espeak-ng`. Upstream:
 <https://codeberg.org/childsplay/childsplay>.
 
 To refresh the upstream checkout used for extraction:
@@ -196,8 +387,10 @@ git clone https://codeberg.org/childsplay/childsplay.git \
   legacy-sources/childsplay-legacy
 ```
 
-`legacy-sources/` is git-ignored — it is a working copy for pulling assets,
-not part of this repository.
+`legacy-sources/` is git-ignored — a working copy for pulling assets, not
+part of this repository.
+
+---
 
 ## License
 
