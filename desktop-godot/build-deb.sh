@@ -256,8 +256,10 @@ Recommends: libasound2
 Homepage: $HOMEPAGE
 Description: Childsplay Modern educational activity suite
  A Godot 4 port of the classic Childsplay suite of learning games for
- children between 2 and 7 years old. The launcher opens five activities:
- Memory, Falling Letter, Sound Memory, Packid and Billiards.
+ children between 2 and 7 years old. The launcher opens 19 activities
+ spanning memory, letters and words, numbers, sound recognition, jigsaw
+ puzzles, drawing-style reveal, and gentle arcade games, with a
+ light/dark theme and per-channel sound controls.
 EOF
 
 cat > "$STAGE/DEBIAN/postinst" <<'EOF'
