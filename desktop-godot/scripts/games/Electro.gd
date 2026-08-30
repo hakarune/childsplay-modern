@@ -8,6 +8,11 @@ const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
 const SIDE := 44.0
 const NODE_R := 13.0
+# The visible dot is small; the hit target is a fingertip (§I.2). Pick up a
+# wire from within PICK_REACH of a node, and on release snap to the NEAREST
+# eligible node in the other column within DROP_REACH.
+const PICK_REACH := 46.0
+const DROP_REACH := 120.0
 const PAIRS := [3, 4, 5, 6, 7, 8]
 
 const PAIRS_FILE := "res://assets/data/electro.json"
@@ -151,13 +156,22 @@ func _right_node(i: int) -> Vector2:
 	return Vector2(_right_x(), _row_y(i) + _tile_h / 2.0)
 
 
-func _node_hit(p: Vector2) -> Dictionary:
+## Nearest unsolved node within `reach` (§I.2.2 — no pixel-exact hit needed).
+func _node_hit(p: Vector2, reach := PICK_REACH) -> Dictionary:
+	var best := {}
+	var best_d := reach
 	for i in _ids.size():
-		if not _solved.has(_ids[i]) and p.distance_to(_left_node(i)) < NODE_R * 2.2:
-			return { "col": "L", "id": _ids[i], "i": i }
-		if not _solved.has(_right_ids[i]) and p.distance_to(_right_node(i)) < NODE_R * 2.2:
-			return { "col": "R", "id": _right_ids[i], "i": i }
-	return {}
+		if not _solved.has(_ids[i]):
+			var d := p.distance_to(_left_node(i))
+			if d < best_d:
+				best_d = d
+				best = { "col": "L", "id": _ids[i], "i": i }
+		if not _solved.has(_right_ids[i]):
+			var d2 := p.distance_to(_right_node(i))
+			if d2 < best_d:
+				best_d = d2
+				best = { "col": "R", "id": _right_ids[i], "i": i }
+	return best
 
 
 func _process(delta: float) -> void:
@@ -201,7 +215,7 @@ func _end_drag(p: Vector2) -> void:
 		return
 	var d := _drag
 	_drag = {}
-	var hit := _node_hit(p)
+	var hit := _node_hit(p, DROP_REACH)
 	if not hit or hit["col"] == d["col"]:
 		queue_redraw()
 		return
@@ -299,7 +313,16 @@ func _draw() -> void:
 		var list: Array = _ids if _drag["col"] == "L" else _right_ids
 		var i := list.find(_drag["id"])
 		var a := _left_node(i) if _drag["col"] == "L" else _right_node(i)
-		draw_polyline(_bezier_pts(a, Vector2(_drag["x"], _drag["y"])), GameContext.c("warn"), 6.0, true)
+		var tip := Vector2(_drag["x"], _drag["y"])
+		draw_polyline(_bezier_pts(a, tip), GameContext.c("warn"), 6.0, true)
+		# fat finger halo so the wire end is easy to see (§I.2.3)
+		draw_circle(tip, 26.0, Color(1, 0.85, 0.24, 0.22))
+		draw_arc(tip, 26.0, 0.0, TAU, 28, Color(1, 0.85, 0.24, 0.85), 2.0)
+		# highlight the node it would snap to
+		var snap := _node_hit(tip, DROP_REACH)
+		if snap and snap["col"] != _drag["col"]:
+			var sn: Vector2 = _left_node(snap["i"]) if snap["col"] == "L" else _right_node(snap["i"])
+			draw_arc(sn, NODE_R + 7.0, 0.0, TAU, 28, Color("ffd93d"), 3.0)
 
 
 func _draw_node(n: Vector2, done: bool) -> void:
