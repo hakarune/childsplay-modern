@@ -118,11 +118,8 @@ so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-30 — spoken lines baked into audio (assets/voice/,
-no TTS dependency). §A/§C asset migration started: flat purpose pools
-assets/graphics/pools/{backgrounds,animals,ui} built by tools/migrate-assets.sh;
-puzzle / wipe / find it / memory / electro / image changer / flashcards /
-aquarium retargeted on both targets, extension-less paths resolved via
-manifest.json (svg→png→jpg). Puzzle & Wipe & Find It now pull a random
-non-repeating painting from a 17-picture shared pool. Still on the legacy
-tree: soundmemory pics, packid / billiards sprites, aquarium fish frames._
+_Last updated: 2026-08-30 — §A/§C asset migration COMPLETE for graphics:
+every game now reads from assets/graphics/pools/{backgrounds,animals,ui,
+soundpics,icons,sprites/<game>}; the web sync no longer touches
+graphics/lib/. Baked voice pack (assets/voice/) shipping on both targets.
+Next: the §D light/dark palette sweep across the remaining games._

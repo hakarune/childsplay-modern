@@ -14,7 +14,7 @@ const LEVELS = [
 ];
 
 const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-const GHOST_PICS = ['packid/appel.png', 'packid/banaan.png', 'packid/citroen.png'];
+const GHOST_PICS = ['sprites/packid/appel', 'sprites/packid/banaan', 'sprites/packid/citroen'];
 const key = (c) => `${c.x},${c.y}`;
 
 const SND_EAT = 'sfx/waka.wav';
@@ -255,8 +255,8 @@ export default class PackidGame extends Scene {
     ctx.fillStyle = '#161c2e';
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-    const brick = img('packid/brick.png');
-    const kers = img('packid/kers.png');
+    const brick = img('sprites/packid/brick');
+    const kers = img('sprites/packid/kers');
     ctx.save();
     ctx.translate(this._ox, this._oy);
 
@@ -283,7 +283,7 @@ export default class PackidGame extends Scene {
 
     // pac
     const caught = this._resetT > 0;
-    let sprite = 'packid/pac_sad.png';
+    let sprite = 'sprites/packid/pac_sad';
     if (!caught) {
       const d = this._pac.dir;
       const face = d[0] > 0 ? 'r' : d[0] < 0 ? 'l' : d[1] < 0 ? 'u' : d[1] > 0 ? 'd' : 'r';

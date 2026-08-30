@@ -250,7 +250,7 @@ export default class BilliardsGame extends Scene {
       ctx.setLineDash([]);
     }
 
-    const cueImg = img('billiards/ball1.png');
+    const cueImg = img('sprites/billiards/ball1');
     for (const b of this._balls) {
       if (b.potted) continue;
       if (b.cue) {

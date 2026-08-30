@@ -156,7 +156,7 @@ export default class SoundMemoryGame extends Scene {
       ctx.fill();
 
       if (c.matched) {
-        drawImageFit(ctx, img(`soundmemory/img/${c.id}.png`), c.x + 12, c.y + 12, c.s - 24, c.s - 24);
+        drawImageFit(ctx, img(`soundpics/${c.id}`), c.x + 12, c.y + 12, c.s - 24, c.s - 24);
       } else {
         const wob = playing ? 1 + 0.12 * Math.sin(this._pulse * 22) : 1;
         ctx.save();

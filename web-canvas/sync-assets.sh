@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# sync-assets.sh - (re)build web-canvas/assets/ as a small, web-sized
-# subset of the shared ../assets/ pool (itself extracted from
-# legacy-sources/). The full pool is ~50 MB; the web target only ships
-# what the launcher and the five games actually use (~3 MB), flattened
-# into friendly paths.
+# sync-assets.sh - (re)build web-canvas/assets/ from the shared ../assets/.
+#
+# Graphics come entirely from the flat, purpose-named pools built by
+# tools/migrate-assets.sh (Design Policy §A) — this script no longer
+# touches the legacy `assets/graphics/lib/` tree. Audio still comes from
+# ../assets/audio/lib/ until an audio-pool migration lands.
 #
 # Run after cloning or whenever ../assets/ changes. The result is checked
-# in so `web-canvas/` deploys as-is, but this script is the source of
-# truth for what belongs there.
+# in so `web-canvas/` deploys as-is.
 #
 set -euo pipefail
 
@@ -18,72 +18,34 @@ DST="$HERE/assets"
 
 [ -d "$SRC" ] || { echo "error: $SRC not found" >&2; exit 1; }
 
-G="$SRC/graphics/lib/CPData"
 POOLS="$SRC/graphics/pools"
-ICONS="$SRC/graphics/lib/SPData/themes/childsplay/menuicons"
-SICONS="$SRC/graphics/lib/SPData/themes/seniorplay/menuicons"
 A="$SRC/audio/lib/CPData"
 
+[ -d "$POOLS" ] || { echo "error: $POOLS not found — run tools/migrate-assets.sh" >&2; exit 1; }
+
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,packid,billiards,aquarium,soundmemory/img,soundmemory/snd,sfx,voice}
+mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,soundpics,sfx,voice}
+mkdir -p "$DST"/sprites/{packid,billiards,aquarium}
+mkdir -p "$DST"/soundmemory/snd
 mkdir -p "$DST"/flashcards/{de,nl,fr,es}
 
-# --- flat purpose-named graphics pools (Design Policy §A) -------------
-cp "$POOLS/backgrounds/"* "$DST/backgrounds/"
-cp "$POOLS/animals/"*     "$DST/animals/"
-cp "$POOLS/ui/"*          "$DST/ui/"
+# --- graphics: straight from the pools (Design Policy §A) ------------
+cp "$POOLS/backgrounds/"*       "$DST/backgrounds/"
+cp "$POOLS/animals/"*           "$DST/animals/"
+cp "$POOLS/ui/"*                "$DST/ui/"
+cp "$POOLS/soundpics/"*         "$DST/soundpics/"
+cp "$POOLS/icons/"*             "$DST/icons/"
+cp "$POOLS/sprites/packid/"*    "$DST/sprites/packid/"
+cp "$POOLS/sprites/billiards/"* "$DST/sprites/billiards/"
+cp "$POOLS/sprites/aquarium/"*  "$DST/sprites/aquarium/"
 
 # --- baked voice pack (Design Policy §E) — instructions & names as audio --
 cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack — run tools/gen-voice.sh)"
 
-# --- launcher icons (renamed to our game ids) ---------------------------
-cp "$ICONS/packid.icon.png"         "$DST/icons/packid.png"
-cp "$ICONS/fallingletters.icon.png" "$DST/icons/fallingletter.png"
-cp "$ICONS/soundmemory.icon.png"    "$DST/icons/soundmemory.png"
-cp "$ICONS/memory_sp.icon.png"      "$DST/icons/memory.png"
-cp "$ICONS/billiard.icon.png"       "$DST/icons/billiards.png"
-cp "$ICONS/findsound.icon.png"      "$DST/icons/findsound.png"
-cp "$ICONS/puzzle.icon.png"         "$DST/icons/puzzle.png"
-cp "$ICONS/fishtank.icon.png"       "$DST/icons/aquarium.png"
-cp "$ICONS/pong.icon.png"           "$DST/icons/pong.png"
-cp "$ICONS/findit_sp.icon.png"      "$DST/icons/findit.png"
-cp "$ICONS/fourrow.icon.png"        "$DST/icons/fourrow.png"
-cp "$ICONS/flashcards.icon.png"     "$DST/icons/flashcards.png"
-cp "$ICONS/BlockBreaker.icon.png"   "$DST/icons/blockbreaker.png"
-cp "$ICONS/simon_sp.icon.png"      "$DST/icons/simon.png"
-cp "$ICONS/electro_sp.icon.png"    "$DST/icons/electro.png"
-cp "$ICONS/TicTacToe.icon.png"     "$DST/icons/tictactoe.png"
-cp "$ICONS/wipe.icon.png"          "$DST/icons/wipe.png"
-cp "$ICONS/ichanger.icon.png"      "$DST/icons/ichanger.png"
-cp "$ICONS/numbers_sp.icon.png"    "$DST/icons/numbers.png"
-cp "$SICONS/synonyms.icon.png"     "$DST/icons/synonyms.png"
-
-# --- UI font -----------------------------------------------------------
+# --- UI font ---------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
 
-# --- Aquarium: fish swim frames (backgrounds + bubble come from pools) --
-FT="$G/FishtankData"
-for n in shark1 manta eel discus2 QueenAngel butfish blueking2 collaris \
-         six_barred cichlid1 newf1 f01 f04 f06 f09 f13; do
-  cp "$FT/${n}_0.png" "$DST/aquarium/${n}_0.png"
-  cp "$FT/${n}_1.png" "$DST/aquarium/${n}_1.png"
-done
-
-# --- Packid: sprites, wall + cherry tiles, fruit "ghosts" ------------
-cp "$G/PackidData/"pac_*.png "$G/PackidData/brick.png" \
-   "$G/PackidData/kers.png" "$G/PackidData/appel.png" \
-   "$G/PackidData/banaan.png" "$G/PackidData/citroen.png" \
-   "$G/PackidData/peer.png" "$DST/packid/"
-
-# --- Billiards: balls, pocket, cue ---------------------------------
-cp "$G/BilliardData/ball1.png" "$G/BilliardData/ball2.png" \
-   "$G/BilliardData/hole.png" "$G/BilliardData/stick.png" "$DST/billiards/"
-
-# --- Sound Memory: reveal pictures + the sound clips -----------------
-# Some names repeat across level folders; first one wins.
-for f in "$G/FindsoundData/Images/"level*/*.png; do
-  cp -n "$f" "$DST/soundmemory/img/"
-done
+# --- Sound Memory / Find Sound: the sound clips --------------------
 cp "$A/SoundmemoryData/Sounds/"*.ogg "$DST/soundmemory/snd/"
 
 # --- shared sound effects ------------------------------------------

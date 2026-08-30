@@ -69,7 +69,7 @@ export default class AquariumGame extends Scene {
         frameT: Math.random() * 2, phase: Math.random() * 10,
         dart: 0, target: null, hover: 0,
       };
-      Promise.all([loadImage(`aquarium/${sp.id}_0.png`), loadImage(`aquarium/${sp.id}_1.png`)])
+      Promise.all([loadImage(`sprites/aquarium/${sp.id}_0`), loadImage(`sprites/aquarium/${sp.id}_1`)])
         .then(([a, b]) => { fish.frames = [a, b]; });
       this._fish.push(fish);
     }

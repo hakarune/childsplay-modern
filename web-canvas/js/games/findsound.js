@@ -20,7 +20,7 @@ const SND_GOOD = 'sfx/good.ogg';
 const SND_BAD = 'sfx/wrong.ogg';
 const SND_WIN = 'sfx/winner.ogg';
 
-const IMG = (id) => `soundmemory/img/${id}.png`;
+const IMG = (id) => `soundpics/${id}`;
 const CLIP = (id) => `soundmemory/snd/${id}.ogg`;
 
 export default class FindSoundGame extends Scene {
