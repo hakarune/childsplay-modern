@@ -25,6 +25,8 @@ const MIN_ASPECT = 1.30;   // ~4:3  — iPad, older monitors
 const MAX_ASPECT = 2.00;   // ~18:9 — wide laptops, split view
 const REF_ASPECT = 16 / 9; // portrait / fallback world shape
 
+import { getArtStyle, CLASSIC, refreshArtStyles } from './artstyle.js';
+
 const ASSET_ROOT = new URL('../assets/', import.meta.url).href;
 const HAS_EXT = /\.(png|jpe?g|svg|webp|gif)$/i;
 const isImage = (p) => HAS_EXT.test(p);
@@ -50,15 +52,23 @@ export async function loadManifest() {
   } catch {
     _manifest = {};
   }
+  refreshArtStyles(_manifest);
   return _manifest;
 }
 
 /** Resolve an extension-less pool path (`backgrounds/castle`) to a real file
- *  via the manifest; a path that already has an extension is returned as-is. */
+ *  via the manifest; a path that already has an extension is returned as-is.
+ *  When an alternate art style is active, a `themes/<style>/<base>` entry in
+ *  the manifest wins (Policy §C.4); otherwise the base pool file is used. */
 export function resolveImage(base) {
   const s = String(base);
   if (HAS_EXT.test(s)) return s;
   const m = _manifest || {};
+  const style = getArtStyle();
+  if (style && style !== CLASSIC) {
+    const over = m[`themes/${style}/${s}`];
+    if (over) return over;
+  }
   return m[s] || `${s}.png`;
 }
 

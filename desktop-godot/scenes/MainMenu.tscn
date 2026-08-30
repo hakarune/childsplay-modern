@@ -27,482 +27,58 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 48
-theme_override_constants/margin_top = 36
-theme_override_constants/margin_right = 48
-theme_override_constants/margin_bottom = 36
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 24
 
 [node name="Layout" type="VBoxContainer" parent="Screen"]
 layout_mode = 2
-theme_override_constants/separation = 28
+theme_override_constants/separation = 18
 
 [node name="TopBar" type="HBoxContainer" parent="Screen/Layout"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Screen/Layout/TopBar"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 1
-theme_override_font_sizes/font_size = 44
+theme_override_font_sizes/font_size = 40
 text = "Childsplay Modern"
 vertical_alignment = 1
 
-[node name="AudioToggle" type="Button" parent="Screen/Layout/TopBar"]
+[node name="Chrome" type="HBoxContainer" parent="Screen/Layout/TopBar"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 56)
 layout_mode = 2
-toggle_mode = true
-text = "Audio: On"
+theme_override_constants/separation = 8
 
-[node name="ExitButton" type="Button" parent="Screen/Layout/TopBar"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 56)
-layout_mode = 2
-text = "Exit"
-
-[node name="GameGrid" type="GridContainer" parent="Screen/Layout"]
+[node name="TileLayer" type="Control" parent="Screen/Layout"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/h_separation = 28
-theme_override_constants/v_separation = 28
-columns = 3
 
-[node name="PackidButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
+[node name="Pager" type="HBoxContainer" parent="Screen/Layout"]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Packid"
-ignore_texture_size = true
-stretch_mode = 5
+alignment = 1
+theme_override_constants/separation = 16
 
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/PackidButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Packid"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="FallingletterButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
+[node name="PrevPage" type="Button" parent="Screen/Layout/Pager"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 44)
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Falling Letter"
-ignore_texture_size = true
-stretch_mode = 5
+text = "‹"
 
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/FallingletterButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Falling Letter"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="MemoryButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
+[node name="PageLabel" type="Label" parent="Screen/Layout/Pager"]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Memory"
-ignore_texture_size = true
-stretch_mode = 5
+text = "Page 1 / 1"
+vertical_alignment = 1
 
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/MemoryButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Memory"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="BilliardsButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
+[node name="NextPage" type="Button" parent="Screen/Layout/Pager"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 44)
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Billiards"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/BilliardsButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Billiards"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="FindsoundButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Find Sound"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/FindsoundButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Find Sound"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="PuzzleButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Puzzle"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/PuzzleButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Puzzle"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="AquariumButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Aquarium"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/AquariumButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Aquarium"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="PongButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Pong"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/PongButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Pong"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="FinditButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Find It"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/FinditButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Find It"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="FourrowButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Four in a Row"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/FourrowButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Four in a Row"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="FlashcardsButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Flashcards"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/FlashcardsButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Flashcards"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="BlockbreakerButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Block Breaker"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/BlockbreakerButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Block Breaker"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="SimonButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Simon"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/SimonButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Simon"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="ElectroButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Electro"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/ElectroButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Electro"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="TictactoeButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Tic Tac Toe"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/TictactoeButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Tic Tac Toe"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="WipeButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Wipe"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/WipeButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Wipe"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="IchangerButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Image Changer"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/IchangerButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Image Changer"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="NumbersButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Numbers"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/NumbersButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Numbers"
-horizontal_alignment = 1
-vertical_alignment = 2
-
-[node name="SynonymsButton" type="TextureButton" parent="Screen/Layout/GameGrid"]
-custom_minimum_size = Vector2(300, 220)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_mode = 2
-tooltip_text = "Word Maker"
-ignore_texture_size = true
-stretch_mode = 5
-
-[node name="Caption" type="Label" parent="Screen/Layout/GameGrid/SynonymsButton"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 28
-text = "Word Maker"
-horizontal_alignment = 1
-vertical_alignment = 2
+text = "›"

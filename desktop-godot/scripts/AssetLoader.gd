@@ -13,8 +13,20 @@ extends Node
 
 const ASSET_ROOT := "res://assets"
 
-const IMAGE_EXTS := ["png", "svg", "jpg", "jpeg", "webp"]
+# Resolution order (Design Policy §C.2): a newer `castle.svg` dropped next to
+# `castle.jpg` wins. IMAGE_EXTS is listed best-first and EXT_PRIORITY lets
+# _register() prefer the higher-priority extension on a name collision
+# instead of just keeping whichever the directory walk hit first.
+const IMAGE_EXTS := ["svg", "png", "jpg", "jpeg", "webp"]
+const EXT_PRIORITY := {"svg": 0, "png": 1, "jpg": 2, "jpeg": 3, "webp": 4}
 const AUDIO_EXTS := ["ogg", "wav", "mp3"]
+
+# Optional alternate-art overlay (Design Policy §C.4). Art placed under
+# res://assets/graphics/themes/<style>/<pool>/<name>.<ext> is indexed with a
+# style-relative key ("themes/<style>/<name>") and, when art_style is set to
+# that style, wins over the base pool. "classic" = base pools only.
+const ART_STYLE_DEFAULT := "classic"
+var art_style := ART_STYLE_DEFAULT
 
 const BUS_SFX := "SFX"
 const BUS_VOICE := "Voice"
@@ -22,7 +34,7 @@ const BUS_MUSIC := "Music"
 
 # Per-channel mute is persisted here and mirrors the web 3-way sound
 # popover (Design Policy §E.3): channel name -> audio bus it gates.
-const AUDIO_SETTINGS_PATH := "user://settings.cfg"
+const SETTINGS_PATH := "user://settings.cfg"
 const CHANNEL_BUSES := {"music": BUS_MUSIC, "sfx": BUS_SFX, "voice": BUS_VOICE}
 
 # Number of pooled AudioStreamPlayers for overlapping one-shot sounds.
@@ -51,9 +63,15 @@ var _collision_sample: PackedStringArray = []
 var _seen_paths := {}
 
 
+## Fired when set_art_style() changes the active alternate-art style, so the
+## menu and any texture-drawing scene can reload their art.
+signal art_style_changed
+
+
 func _ready() -> void:
 	_build_audio_players()
 	_load_audio_settings()
+	_load_art_style()
 	var start := Time.get_ticks_msec()
 	_scan_dir(ASSET_ROOT)
 	_seen_paths.clear()
@@ -112,20 +130,55 @@ func _index_file(full_path: String, file_name: String) -> void:
 	var ext := clean.get_extension().to_lower()
 	var key := file_name.to_lower()
 
+	# Alternate-art overlay files keep a style-relative key so they don't
+	# collide with (or overwrite) the base pool entry of the same name.
+	var theme_key := _theme_relative_key(clean)
+
 	if ext in IMAGE_EXTS:
-		_register(_texture_paths, key, clean)
+		if theme_key != "":
+			_register(_texture_paths, theme_key, clean)
+		else:
+			_register(_texture_paths, key, clean)
 		_indexed_textures += 1
 	elif ext in AUDIO_EXTS:
 		_register(_audio_paths, key, clean)
 		_indexed_audio += 1
 
 
+## "res://assets/graphics/themes/<style>/<pool>/<name>.png" -> "themes/<style>/<name>".
+## "" for anything not under a themes/ dir.
+func _theme_relative_key(path: String) -> String:
+	var parts := path.split("/")
+	var ti := parts.find("themes")
+	if ti == -1 or ti + 2 >= parts.size():
+		return ""
+	var style: String = parts[ti + 1].to_lower()
+	var stem: String = parts[parts.size() - 1].get_basename().to_lower()
+	return "themes/%s/%s" % [style, stem]
+
+
 func _register(index: Dictionary, key: String, path: String) -> void:
 	if index.has(key):
-		# Same filename, different location: keep the first (deterministic).
+		# Same name, different file. Prefer the higher-priority extension
+		# (svg > png > jpg > …, Policy §C.2); on a tie prefer a file in the
+		# flat purpose pools (Policy §A) over a stray legacy copy; failing
+		# that keep the first seen.
+		var old_path := String(index[key])
+		var old_ext := old_path.get_extension().to_lower()
+		var new_ext := path.get_extension().to_lower()
+		var old_p: int = EXT_PRIORITY.get(old_ext, 99)
+		var new_p: int = EXT_PRIORITY.get(new_ext, 99)
 		_collision_count += 1
 		if _collision_sample.size() < 12:
 			_collision_sample.append(key)
+		var replace := new_p < old_p
+		if new_p == old_p:
+			replace = path.contains("/pools/") and not old_path.contains("/pools/")
+		if replace:
+			index[key] = path
+			var s := key.get_basename()
+			if s != key:
+				index[s] = path
 		return
 	index[key] = path
 	# Also index without the extension for convenience (e.g. "cherry").
@@ -139,8 +192,17 @@ func _register(index: Dictionary, key: String, path: String) -> void:
 # ---------------------------------------------------------------------------
 
 ## Return a Texture2D for `asset_name` ("cherry.png" or "cherry"), or null.
+## When art_style != "classic", an overlay file of the same name (indexed as
+## "themes/<style>/<name>") is used in preference to the base pool entry.
 func get_texture(asset_name: String) -> Texture2D:
 	var key := asset_name.to_lower()
+
+	if art_style != ART_STYLE_DEFAULT:
+		var stem := key.get_basename() if key.get_extension() != "" else key
+		var overlay := "themes/%s/%s" % [art_style, stem]
+		if _texture_paths.has(overlay):
+			key = overlay
+
 	if not _texture_paths.has(key):
 		push_warning("[AssetLoader] missing texture: '%s'" % asset_name)
 		return null
@@ -269,9 +331,9 @@ func set_channel_muted(channel: String, muted: bool) -> void:
 	if idx >= 0:
 		AudioServer.set_bus_mute(idx, muted)
 	var cfg := ConfigFile.new()
-	cfg.load(AUDIO_SETTINGS_PATH)          # keep other keys (theme, …)
+	cfg.load(SETTINGS_PATH)          # keep other keys (theme, …)
 	cfg.set_value("audio", channel, not muted)
-	cfg.save(AUDIO_SETTINGS_PATH)
+	cfg.save(SETTINGS_PATH)
 
 
 func is_channel_muted(channel: String) -> bool:
@@ -284,13 +346,55 @@ func is_channel_muted(channel: String) -> bool:
 
 func _load_audio_settings() -> void:
 	var cfg := ConfigFile.new()
-	if cfg.load(AUDIO_SETTINGS_PATH) != OK:
+	if cfg.load(SETTINGS_PATH) != OK:
 		return
 	for channel in CHANNEL_BUSES:
 		var on := bool(cfg.get_value("audio", channel, true))
 		var idx := AudioServer.get_bus_index(CHANNEL_BUSES[channel])
 		if idx >= 0:
 			AudioServer.set_bus_mute(idx, not on)
+
+
+# ---------------------------------------------------------------------------
+# Alternate-art style (Design Policy §C.4)
+# ---------------------------------------------------------------------------
+
+## Styles that actually have art on disk under assets/graphics/themes/, plus
+## the always-present "classic". Order is menu order.
+func list_art_styles() -> PackedStringArray:
+	var found: Array[String] = [ART_STYLE_DEFAULT]
+	for key in _texture_paths.keys():
+		var k := String(key)
+		if k.begins_with("themes/"):
+			var style := k.split("/")[1]
+			if not found.has(style):
+				found.append(style)
+	return PackedStringArray(found)
+
+
+func has_art_style(style: String) -> bool:
+	return style == ART_STYLE_DEFAULT or list_art_styles().has(style)
+
+
+func set_art_style(style: String) -> void:
+	var s := style.to_lower()
+	if not has_art_style(s):
+		s = ART_STYLE_DEFAULT
+	if s == art_style:
+		return
+	art_style = s
+	_texture_cache.clear()                 # base <-> overlay swap
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)                 # keep other keys
+	cfg.set_value("ui", "art_style", art_style)
+	cfg.save(SETTINGS_PATH)
+	art_style_changed.emit()
+
+
+func _load_art_style() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK:
+		art_style = str(cfg.get_value("ui", "art_style", ART_STYLE_DEFAULT))
 
 
 # ---------------------------------------------------------------------------

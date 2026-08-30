@@ -40,6 +40,16 @@ cp "$POOLS/sprites/packid/"*    "$DST/sprites/packid/"
 cp "$POOLS/sprites/billiards/"* "$DST/sprites/billiards/"
 cp "$POOLS/sprites/aquarium/"*  "$DST/sprites/aquarium/"
 
+# --- alternate-art overlays (Design Policy §C.4), if any exist -------
+# assets/graphics/themes/<style>/<pool>/<name> -> web-canvas/assets/themes/…
+# manifest.json then carries `themes/<style>/<pool>/<name>` keys and
+# engine.resolveImage() prefers them when that art style is selected.
+if [ -d "$SRC/graphics/themes" ]; then
+  mkdir -p "$DST/themes"
+  cp -R "$SRC/graphics/themes/." "$DST/themes/"
+  echo "  overlay art: $(find "$DST/themes" -type f | wc -l) files under themes/"
+fi
+
 # --- baked voice pack (Design Policy §E) — instructions & names as audio --
 cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack — run tools/gen-voice.sh)"
 

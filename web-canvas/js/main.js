@@ -12,6 +12,7 @@ import { MemoryMenu } from './games/memory-menu.js';
 import { getGame } from './games/index.js';
 import { resetBags } from './util.js';
 import { initTheme, toggleTheme, getTheme } from './theme.js';
+import { initArtStyle, toggleArtStyle, getArtStyle, artStyles } from './artstyle.js';
 
 const canvas = document.getElementById('game-canvas');
 const hud = document.getElementById('hud');
@@ -20,6 +21,7 @@ const title = document.getElementById('activity-name');
 const splash = document.getElementById('splash');
 const fsBtn = document.getElementById('fs-btn');
 const themeBtn = document.getElementById('theme-btn');
+const artBtn = document.getElementById('art-btn');
 const muteBtn = document.getElementById('mute-btn');
 const mutePop = document.getElementById('mute-pop');
 
@@ -28,6 +30,26 @@ initTheme();
 const syncThemeBtn = () => { themeBtn.textContent = getTheme() === 'light' ? '☾' : '☀'; };
 syncThemeBtn();
 themeBtn.addEventListener('click', () => { toggleTheme(); syncThemeBtn(); });
+
+// --- artwork-style toggle (Policy §C.4) — shown only if overlay art exists,
+// which loadManifest()/refreshArtStyles() decides once the manifest is in.
+initArtStyle();
+function syncArtBtn() {
+  const styles = artStyles();
+  artBtn.hidden = styles.length < 2;
+  const s = getArtStyle();
+  artBtn.title = `Artwork: ${s}` + (styles.length > 1 ? ` (tap for ${styles[(styles.indexOf(s) + 1) % styles.length]})` : '');
+  artBtn.dataset.style = s;
+}
+artBtn.addEventListener('click', () => {
+  toggleArtStyle();
+  syncArtBtn();
+  // Menus reload art immediately; a running game picks it up on its next
+  // screen (re-resolving mid-level would restart it).
+  if (game.stateName === 'MainMenu' || game.stateName === 'MemoryMenu') {
+    game.setState(game.stateName);
+  }
+});
 
 // --- sound popover (music / sfx / voice, independent) ------------------
 // A checkbox is CHECKED when that channel is ON (audible).
@@ -142,6 +164,7 @@ window.addEventListener('pointerdown', () => {
 
 // resolveImage() needs the manifest before the first frame draws pool art
 await loadManifest();
+syncArtBtn();                      // now we know whether overlay art exists
 
 game.setState('MainMenu');
 game.start();
