@@ -4,7 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { clamp, Overlay, buttonRow, bag, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 
@@ -211,9 +211,11 @@ export default class WipeGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
@@ -221,7 +223,7 @@ export default class WipeGame extends Scene {
     const goal = Math.round(LEVELS[this._level].target * 100);
     ctx.fillText(`L${this._level + 1}/${LEVELS.length}   ·   ${pct}%  (goal ${goal}%)`, 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     ctx.fillText('drag to wipe the cover away', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, 'drag to wipe the cover away', VIEW_W / 2, HUD / 2);
 

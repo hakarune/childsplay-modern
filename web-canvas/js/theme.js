@@ -10,6 +10,12 @@ export const ROLES = [
   'bg', 'surface', 'surface_alt', 'text', 'text_muted',
   'accent', 'accent_press', 'good', 'bad', 'warn',
   'line', 'overlay_scrim', 'p1', 'p2',
+  // toolbar / HUD bar — a distinct surface, never the play-area colour
+  'hud', 'hud_text', 'hud_muted',
+  // picture card that must stay light in BOTH themes (flashcards, ichanger)
+  'card', 'card_ink',
+  // a game "screen" that stays dark in both themes (pong, block breaker)
+  'board',
 ];
 
 // Contrast-checked against their own bg/surface (WCAG AA for text, 3:1 for
@@ -29,6 +35,12 @@ export const DARK = {
   overlay_scrim: 'rgba(4,7,12,0.66)',
   p1: '#ff6b6b',
   p2: '#ffd93d',
+  hud: '#34435d',
+  hud_text: '#f2f5fa',
+  hud_muted: '#b7c6e0',
+  card: '#f4f6fb',
+  card_ink: '#1a2330',
+  board: '#0a1524',
 };
 
 export const LIGHT = {
@@ -46,6 +58,12 @@ export const LIGHT = {
   overlay_scrim: 'rgba(12,17,26,0.55)',
   p1: '#c62f2f',
   p2: '#b07500',
+  hud: '#c6d1e5',
+  hud_text: '#1a2330',
+  hud_muted: '#4a566b',
+  card: '#ffffff',
+  card_ink: '#1a2330',
+  board: '#12314e',
 };
 
 // live object — imported by reference everywhere

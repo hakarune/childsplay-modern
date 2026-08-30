@@ -5,7 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, roundRect, inRect, Overlay, buttonRow } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 56;
 
@@ -214,15 +214,17 @@ export default class WordMakerGame extends Scene {
     drawKey(this._okKey, true);
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}   ·   ${this._found.length}/${lv.target} words`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     ctx.fillText('tap letters, then Enter', VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);

@@ -6,6 +6,7 @@
 
 import { Scene, VIEW_W, VIEW_H, loadImage, playSound } from '../engine.js';
 import { roundRect, clamp, rand, shuffle, bag, Overlay, buttonRow } from '../util.js';
+import { theme } from '../theme.js';
 
 // Shared painting pool (Wipe + Puzzle draw from the same bag so a session
 // playing both won't repeat a picture) — Design Policy §B.4.
@@ -204,13 +205,15 @@ export default class PuzzleGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#20242e';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, 70);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, 70 - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
@@ -220,7 +223,7 @@ export default class PuzzleGame extends Scene {
 
     if (!this._image) {
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#9fb4d8';
+      ctx.fillStyle = theme.text_muted;
       ctx.font = '400 26px system-ui, sans-serif';
       ctx.fillText('loading picture…', VIEW_W / 2, VIEW_H / 2);
       return;
@@ -234,7 +237,7 @@ export default class PuzzleGame extends Scene {
     ctx.globalAlpha = 0.14;
     ctx.drawImage(im, f.x, f.y, f.w, f.h);
     ctx.restore();
-    ctx.strokeStyle = '#5a6f9c';
+    ctx.strokeStyle = theme.line;
     ctx.lineWidth = 3;
     ctx.strokeRect(f.x, f.y, f.w, f.h);
     ctx.strokeStyle = 'rgba(120,140,180,0.35)';

@@ -4,7 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const SIDE = 44;                 // left/right margin of the brick field
@@ -308,8 +308,14 @@ export default class BlockBreakerGame extends Scene {
   render(ctx) {
     ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.fillStyle = theme.bg;
-    ctx.fillRect(0, HUD, VIEW_W, VIEW_H - HUD);
+
+    // play field is a fixed dark panel, framed against the page
+    const fx = 8, fw = VIEW_W - 16, fy = HUD + 6, fh = VIEW_H - HUD - 14;
+    ctx.fillStyle = theme.board;
+    ctx.fillRect(fx, fy, fw, fh);
+    ctx.strokeStyle = theme.line;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(fx, fy, fw, fh);
 
     for (const b of this._bricks) {
       if (!b.alive) continue;
@@ -332,23 +338,25 @@ export default class BlockBreakerGame extends Scene {
     else ctx.rect(this._padX, this._padY, PAD_W, PAD_H);
     ctx.fill();
 
-    // ball
-    ctx.fillStyle = theme.bad;
+    // ball — bright on the dark field in either theme
+    ctx.fillStyle = '#ff6b6b';
     ctx.beginPath();
     ctx.arc(this._bx, this._by, BALL_R, 0, Math.PI * 2);
     ctx.fill();
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const left = this._bricks.filter((b) => b.alive).length;
     ctx.fillText(`Wall ${this._level + 1}/${LEVELS.length}   ·   bricks left ${left}`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     const _msg = this._stuck ? 'tap or press space to launch' : 'slide to move the paddle';
     ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);

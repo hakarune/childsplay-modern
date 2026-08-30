@@ -3,7 +3,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { rand, clamp, bag, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const BLOBS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45', '#31c2d6'];
@@ -169,9 +169,11 @@ export default class FindItGame extends Scene {
     ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -179,12 +181,12 @@ export default class FindItGame extends Scene {
     ctx.textAlign = 'right';
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}`, VIEW_W - 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     ctx.fillText('find what is different on the right picture', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, 'find what is different on the right picture', VIEW_W / 2, HUD / 2);
 
     if (!this._img) {
-      ctx.fillStyle = theme.text_muted;
+      ctx.fillStyle = theme.hud_muted;
       ctx.fillText('loading picture…', VIEW_W / 2, VIEW_H / 2);
       return;
     }

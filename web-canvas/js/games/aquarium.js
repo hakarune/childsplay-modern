@@ -4,7 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, playLoop } from '../engine.js';
 import { rand, clamp, shuffle } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 import { speak, hasVoice } from '../tts.js';
 
 const KEY_NAMES = 'cp:aquarium:names';
@@ -289,9 +289,11 @@ export default class AquariumGame extends Scene {
     ctx.globalAlpha = 1;
 
     // hint strip
-    ctx.fillStyle = 'rgba(10,20,30,0.35)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, 64);
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, 63, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_muted;
     ctx.font = '500 22px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

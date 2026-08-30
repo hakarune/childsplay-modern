@@ -6,7 +6,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound, loadSound } from '../engine.js';
 import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const LEVELS = [
   { name: 'Animals',      ids: ['cow', 'elephant', 'frog', 'lion', 'rooster', 'sheep'] },
@@ -127,9 +127,11 @@ export default class FindSoundGame extends Scene {
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, 70);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, 70 - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';

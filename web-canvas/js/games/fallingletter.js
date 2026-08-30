@@ -3,6 +3,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { roundRect, clamp, rand, inRect, Overlay, buttonRow } from '../util.js';
+import { theme } from '../theme.js';
 
 const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const COLORS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45'];
@@ -156,7 +157,8 @@ export default class FallingLetterGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#87c7eb';
+    // an outdoor balloon sky: bright by day, dusky at night
+    ctx.fillStyle = theme.mode === 'light' ? '#bfe3f5' : '#26374d';
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     // danger zone
@@ -193,9 +195,11 @@ export default class FallingLetterGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.55)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, 64);
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, 64 - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 26px system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(`Score ${this._score}`, 220, 33);
@@ -210,9 +214,9 @@ export default class FallingLetterGame extends Scene {
     for (const k of this._keys) {
       const lit = this._flash.has(k.ch);
       roundRect(ctx, k.x, k.y, k.w, k.h, 8);
-      ctx.fillStyle = lit ? '#4c7dff' : 'rgba(255,255,255,0.9)';
+      ctx.fillStyle = lit ? theme.accent : theme.card;
       ctx.fill();
-      ctx.fillStyle = lit ? '#fff' : '#1b2333';
+      ctx.fillStyle = lit ? '#fff' : theme.card_ink;
       ctx.font = '700 24px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(k.ch, k.x + k.w / 2, k.y + k.h / 2 + 1);

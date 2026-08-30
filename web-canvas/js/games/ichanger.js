@@ -5,7 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { clamp, roundRect, shuffle, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const ROUNDS = 3;
@@ -181,7 +181,7 @@ export default class ImageChangerGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = theme.bg;
+    ctx.fillStyle = theme.surface_alt;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     for (const c of this._cards) {
@@ -194,8 +194,13 @@ export default class ImageChangerGame extends Scene {
       ctx.translate(-cx, 0);
 
       roundRect(ctx, c.x, c.y, c.w, c.h, 16);
-      ctx.fillStyle = faceUp ? theme.text : theme.surface_alt;
+      ctx.fillStyle = faceUp ? theme.card : theme.surface_alt;
       ctx.fill();
+      if (faceUp) {
+        ctx.strokeStyle = theme.line;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
 
       if (faceUp) {
         const im = img(src(c.id));
@@ -207,7 +212,7 @@ export default class ImageChangerGame extends Scene {
           ctx.drawImage(im, cx - dw / 2, c.y + (c.h - dh) / 2, dw, dh);
         }
       } else {
-        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fillStyle = theme.text_muted;
         ctx.font = '700 40px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -242,15 +247,17 @@ export default class ImageChangerGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}   ·   round ${Math.min(this._round + 1, ROUNDS)}/${ROUNDS}`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     const msg = this._phase === 'study' ? 'remember the pictures, then press Start'
       : this._phase === 'guess' ? 'which picture changed'
       : this._phase === 'result' ? 'nice!'

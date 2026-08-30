@@ -3,7 +3,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
 import { roundRect, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const TILE = 40;
 const HUD_H = 64;
@@ -253,7 +253,7 @@ export default class PackidGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#161c2e';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     const brick = img('sprites/packid/brick');
@@ -265,7 +265,7 @@ export default class PackidGame extends Scene {
       for (let x = 0; x < this._cols; x++) {
         if (this._wall[y][x]) {
           if (brick) ctx.drawImage(brick, x * TILE, y * TILE, TILE, TILE);
-          else { ctx.fillStyle = '#2b3f74'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); }
+          else { ctx.fillStyle = theme.accent; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); }
         } else if (this._dots[y][x]) {
           if (kers) ctx.drawImage(kers, x * TILE + TILE * 0.28, y * TILE + TILE * 0.28, TILE * 0.44, TILE * 0.44);
           else { ctx.fillStyle = theme.bad; ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 5, 0, 7); ctx.fill(); }
@@ -299,9 +299,11 @@ export default class PackidGame extends Scene {
     ctx.restore();
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD_H);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD_H - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

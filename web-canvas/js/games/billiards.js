@@ -3,7 +3,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
 import { clamp, dist, inRect, Overlay, buttonRow } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const TABLE_MAX_W = 980;
 const TABLE_H = 520;
@@ -270,9 +270,11 @@ export default class BilliardsGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, 60);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, 60 - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -281,7 +283,7 @@ export default class BilliardsGame extends Scene {
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}  -  ${LEVELS[this._level].name}`, VIEW_W - 24, 30);
     if (!this._canShoot() && !this._over) {
       ctx.textAlign = 'left';
-      ctx.fillStyle = DARK.text_muted;
+      ctx.fillStyle = theme.hud_muted;
       ctx.fillText('rolling…', 220, 30);
     }
 

@@ -5,7 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, rand, roundRect, shuffle, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const R = 42;                       // tile radius
@@ -175,16 +175,18 @@ export default class NumbersGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const got = Math.min(this._next - 1, this._count());
     ctx.fillText(`L${this._level + 1}/6   ·   ${got}/${this._count()}`, 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     const msg = this._phase === 'study' ? 'remember where the numbers are, then press Start'
       : this._phase === 'peek' ? 'take another look'
       : `tap number ${this._next}`;

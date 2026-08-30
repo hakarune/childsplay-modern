@@ -4,7 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const COLS = 7, ROWS = 6;
 const HUD = 64;
@@ -233,9 +233,11 @@ export default class FourRowGame extends Scene {
     }
 
     // HUD (dark chrome strip, light text in both themes)
-    ctx.fillStyle = 'rgba(14,19,28,0.82)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';

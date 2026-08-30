@@ -99,19 +99,22 @@ export default class FlashcardsGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = theme.bg;
+    ctx.fillStyle = theme.surface_alt;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
-    // card
+    // card — a printed flash card: stays light (near-white) in BOTH themes
     const cw = 520, ch = 470, cx = VIEW_W / 2 - cw / 2, cyy = 78;
     roundRect(ctx, cx, cyy, cw, ch, 28);
-    ctx.fillStyle = theme.text;
+    ctx.fillStyle = theme.card;
     ctx.fill();
+    ctx.strokeStyle = theme.line;
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
     const card = DECK[this._i];
     drawImageFit(ctx, img(card.img), cx + 30, cyy + 26, cw - 60, ch - 150);
 
-    ctx.fillStyle = theme.bg;
+    ctx.fillStyle = theme.card_ink;
     ctx.font = '700 62px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -151,7 +154,7 @@ export default class FlashcardsGame extends Scene {
     for (let k = 0; k < dots; k++) {
       ctx.beginPath();
       ctx.arc(VIEW_W / 2 - (dots * dw) / 2 + k * dw + dw / 2, VIEW_H - 44, 5, 0, Math.PI * 2);
-      ctx.fillStyle = k === this._i ? '#ffd93d' : 'rgba(255,255,255,0.28)';
+      ctx.fillStyle = k === this._i ? theme.warn : theme.line;
       ctx.fill();
     }
 

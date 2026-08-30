@@ -5,7 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const X = 1;
@@ -285,15 +285,17 @@ export default class TicTacToeGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(14,19,28,0.82)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(this._twoP ? '2 players' : `Level ${this._level + 1}/${LEVELS.length} – ${LEVELS[this._level].name}`, 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     const _msg = this._done ? 'game over'
       : this._twoP ? (this._turn === X ? "blue's turn" : "orange's turn")
       : this._turn === X ? 'your turn' : 'computer thinking';

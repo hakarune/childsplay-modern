@@ -5,7 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { clamp, roundRect, shuffle, dist, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const SIDE = 44;
@@ -235,15 +235,17 @@ export default class ElectroGame extends Scene {
     }
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${this._level + 1}/${PAIRS.length}   ·   ${this._solved.size}/${PAIRS[this._level]} wired`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = DARK.text_muted;
+    ctx.fillStyle = theme.hud_muted;
     ctx.fillText('drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, 'drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
 

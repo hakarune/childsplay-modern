@@ -2,7 +2,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, rand, Overlay, buttonRow } from '../util.js';
-import { theme, DARK } from '../theme.js';
+import { theme } from '../theme.js';
 
 const HUD = 64;
 const PW = 16, PH = 116;          // paddle size
@@ -154,33 +154,42 @@ export default class PongGame extends Scene {
   render(ctx) {
     ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.fillStyle = theme.bg;
-    ctx.fillRect(0, HUD, VIEW_W, VIEW_H - HUD);
+
+    // the court is a fixed dark "screen" (a polarised look) in either theme,
+    // framed so its edges read against the page
+    const bx = 10, bw = VIEW_W - 20, byy = HUD + 8, bh = VIEW_H - HUD - 18;
+    ctx.fillStyle = theme.board;
+    ctx.fillRect(bx, byy, bw, bh);
+    ctx.strokeStyle = theme.line;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(bx, byy, bw, bh);
 
     // centre dashes
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
     ctx.lineWidth = 4;
     ctx.setLineDash([16, 18]);
     ctx.beginPath();
-    ctx.moveTo(VIEW_W / 2, HUD + 10);
-    ctx.lineTo(VIEW_W / 2, VIEW_H - 10);
+    ctx.moveTo(VIEW_W / 2, byy + 6);
+    ctx.lineTo(VIEW_W / 2, byy + bh - 6);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.fillStyle = theme.good;
+    ctx.fillStyle = '#5be3a0';                 // bright on the dark court, both themes
     ctx.fillRect(60, this._py, PW, PH);
-    ctx.fillStyle = '#ff9f45';
+    ctx.fillStyle = '#ffb454';
     ctx.fillRect(VIEW_W - 60 - PW, this._ay, PW, PH);
 
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(this._bx, this._by, BR, 0, Math.PI * 2);
     ctx.fill();
 
     // HUD
-    ctx.fillStyle = 'rgba(16,21,32,0.6)';
+    ctx.fillStyle = theme.hud;
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = DARK.text;
+    ctx.fillStyle = theme.line;
+    ctx.fillRect(0, HUD - 1, VIEW_W, 1);
+    ctx.fillStyle = theme.hud_text;
     ctx.font = '700 32px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
