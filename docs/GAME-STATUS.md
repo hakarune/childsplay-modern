@@ -193,4 +193,21 @@ shipped** table. New **Out of scope** section records the four dropped
 activities and why: Daily Training (`dltr.py`, meta-runner, not a game),
 Photo Album (`photoalbum.py`, no interaction), Birthday (`birthday.py`,
 reminder screen), Spin the Bottle (`spinbottle.py`, redundant with Word
-Maker). Summary table reworked to the three groups._
+Maker). Summary table reworked to the three groups.
+
+2026-08-30 (playtest build): worked the playtest punch-list. Infra —
+SVG-first asset resolution on both targets (Godot `IMAGE_EXTS` reorder +
+priority-aware collision + `/pools/` tiebreak), a `themes/<style>/`
+alternate-art overlay with a launcher **artwork toggle** (classic/modern),
+`assets/data/backgrounds.json` difficulty tiers with `tierBag` /
+`draw_tiered`. **Godot menu rebuilt to §F** — square tiles, responsive +
+paginated grid, flat `icons/<id>` pool art, light/dark + artwork + sound
+chrome. Web menu tiles enlarged. **Falling Letter**: 6-tier LEVELS table +
+dual keyboard (device OS keyboard via hidden input, in-canvas kept for
+a11y, ⌨ toggle) + no-eject level replay. **Word Maker**: same ⌨ toggle.
+**Puzzle**: 10 levels, tier-tagged painting draw. **Wipe**: tier steps +
+full 17-painting shared pool. **Pong**: Modern/Retro/Neon/Y2K court
+styles, each light+dark, picker on both targets. **Aquarium**: last five
+fish named, Material-3 parallax backdrop (SVG fish drop-in ready).
+**Numbers** HUD overlap already fixed earlier — verified one-row.
+Every game filed a `docs/assets/<id>.assets.md` (§A.7)._

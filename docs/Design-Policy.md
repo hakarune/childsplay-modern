@@ -703,6 +703,19 @@ Legend: **A** layout/naming · **B** pool+no-repeat · **C** format resolve ·
 game) · **G** HUD (`HUD_H=64`, one row) · **H** levels/ramp · **I** touch/hit ·
 **J** data file · **K** multiplayer.
 
+**Status (2026-08-30).** Cross-cutting infra done: palette, AudioManager,
+`Bag`, manifest, **SVG-first resolver + `themes/<style>/` overlay + artwork
+toggle (§C)**, `loadData` / `load_json`, **`tierBag` / `draw_tiered` (§B)**.
+Web menu rebuilt to §F; **Godot menu rebuilt to §F** (square tiles,
+responsive + paginated grid, pool icons, light/dark + artwork + sound
+chrome). Remaining per-game rows below still open except where struck:
+~~fallingletter H/I.3~~ (LEVELS table + dual keyboard done),
+~~synonyms I.3~~ (dual keyboard done), ~~puzzle B/H~~ (10 levels + tier
+tags), ~~wipe B/H~~ (tier tags + wide pool), ~~pong D.5~~ (era themes both
+targets), ~~aquarium names~~ (all fish named; modern parallax backdrop),
+~~numbers G~~ (one-row HUD). Every game now has a
+`docs/assets/<id>.assets.md` (§A.7).
+
 | Game | Must change |
 | --- | --- |
 | **menu** (`menu.js` / `MainMenu.*`) | D (all literals → palette), F (square tiles, margins, state contrast, paginate, light/dark + mute chrome) |
