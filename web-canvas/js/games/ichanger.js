@@ -21,7 +21,7 @@ const DECK = [
   '07_sheep', '08_turtle', '09_panda', '10_chicken', '11_redbird', '12_wolf',
   '13_monkey', '14_fox', '16_elephant', '17_lion', '21_frog',
 ];
-const src = (id) => `memory/${id}.png`;
+const src = (id) => `animals/${id}`;
 
 const SND_FLIP = 'sfx/dealcard1.wav';
 const SND_START = 'sfx/pick.wav';

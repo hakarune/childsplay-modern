@@ -118,11 +118,11 @@ so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-29 — cross-cutting infra landed (palette, AudioManager,
-Bag, manifest, menu rework) and the first migration pass: sound-channel fixes,
-a 🔊 read-instructions button on every game with an instruction line, one 64px
-HUD height, Numbers HUD-overlap fix, Wipe 12-level retune + shared painting
-pool with Puzzle, Simon 8 levels, Puzzle 9 levels, Falling Letter gentler ramp,
-Electro touch targets + snap, Four in a Row palette/contrast + local 2-player,
-Tic Tac Toe local 2-player, Aquarium "say the names" mode. See docs/Design-Policy.md
-§L for the remaining per-game items._
+_Last updated: 2026-08-30 — spoken lines baked into audio (assets/voice/,
+no TTS dependency). §A/§C asset migration started: flat purpose pools
+assets/graphics/pools/{backgrounds,animals,ui} built by tools/migrate-assets.sh;
+puzzle / wipe / find it / memory / electro / image changer / flashcards /
+aquarium retargeted on both targets, extension-less paths resolved via
+manifest.json (svg→png→jpg). Puzzle & Wipe & Find It now pull a random
+non-repeating painting from a 17-picture shared pool. Still on the legacy
+tree: soundmemory pics, packid / billiards sprites, aquarium fish frames._

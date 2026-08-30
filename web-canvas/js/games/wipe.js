@@ -9,7 +9,7 @@ const HUD = 64;
 
 // Shared painting pool (Wipe + Puzzle draw from the same bag so one session
 // playing both won't see the same picture twice) — Design Policy §B.4.
-const PAINTINGS = ['renoir0', 'monet0', 'bruegel0', 'gogh0', 'pieck0', 'vermeer1'];
+const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
 
 // 12 levels: target rises 0.65 → 0.99, sponge shrinks 54 → 26.
 const LEVELS = Array.from({ length: 12 }, (_, i) => ({
@@ -43,7 +43,7 @@ export default class WipeGame extends Scene {
     this._overlay.hide();
     this._imgName = bag('backgrounds', PAINTINGS).draw();
     const want = this._imgName;
-    loadImage(`puzzle/${want}.jpg`).then((im) => {
+    loadImage(`backgrounds/${want}`).then((im) => {
       if (this._imgName !== want) return;
       this._img = im;
       this._geo();
@@ -174,7 +174,7 @@ export default class WipeGame extends Scene {
 
     const f = this._frame;
     if (f) {
-      const im = this._img || (this._imgName && img(`puzzle/${this._imgName}.jpg`));
+      const im = this._img || (this._imgName && img(`backgrounds/${this._imgName}`));
       if (im && im.naturalWidth) ctx.drawImage(im, f.x, f.y, f.w, f.h);
       else {
         ctx.fillStyle = '#20293a';

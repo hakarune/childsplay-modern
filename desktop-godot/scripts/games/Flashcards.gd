@@ -9,18 +9,18 @@ extends Control
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 
 const DECK := [
-	{ "word": "bear", "img": "03_bear.png" },
-	{ "word": "cow", "img": "06_cow.png" },
-	{ "word": "dog", "img": "dog.png" },
-	{ "word": "elephant", "img": "16_elephant.png" },
-	{ "word": "fox", "img": "14_fox.png" },
-	{ "word": "frog", "img": "21_frog.png" },
-	{ "word": "hippopotamus", "img": "04_hippopotamus.png" },
-	{ "word": "horse", "img": "horse.png" },
-	{ "word": "lion", "img": "17_lion.png" },
-	{ "word": "pig", "img": "02_pig.png" },
-	{ "word": "penguin", "img": "05_penguin.png" },
-	{ "word": "rooster", "img": "rooster.png" },
+	{ "word": "bear", "img": "03_bear" },
+	{ "word": "cow", "img": "06_cow" },
+	{ "word": "dog", "img": "dog" },
+	{ "word": "elephant", "img": "16_elephant" },
+	{ "word": "fox", "img": "14_fox" },
+	{ "word": "frog", "img": "21_frog" },
+	{ "word": "hippopotamus", "img": "04_hippopotamus" },
+	{ "word": "horse", "img": "horse" },
+	{ "word": "lion", "img": "17_lion" },
+	{ "word": "pig", "img": "02_pig" },
+	{ "word": "penguin", "img": "05_penguin" },
+	{ "word": "rooster", "img": "rooster" },
 ]
 
 const LANGS := [

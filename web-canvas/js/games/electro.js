@@ -38,7 +38,7 @@ export default class ElectroGame extends Scene {
     const ids = shuffle(ANIMALS.slice()).slice(0, count);
     this._ids = ids.slice();
     this._rightIds = shuffle(ids.slice());
-    for (const id of ids) loadImage(`memory/${id}.png`);
+    for (const id of ids) loadImage(`animals/${id}`);
     this._solved = new Set();
     this._wrong = null;            // { a, b, t }  transient buzz
     this._drag = null;             // { col:'L'|'R', id, x, y }
@@ -163,7 +163,7 @@ export default class ElectroGame extends Scene {
       const buzz = wrongIds.includes(id);
       this._tile(ctx, this._leftX, y, this._tileW, this._tileH,
         buzz ? '#5b2b2b' : done ? '#26402c' : '#243247');
-      const im = img(`memory/${id}.png`);
+      const im = img(`animals/${id}`);
       if (im && im.naturalWidth) {
         const pad = 8;
         const s = Math.min((this._tileW - pad * 2) / im.naturalWidth, (this._tileH - pad * 2) / im.naturalHeight);

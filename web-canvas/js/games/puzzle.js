@@ -9,7 +9,7 @@ import { roundRect, clamp, rand, shuffle, bag, Overlay, buttonRow } from '../uti
 
 // Shared painting pool (Wipe + Puzzle draw from the same bag so a session
 // playing both won't repeat a picture) — Design Policy §B.4.
-const PAINTINGS = ['renoir0', 'monet0', 'bruegel0', 'gogh0', 'pieck0', 'vermeer1'];
+const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
 
 // 9 levels: 3 regular grids, then progressively finer irregular cuts. The
 // picture for each level is drawn from the shared pool, not hard-coded.
@@ -88,7 +88,7 @@ export default class PuzzleGame extends Scene {
     const lv = LEVELS[this._level];
     this._imgName = bag('backgrounds', PAINTINGS).draw();
     const want = this._imgName;
-    loadImage(`puzzle/${want}.jpg`).then((im) => {
+    loadImage(`backgrounds/${want}`).then((im) => {
       if (this._imgName !== want) return; // stale
       this._image = im;
       this._build(lv);

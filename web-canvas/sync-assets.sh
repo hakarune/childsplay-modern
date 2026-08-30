@@ -19,13 +19,19 @@ DST="$HERE/assets"
 [ -d "$SRC" ] || { echo "error: $SRC not found" >&2; exit 1; }
 
 G="$SRC/graphics/lib/CPData"
+POOLS="$SRC/graphics/pools"
 ICONS="$SRC/graphics/lib/SPData/themes/childsplay/menuicons"
 SICONS="$SRC/graphics/lib/SPData/themes/seniorplay/menuicons"
 A="$SRC/audio/lib/CPData"
 
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,aquarium,soundmemory/img,soundmemory/snd,sfx,voice}
+mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,packid,billiards,aquarium,soundmemory/img,soundmemory/snd,sfx,voice}
 mkdir -p "$DST"/flashcards/{de,nl,fr,es}
+
+# --- flat purpose-named graphics pools (Design Policy §A) -------------
+cp "$POOLS/backgrounds/"* "$DST/backgrounds/"
+cp "$POOLS/animals/"*     "$DST/animals/"
+cp "$POOLS/ui/"*          "$DST/ui/"
 
 # --- baked voice pack (Design Policy §E) — instructions & names as audio --
 cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack — run tools/gen-voice.sh)"
@@ -55,26 +61,13 @@ cp "$SICONS/synonyms.icon.png"     "$DST/icons/synonyms.png"
 # --- UI font -----------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
 
-# --- Puzzle: a few GPL paintings from WipeData ------------------------
-mkdir -p "$DST/puzzle"
-for n in renoir0 monet0 bruegel0 gogh0 pieck0 vermeer1; do
-  cp "$G/WipeData/tileset_1/$n.jpg" "$DST/puzzle/$n.jpg"
-done
-
-# --- Aquarium: tank backgrounds, fish swim frames, bubble sprite ------
+# --- Aquarium: fish swim frames (backgrounds + bubble come from pools) --
 FT="$G/FishtankData"
-mkdir -p "$DST/aquarium"
-cp "$FT/backgrounds/childsplay/1.jpg"  "$DST/aquarium/tank1.jpg"
-cp "$FT/backgrounds/childsplay/6.jpg"  "$DST/aquarium/tank2.jpg"
-cp "$FT/backgrounds/childsplay/blub0.png" "$DST/aquarium/bubble.png"
 for n in shark1 manta eel discus2 QueenAngel butfish blueking2 collaris \
          six_barred cichlid1 newf1 f01 f04 f06 f09 f13; do
   cp "$FT/${n}_0.png" "$DST/aquarium/${n}_0.png"
   cp "$FT/${n}_1.png" "$DST/aquarium/${n}_1.png"
 done
-
-# --- Memory: tileset_2 pictures + card back ---------------------------
-cp "$G/Memory_spData/tileset_2/childsplay/"*.png "$DST/memory/"
 
 # --- Packid: sprites, wall + cherry tiles, fruit "ghosts" ------------
 cp "$G/PackidData/"pac_*.png "$G/PackidData/brick.png" \

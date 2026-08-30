@@ -11,18 +11,18 @@ import { roundRect, drawImageFit, inRect } from '../util.js';
 import { say } from '../tts.js';
 
 const DECK = [
-  { word: 'bear', img: 'memory/03_bear.png' },
-  { word: 'cow', img: 'memory/06_cow.png' },
-  { word: 'dog', img: 'soundmemory/img/dog.png' },
-  { word: 'elephant', img: 'memory/16_elephant.png' },
-  { word: 'fox', img: 'memory/14_fox.png' },
-  { word: 'frog', img: 'memory/21_frog.png' },
-  { word: 'hippopotamus', img: 'memory/04_hippopotamus.png' },
-  { word: 'horse', img: 'soundmemory/img/horse.png' },
-  { word: 'lion', img: 'memory/17_lion.png' },
-  { word: 'pig', img: 'memory/02_pig.png' },
-  { word: 'penguin', img: 'memory/05_penguin.png' },
-  { word: 'rooster', img: 'soundmemory/img/rooster.png' },
+  { word: 'bear', img: 'animals/03_bear' },
+  { word: 'cow', img: 'animals/06_cow' },
+  { word: 'dog', img: 'animals/dog' },
+  { word: 'elephant', img: 'animals/16_elephant' },
+  { word: 'fox', img: 'animals/14_fox' },
+  { word: 'frog', img: 'animals/21_frog' },
+  { word: 'hippopotamus', img: 'animals/04_hippopotamus' },
+  { word: 'horse', img: 'animals/horse' },
+  { word: 'lion', img: 'animals/17_lion' },
+  { word: 'pig', img: 'animals/02_pig' },
+  { word: 'penguin', img: 'animals/05_penguin' },
+  { word: 'rooster', img: 'animals/rooster' },
 ];
 
 const LANGS = [

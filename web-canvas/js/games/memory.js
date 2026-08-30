@@ -18,8 +18,8 @@ const PIC_NAMES = ['01_cat', '02_pig', '03_bear', '04_hippopotamus', '05_penguin
   '12_wolf', '13_monkey', '14_fox', '15_bluebirds', '16_elephant', '17_lion',
   '18_gnu', '19_bluebaby', '20_greenbaby', '21_frog'];
 
-const BACK = 'memory/CP_cardback.png';
-const FRONT = 'memory/CP_cardfront.png';
+const BACK = 'ui/card_back';
+const FRONT = 'ui/card_front';
 
 const VARIANT_LABEL = { pictures: 'Pictures', lower: 'lowercase', upper: 'UPPERCASE', numbers: 'Numbers' };
 
@@ -37,7 +37,7 @@ function deckFor(variant) {
     case 'numbers':
       return '0123456789'.split('').map((c) => ({ id: c, text: c }));
     default:
-      return PIC_NAMES.map((n) => ({ id: n, img: `memory/${n}.png` }));
+      return PIC_NAMES.map((n) => ({ id: n, img: `animals/${n}` }));
   }
 }
 

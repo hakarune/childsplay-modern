@@ -2,15 +2,18 @@
 // right copy has a few coloured spots added. Tap them all.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { rand, clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { rand, clamp, bag, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 
 const HUD = 64;
 const BLOBS = ['#ff5a5a', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45', '#31c2d6'];
 
+// picture drawn from the shared painting pool (Design Policy §B)
+const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
+
 const LEVELS = [
-  { img: 'renoir0', diffs: 3, r: 30 },
-  { img: 'monet0', diffs: 5, r: 25 },
-  { img: 'bruegel0', diffs: 6, r: 20 },
+  { diffs: 3, r: 30 },
+  { diffs: 5, r: 25 },
+  { diffs: 6, r: 20 },
 ];
 
 const SND_GOOD = 'sfx/good.ogg';
@@ -37,8 +40,10 @@ export default class FindItGame extends Scene {
     this._miss = null;
     this._overlay.hide();
 
-    loadImage(`puzzle/${lv.img}.jpg`).then((im) => {
-      if (LEVELS[this._level] !== lv) return;
+    this._imgName = bag('backgrounds', PAINTINGS).draw();
+    const want = this._imgName;
+    loadImage(`backgrounds/${want}`).then((im) => {
+      if (this._imgName !== want) return;
       this._img = im;
       this._layout(im, lv);
     });

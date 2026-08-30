@@ -8,8 +8,8 @@ import { speak, hasVoice } from '../tts.js';
 
 const KEY_NAMES = 'cp:aquarium:names';
 
-const TANKS = ['aquarium/tank1.jpg', 'aquarium/tank2.jpg'];
-const BUBBLE = 'aquarium/bubble.png';
+const TANKS = ['backgrounds/aquarium_1', 'backgrounds/aquarium_2', 'backgrounds/aquarium_3', 'backgrounds/aquarium_4', 'backgrounds/aquarium_5', 'backgrounds/aquarium_6'];
+const BUBBLE = 'ui/bubble';
 
 const SPECIES = [
   { id: 'shark1', name: 'shark', base: 0.9, rare: true },
