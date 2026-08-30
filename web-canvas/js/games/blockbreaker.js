@@ -4,6 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const SIDE = 44;                 // left/right margin of the brick field
@@ -25,7 +26,7 @@ const SUBSTEPS = 3;
 
 // Brick palette. '#' is a tough brick (two hits); '.' is a gap.
 const TINTS = {
-  r: '#ff5a5a', o: '#ff9838', y: '#ffd93d', g: '#5fce6b',
+  r: '#ff6b6b', o: '#ff9838', y: '#ffd93d', g: '#5fce6b',
   b: '#4d96ff', p: '#b980f0', c: '#33c2d6',
 };
 const TOUGH = '#8a94a6';
@@ -104,7 +105,7 @@ export default class BlockBreakerGame extends Scene {
         this._bricks.push({
           c, r, tough,
           hp: tough ? 2 : 1,
-          color: tough ? TOUGH : (TINTS[ch] || '#9fb4d8'),
+          color: tough ? TOUGH : (TINTS[ch] || theme.text_muted),
           alive: true,
         });
       }
@@ -305,9 +306,9 @@ export default class BlockBreakerGame extends Scene {
 
   // --- render --------------------------------------------------------
   render(ctx) {
-    ctx.fillStyle = '#0c1018';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.fillStyle = '#0a0d14';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, HUD, VIEW_W, VIEW_H - HUD);
 
     for (const b of this._bricks) {
@@ -332,7 +333,7 @@ export default class BlockBreakerGame extends Scene {
     ctx.fill();
 
     // ball
-    ctx.fillStyle = '#ff5a5a';
+    ctx.fillStyle = theme.bad;
     ctx.beginPath();
     ctx.arc(this._bx, this._by, BALL_R, 0, Math.PI * 2);
     ctx.fill();
@@ -340,19 +341,19 @@ export default class BlockBreakerGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const left = this._bricks.filter((b) => b.alive).length;
     ctx.fillText(`Wall ${this._level + 1}/${LEVELS.length}   ·   bricks left ${left}`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     const _msg = this._stuck ? 'tap or press space to launch' : 'slide to move the paddle';
     ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#ff8a8a';
+    ctx.fillStyle = theme.bad;
     ctx.font = '600 20px system-ui, sans-serif';
     ctx.fillText('●'.repeat(this._lives) + '○'.repeat(LIVES - this._lives), VIEW_W - 20, HUD / 2);
 

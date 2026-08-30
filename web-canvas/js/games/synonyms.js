@@ -5,6 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, roundRect, inRect, Overlay, buttonRow } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 56;
 
@@ -159,7 +160,7 @@ export default class WordMakerGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#141b26';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     const lv = LEVELS[this._level];
@@ -167,7 +168,7 @@ export default class WordMakerGame extends Scene {
     // prompt + word tray
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = theme.text_muted;
     ctx.font = '600 26px system-ui, sans-serif';
     ctx.fillText(`make words that start with  “${lv.letter.toUpperCase()}”`, VIEW_W / 2, HUD + 46);
 
@@ -176,28 +177,33 @@ export default class WordMakerGame extends Scene {
     const trayY = HUD + 76;
     const sh = this._shake > 0 ? Math.sin(this._shake * 60) * 6 : 0;
     roundRect(ctx, trayX + sh, trayY, trayW, 74, 14);
-    ctx.fillStyle = this._shake > 0 ? '#5b2b2b' : '#232f45';
+    ctx.fillStyle = theme.surface;
     ctx.fill();
-    ctx.fillStyle = '#eef2f7';
+    if (this._shake > 0) {
+      ctx.strokeStyle = theme.bad;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+    ctx.fillStyle = theme.text;
     ctx.font = '700 44px ui-monospace, monospace';
     ctx.fillText(this._word.toUpperCase() || '…', VIEW_W / 2 + sh, trayY + 38);
 
     // found words
     ctx.font = '600 22px system-ui, sans-serif';
-    ctx.fillStyle = '#7be0a0';
+    ctx.fillStyle = theme.good;
     this._found.forEach((w, i) => {
       ctx.fillText(w, VIEW_W / 2, trayY + 100 + i * 30);
     });
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = theme.text_muted;
     ctx.font = '500 18px system-ui, sans-serif';
     ctx.fillText(`${this._found.length} / ${lv.target}`, VIEW_W / 2, trayY + 100 + this._found.length * 30 + 6);
 
     // keyboard
     const drawKey = (k, big) => {
       roundRect(ctx, k.x, k.y, k.w, k.h, 10);
-      ctx.fillStyle = '#2b3856';
+      ctx.fillStyle = theme.surface;
       ctx.fill();
-      ctx.fillStyle = '#eef2f7';
+      ctx.fillStyle = theme.text;
       ctx.font = `600 ${big ? 22 : 26}px system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -210,13 +216,13 @@ export default class WordMakerGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}   ·   ${this._found.length}/${lv.target} words`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     ctx.fillText('tap letters, then Enter', VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);

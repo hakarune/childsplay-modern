@@ -5,6 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
 import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const LEVELS = [
   { name: 'Toddler', cols: 2, rows: 2 },
@@ -173,12 +174,12 @@ export default class MemoryGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#222b3d';
+    ctx.fillStyle = theme.surface;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, 70);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -199,7 +200,7 @@ export default class MemoryGame extends Scene {
       ctx.save();
       ctx.translate(cx, c.y);
       roundRect(ctx, -w / 2, 0, w, c.s, 12);
-      ctx.fillStyle = c.matched ? '#3f7d52' : '#33405a';
+      ctx.fillStyle = c.matched ? theme.good : theme.surface_alt;
       ctx.fill();
       ctx.clip();
 
@@ -212,7 +213,7 @@ export default class MemoryGame extends Scene {
           drawImageFit(ctx, front, -w / 2 + 6, 6, w - 12, c.s - 12);
           ctx.save();
           ctx.scale(sx, 1);            // squish the glyph with the flip
-          ctx.fillStyle = '#1b2333';
+          ctx.fillStyle = theme.bg;
           ctx.font = `700 ${Math.round(c.s * 0.5)}px system-ui, sans-serif`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -223,7 +224,7 @@ export default class MemoryGame extends Scene {
       ctx.restore();
 
       if (c.matched) {
-        ctx.strokeStyle = '#7be0a0';
+        ctx.strokeStyle = theme.good;
         ctx.lineWidth = 3;
         roundRect(ctx, c.x + 1.5, c.y + 1.5, c.s - 3, c.s - 3, 12);
         ctx.stroke();

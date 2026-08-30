@@ -6,6 +6,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound, loadSound } from '../engine.js';
 import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const LEVELS = [
   { name: 'Animals',      ids: ['cow', 'elephant', 'frog', 'lion', 'rooster', 'sheep'] },
@@ -122,13 +123,13 @@ export default class FindSoundGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#243044';
+    ctx.fillStyle = theme.surface;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, 70);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -145,14 +146,14 @@ export default class FindSoundGame extends Scene {
         dx = Math.sin(this._wobble.t * 50) * 8 * (1 - this._wobble.t / 0.45);
       }
       roundRect(ctx, c.x + dx, c.y, c.s, c.s, 16);
-      ctx.fillStyle = c.found ? '#3f7d52' : '#33405a';
+      ctx.fillStyle = c.found ? theme.good : theme.surface_alt;
       ctx.fill();
       ctx.save();
       ctx.globalAlpha = c.found ? 0.55 : 1;
       drawImageFit(ctx, img(IMG(c.id)), c.x + dx + 12, c.y + 12, c.s - 24, c.s - 24);
       ctx.restore();
       if (c.found) {
-        ctx.fillStyle = '#7be0a0';
+        ctx.fillStyle = theme.good;
         ctx.font = `700 ${Math.round(c.s * 0.24)}px system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';

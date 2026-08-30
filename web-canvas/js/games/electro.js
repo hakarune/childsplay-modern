@@ -5,6 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { clamp, roundRect, shuffle, dist, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const SIDE = 44;
@@ -150,7 +151,7 @@ export default class ElectroGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#141a24';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     const wrongIds = this._wrong ? [this._wrong.a, this._wrong.b] : [];
@@ -162,7 +163,7 @@ export default class ElectroGame extends Scene {
       const done = this._solved.has(id);
       const buzz = wrongIds.includes(id);
       this._tile(ctx, this._leftX, y, this._tileW, this._tileH,
-        buzz ? '#5b2b2b' : done ? '#26402c' : '#243247');
+        buzz ? theme.bad : done ? theme.good : theme.surface);
       const im = img(`animals/${id}`);
       if (im && im.naturalWidth) {
         const pad = 8;
@@ -183,8 +184,8 @@ export default class ElectroGame extends Scene {
       const done = this._solved.has(id);
       const buzz = wrongIds.includes(id);
       this._tile(ctx, this._rightX, y, this._tileW, this._tileH,
-        buzz ? '#5b2b2b' : done ? '#26402c' : '#243247');
-      ctx.fillStyle = done ? '#8fd6a0' : '#eef2f7';
+        buzz ? theme.bad : done ? theme.good : theme.surface);
+      ctx.fillStyle = done ? theme.bg : theme.text;
       ctx.textAlign = 'center';
       ctx.fillText(label(id), this._rightX + this._tileW / 2 + 8, y + this._tileH / 2);
       this._drawNode(ctx, this._rightNode(i), done);
@@ -236,13 +237,13 @@ export default class ElectroGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${this._level + 1}/${PAIRS.length}   ·   ${this._solved.size}/${PAIRS[this._level]} wired`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     ctx.fillText('drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, 'drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
 
@@ -261,9 +262,9 @@ export default class ElectroGame extends Scene {
   _drawNode(ctx, n, done) {
     ctx.beginPath();
     ctx.arc(n.x, n.y, NODE_R, 0, Math.PI * 2);
-    ctx.fillStyle = done ? '#5fce6b' : '#8fa6c8';
+    ctx.fillStyle = done ? theme.good : theme.text_muted;
     ctx.fill();
-    ctx.fillStyle = '#141a24';
+    ctx.fillStyle = theme.bg;
     ctx.beginPath();
     ctx.arc(n.x, n.y, NODE_R * 0.45, 0, Math.PI * 2);
     ctx.fill();

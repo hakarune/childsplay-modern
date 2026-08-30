@@ -8,6 +8,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, loadSound, playSound } from '../engine.js';
 import { roundRect, drawImageFit, inRect } from '../util.js';
+import { theme } from '../theme.js';
 import { say } from '../tts.js';
 
 const DECK = [
@@ -98,19 +99,19 @@ export default class FlashcardsGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#1b2333';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     // card
     const cw = 520, ch = 470, cx = VIEW_W / 2 - cw / 2, cyy = 78;
     roundRect(ctx, cx, cyy, cw, ch, 28);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = theme.text;
     ctx.fill();
 
     const card = DECK[this._i];
     drawImageFit(ctx, img(card.img), cx + 30, cyy + 26, cw - 60, ch - 150);
 
-    ctx.fillStyle = '#1b2333';
+    ctx.fillStyle = theme.bg;
     ctx.font = '700 62px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -119,9 +120,9 @@ export default class FlashcardsGame extends Scene {
     // nav arrows
     for (const [b, glyph] of [[this._prevBtn, '‹'], [this._nextBtn, '›']]) {
       roundRect(ctx, b.x, b.y, b.w, b.h, 16);
-      ctx.fillStyle = '#2b3856';
+      ctx.fillStyle = theme.surface;
       ctx.fill();
-      ctx.fillStyle = '#eef2f7';
+      ctx.fillStyle = theme.text;
       ctx.font = '700 80px system-ui, sans-serif';
       ctx.fillText(glyph, b.x + b.w / 2, b.y + b.h / 2);
     }
@@ -129,7 +130,7 @@ export default class FlashcardsGame extends Scene {
     // speak button
     const sb = this._sayBtn;
     roundRect(ctx, sb.x, sb.y, sb.w, sb.h, 16);
-    ctx.fillStyle = '#4c7dff';
+    ctx.fillStyle = theme.accent;
     ctx.fill();
     ctx.fillStyle = '#fff';
     ctx.font = '600 26px system-ui, sans-serif';
@@ -138,7 +139,7 @@ export default class FlashcardsGame extends Scene {
     // language chips
     this._langBtns.forEach((b, k) => {
       roundRect(ctx, b.x, b.y, b.w, b.h, 12);
-      ctx.fillStyle = k === this._lang ? '#4c7dff' : '#2b3856';
+      ctx.fillStyle = k === this._lang ? theme.accent : theme.surface;
       ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.font = '600 20px system-ui, sans-serif';
@@ -154,7 +155,7 @@ export default class FlashcardsGame extends Scene {
       ctx.fill();
     }
 
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = theme.text_muted;
     ctx.font = '500 20px system-ui, sans-serif';
     ctx.fillText('tap the picture or "say it" to hear the word', VIEW_W / 2, 52);
   }

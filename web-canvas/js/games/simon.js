@@ -4,6 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, roundRect, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const TARGETS = [2, 3, 4, 5, 6, 7, 8, 9];
@@ -208,7 +209,7 @@ export default class SimonGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#161b26';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     this._rects.forEach((r, i) => {
@@ -228,7 +229,7 @@ export default class SimonGame extends Scene {
 
     if (this._phase === 'idle' && !this._overlay.visible) {
       const sb = this._startBtn;
-      ctx.fillStyle = '#4c7dff';
+      ctx.fillStyle = theme.accent;
       roundRect(ctx, sb.x, sb.y, sb.w, sb.h, 16);
       ctx.fill();
       ctx.fillStyle = '#fff';
@@ -240,14 +241,14 @@ export default class SimonGame extends Scene {
 
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const shown = Math.min(this._seq.length, TARGETS[this._level]);
     ctx.fillText(`L${this._level + 1}/${TARGETS.length}   ·   length ${shown}/${TARGETS[this._level]}`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     const msg = this._phase === 'idle' ? 'press Start, then repeat the sequence'
       : (this._phase === 'show' || this._phase === 'pause') ? 'watch and listen'
       : 'your turn, tap the colours in order';

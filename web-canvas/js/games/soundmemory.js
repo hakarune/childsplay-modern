@@ -4,6 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
 import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const LEVELS = [
   { name: 'Toddler', cols: 2, rows: 2 },
@@ -134,12 +135,12 @@ export default class SoundMemoryGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#222b3d';
+    ctx.fillStyle = theme.surface;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, 70);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

@@ -4,6 +4,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, playLoop } from '../engine.js';
 import { rand, clamp, shuffle } from '../util.js';
+import { theme, DARK } from '../theme.js';
 import { speak, hasVoice } from '../tts.js';
 
 const KEY_NAMES = 'cp:aquarium:names';
@@ -213,7 +214,7 @@ export default class AquariumGame extends Scene {
   render(ctx) {
     // background (cover-fit, slow parallax)
     const bg = img(this._tank);
-    ctx.fillStyle = '#0a2a3a';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     if (bg && bg.naturalWidth) {
       const s = Math.max((VIEW_W + 80) / bg.naturalWidth, VIEW_H / bg.naturalHeight);
@@ -290,7 +291,7 @@ export default class AquariumGame extends Scene {
     // hint strip
     ctx.fillStyle = 'rgba(10,20,30,0.35)';
     ctx.fillRect(0, 0, VIEW_W, 64);
-    ctx.fillStyle = '#dfeaf5';
+    ctx.fillStyle = DARK.text_muted;
     ctx.font = '500 22px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

@@ -5,6 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const X = 1;
@@ -230,14 +231,14 @@ export default class TicTacToeGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#151b26';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     const g = this._grid;
     const c = this._cell;
 
     // grid lines
-    ctx.strokeStyle = '#41567d';
+    ctx.strokeStyle = theme.line;
     ctx.lineWidth = 6;
     ctx.lineCap = 'round';
     for (let k = 1; k < 3; k++) {
@@ -256,7 +257,7 @@ export default class TicTacToeGame extends Scene {
       const cy = g.y + ((i / 3) | 0) * c + c / 2;
       const r = c * 0.28;
       if (this._board[i] === X) {
-        ctx.strokeStyle = '#5b8cff';
+        ctx.strokeStyle = theme.accent;
         ctx.beginPath();
         ctx.moveTo(cx - r, cy - r); ctx.lineTo(cx + r, cy + r);
         ctx.moveTo(cx + r, cy - r); ctx.lineTo(cx - r, cy + r);
@@ -275,7 +276,7 @@ export default class TicTacToeGame extends Scene {
       const p = (i) => [g.x + (i % 3) * c + c / 2, g.y + ((i / 3) | 0) * c + c / 2];
       const [ax, ay] = p(a);
       const [dx, dy] = p(d);
-      ctx.strokeStyle = '#7be0a0';
+      ctx.strokeStyle = theme.good;
       ctx.lineWidth = 10;
       ctx.beginPath();
       ctx.moveTo(ax, ay);
@@ -286,13 +287,13 @@ export default class TicTacToeGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(14,19,28,0.82)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(this._twoP ? '2 players' : `Level ${this._level + 1}/${LEVELS.length} – ${LEVELS[this._level].name}`, 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     const _msg = this._done ? 'game over'
       : this._twoP ? (this._turn === X ? "blue's turn" : "orange's turn")
       : this._turn === X ? 'your turn' : 'computer thinking';
@@ -301,7 +302,7 @@ export default class TicTacToeGame extends Scene {
 
     // mode pill (tappable only before the first mark)
     const mb = this._modeBtn;
-    ctx.fillStyle = this._moves === 0 ? '#5b8cff' : 'rgba(255,255,255,0.12)';
+    ctx.fillStyle = this._moves === 0 ? theme.accent : 'rgba(255,255,255,0.12)';
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(mb.x, mb.y, mb.w, mb.h, 10);
     else ctx.rect(mb.x, mb.y, mb.w, mb.h);

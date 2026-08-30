@@ -118,8 +118,12 @@ so nothing is lost.
 
 ---
 
-_Last updated: 2026-08-30 — §A/§C asset migration COMPLETE for graphics:
-every game now reads from assets/graphics/pools/{backgrounds,animals,ui,
-soundpics,icons,sprites/<game>}; the web sync no longer touches
-graphics/lib/. Baked voice pack (assets/voice/) shipping on both targets.
-Next: the §D light/dark palette sweep across the remaining games._
+_Last updated: 2026-08-30 — §D light/dark palette sweep DONE on the web
+target: all 18 remaining games now paint from the theme.* roles instead of
+colour literals, so light mode is usable everywhere. HUD chrome stays fixed
+dark (§G) with fixed-light DARK.* text on it. Iconic/decorative palettes
+(Simon pads, billiard balls, brick tints, pong/packid/aquarium atmosphere)
+kept as literals by design. WCAG: every text/surface role pair ≥4.5:1 in
+both palettes; transient wrong-answer flashes reworked to a border so text
+contrast holds. Next: Godot palette parity — sweep each `_draw()` to
+`GameContext.c(role)` and connect `theme_changed` → `queue_redraw`._

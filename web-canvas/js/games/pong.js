@@ -2,6 +2,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, rand, Overlay, buttonRow } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const PW = 16, PH = 116;          // paddle size
@@ -151,9 +152,9 @@ export default class PongGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#101826';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    ctx.fillStyle = '#0c1420';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, HUD, VIEW_W, VIEW_H - HUD);
 
     // centre dashes
@@ -166,7 +167,7 @@ export default class PongGame extends Scene {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.fillStyle = '#7be0a0';
+    ctx.fillStyle = theme.good;
     ctx.fillRect(60, this._py, PW, PH);
     ctx.fillStyle = '#ff9f45';
     ctx.fillRect(VIEW_W - 60 - PW, this._ay, PW, PH);
@@ -179,7 +180,7 @@ export default class PongGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '700 32px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

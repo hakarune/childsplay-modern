@@ -3,9 +3,10 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { rand, clamp, bag, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
-const BLOBS = ['#ff5a5a', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45', '#31c2d6'];
+const BLOBS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45', '#31c2d6'];
 
 // picture drawn from the shared painting pool (Design Policy §B)
 const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
@@ -143,7 +144,7 @@ export default class FindItGame extends Scene {
       const cy = panel.y + d.ny * panel.h;
       const r = LEVELS[this._level].r;
       if (d.found) {
-        ctx.strokeStyle = '#7be0a0';
+        ctx.strokeStyle = theme.good;
         ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
@@ -159,18 +160,18 @@ export default class FindItGame extends Scene {
       }
     }
     ctx.restore();
-    ctx.strokeStyle = '#5a6f9c';
+    ctx.strokeStyle = theme.line;
     ctx.lineWidth = 3;
     ctx.strokeRect(panel.x, panel.y, panel.w, panel.h);
   }
 
   render(ctx) {
-    ctx.fillStyle = '#20242e';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -178,12 +179,12 @@ export default class FindItGame extends Scene {
     ctx.textAlign = 'right';
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}`, VIEW_W - 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     ctx.fillText('find what is different on the right picture', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, 'find what is different on the right picture', VIEW_W / 2, HUD / 2);
 
     if (!this._img) {
-      ctx.fillStyle = '#9fb4d8';
+      ctx.fillStyle = theme.text_muted;
       ctx.fillText('loading picture…', VIEW_W / 2, VIEW_H / 2);
       return;
     }
@@ -193,7 +194,7 @@ export default class FindItGame extends Scene {
 
     if (this._miss) {
       ctx.globalAlpha = clamp(1 - this._miss.t / 0.4, 0, 1);
-      ctx.strokeStyle = '#ff5a5a';
+      ctx.strokeStyle = theme.bad;
       ctx.lineWidth = 5;
       const s = 16;
       ctx.beginPath();

@@ -5,6 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
 import { clamp, rand, roundRect, shuffle, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const R = 42;                       // tile radius
@@ -134,7 +135,7 @@ export default class NumbersGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#141b26';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     const showNums = this._phase === 'study' || this._phase === 'peek';
@@ -143,8 +144,8 @@ export default class NumbersGame extends Scene {
       const p = this._pos(t);
       const flashing = t.flash > 0;
       const reveal = showNums || t.lit;
-      let fill = '#2b3856';
-      if (t.lit) fill = '#26402c';
+      let fill = theme.surface;
+      if (t.lit) fill = theme.good;
       if (flashing) fill = t.lit ? '#2e6b3a' : '#5b2b2b';
       ctx.beginPath();
       ctx.arc(p.x, p.y, R, 0, Math.PI * 2);
@@ -154,7 +155,7 @@ export default class NumbersGame extends Scene {
       ctx.strokeStyle = t.lit ? '#7be0a0' : 'rgba(255,255,255,0.18)';
       ctx.stroke();
 
-      ctx.fillStyle = reveal ? '#eef2f7' : 'rgba(255,255,255,0.28)';
+      ctx.fillStyle = reveal ? theme.text : 'rgba(255,255,255,0.28)';
       ctx.font = `700 ${reveal ? 34 : 30}px system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -163,7 +164,7 @@ export default class NumbersGame extends Scene {
 
     if (this._phase === 'study' && !this._overlay.visible) {
       const b = this._startBtn;
-      ctx.fillStyle = '#4c7dff';
+      ctx.fillStyle = theme.accent;
       roundRect(ctx, b.x, b.y, b.w, b.h, 14);
       ctx.fill();
       ctx.fillStyle = '#fff';
@@ -176,14 +177,14 @@ export default class NumbersGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     const got = Math.min(this._next - 1, this._count());
     ctx.fillText(`L${this._level + 1}/6   ·   ${got}/${this._count()}`, 24, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     const msg = this._phase === 'study' ? 'remember where the numbers are, then press Start'
       : this._phase === 'peek' ? 'take another look'
       : `tap number ${this._next}`;

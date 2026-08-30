@@ -3,6 +3,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
 import { roundRect, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const TILE = 40;
 const HUD_H = 64;
@@ -267,7 +268,7 @@ export default class PackidGame extends Scene {
           else { ctx.fillStyle = '#2b3f74'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); }
         } else if (this._dots[y][x]) {
           if (kers) ctx.drawImage(kers, x * TILE + TILE * 0.28, y * TILE + TILE * 0.28, TILE * 0.44, TILE * 0.44);
-          else { ctx.fillStyle = '#ff5a5a'; ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 5, 0, 7); ctx.fill(); }
+          else { ctx.fillStyle = theme.bad; ctx.beginPath(); ctx.arc(x * TILE + TILE / 2, y * TILE + TILE / 2, 5, 0, 7); ctx.fill(); }
         }
       }
     }
@@ -300,7 +301,7 @@ export default class PackidGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD_H);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

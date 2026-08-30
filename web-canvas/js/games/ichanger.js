@@ -5,6 +5,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
 import { clamp, roundRect, shuffle, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { theme, DARK } from '../theme.js';
 
 const HUD = 64;
 const ROUNDS = 3;
@@ -180,7 +181,7 @@ export default class ImageChangerGame extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#151b26';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     for (const c of this._cards) {
@@ -193,7 +194,7 @@ export default class ImageChangerGame extends Scene {
       ctx.translate(-cx, 0);
 
       roundRect(ctx, c.x, c.y, c.w, c.h, 16);
-      ctx.fillStyle = faceUp ? '#eef2f7' : '#33507f';
+      ctx.fillStyle = faceUp ? theme.text : theme.surface_alt;
       ctx.fill();
 
       if (faceUp) {
@@ -230,7 +231,7 @@ export default class ImageChangerGame extends Scene {
 
     if (this._phase === 'study' && !this._overlay.visible) {
       const b = this._startBtn;
-      ctx.fillStyle = '#4c7dff';
+      ctx.fillStyle = theme.accent;
       roundRect(ctx, b.x, b.y, b.w, b.h, 14);
       ctx.fill();
       ctx.fillStyle = '#fff';
@@ -243,13 +244,13 @@ export default class ImageChangerGame extends Scene {
     // HUD
     ctx.fillStyle = 'rgba(16,21,32,0.6)';
     ctx.fillRect(0, 0, VIEW_W, HUD);
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = DARK.text;
     ctx.font = '600 22px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}   ·   round ${Math.min(this._round + 1, ROUNDS)}/${ROUNDS}`, 200, HUD / 2);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = DARK.text_muted;
     const msg = this._phase === 'study' ? 'remember the pictures, then press Start'
       : this._phase === 'guess' ? 'which picture changed'
       : this._phase === 'result' ? 'nice!'

@@ -6,6 +6,7 @@
 
 import { Scene, VIEW_W, VIEW_H } from '../engine.js';
 import { roundRect, inRect } from '../util.js';
+import { theme } from '../theme.js';
 
 const TITLE_H = 150;
 const PAD = 70;
@@ -67,15 +68,15 @@ export class MemoryMenu extends Scene {
   }
 
   render(ctx) {
-    ctx.fillStyle = '#1b2333';
+    ctx.fillStyle = theme.bg;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#eef2f7';
+    ctx.fillStyle = theme.text;
     ctx.font = '700 56px system-ui, sans-serif';
     ctx.fillText('Memory Games', VIEW_W / 2, TITLE_H / 2 - 4);
-    ctx.fillStyle = '#9fb4d8';
+    ctx.fillStyle = theme.text_muted;
     ctx.font = '400 24px system-ui, sans-serif';
     ctx.fillText('pick a deck', VIEW_W / 2, TITLE_H / 2 + 40);
 
@@ -84,10 +85,10 @@ export class MemoryMenu extends Scene {
       const hovered = i === this._hover && !pressed;
       const k = pressed ? 4 : 0;
       roundRect(ctx, t.x + k, t.y + k, t.w - k * 2, t.h - k * 2, 24);
-      ctx.fillStyle = pressed ? '#3a63d0' : hovered ? '#41567d' : '#2b3856';
+      ctx.fillStyle = pressed ? theme.accent_press : hovered ? theme.surface_alt : theme.surface;
       ctx.fill();
 
-      ctx.fillStyle = '#dfe8ff';
+      ctx.fillStyle = theme.text;
       ctx.font = `700 ${Math.round(t.h * 0.34)}px system-ui, sans-serif`;
       ctx.fillText(t.v.sample, t.x + t.w / 2, t.y + t.h * 0.42);
 
