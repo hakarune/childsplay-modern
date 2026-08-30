@@ -58,7 +58,7 @@ top-level tile.
 
 ---
 
-## Classic Childsplay activities (the shipped 13)
+## Classic Childsplay activities (the shipped 14)
 
 These are the activities in the standard Childsplay menu that this project
 is committed to porting first.
@@ -72,20 +72,25 @@ is committed to porting first.
 | **Sound Memory** | `soundmemory.py` | ✅ | ✅ | `?`-tiles play a clip; match by audio id; a match reveals the picture. Grids 2×2 → 4×3. Reached via the Memory sub-menu → "Sounds". |
 | **Fishtank** / Aquarium | `fishtank.py` | ✅ | ✅ | Reinterpreted as a calm **Aquarium** toy (no score): ~12 fish with a 2-frame swim cycle wander + bob + bounce; poke a fish for a bubble sound + its floating name + a dart/flip; tap the water for a ripple + food pellet the nearest fish steer toward. Godot uses `GPUParticles2D` bubbles + a looping ambient track. `Aquarium.tscn` + `AquariumFish.tscn` / `aquarium.js`. |
 | **Find Characters** / Find It | `findit_sp.py` | ✅ | ✅ | Spot the difference — the painting is shown twice, the right copy has a few coloured spots added; tap them all. Procedural (no authored diff-pairs needed) over the `WipeData` paintings; 3 levels (3/5/6 spots). `FindIt.tscn` / `findit.js`. |
-| **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type (physical or on-screen QWERTY keyboard) the letter on each balloon before it hits the danger line; 3 lives; difficulty ramps with score. |
-| **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **6 levels**: 2x2 / 3x3 / 4x4 regular grids, then 3 harder levels cut into 6 / 9 / 12 **different-sized rectangles** by recursive random splits. Source art: GPL paintings from `WipeData`. `Puzzle.tscn` / `puzzle.js`. |
-| **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; 6 themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. `FindSound.tscn` / `findsound.js`. |
+| **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type the letter on each balloon before it hits the danger line. **6-tier `LEVELS` table** (gentle "Warm up" first level, monotonic ramp, 12 pops/level); out of lives just replays the level — no game-over ejection (§H.1.3). **Dual keyboard** (§I.3), both targets: the device OS keyboard (hidden `<input>` web / `virtual_keyboard_show` Godot) is primary on touch, the in-canvas QWERTY stays as the accessibility path, a `⌨` toggle switches between them (persisted). |
+| **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **10 levels**: 3 regular grids (`easy`), 4 free-cut irregular-rectangle levels (`med`), 3 fine-cut levels (`hard`). Each level's picture is drawn from the shared `backgrounds` pool **filtered by the level's difficulty tier** (`assets/data/backgrounds.json`), with session no-repeat shared with Wipe (§B). `Puzzle.tscn` / `puzzle.js`. |
+| **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. Levels + spoken-label overrides load from the hand-editable `assets/data/findsound.json` (§J). A **say-the-names** toggle (§E.3) speaks the picture on a correct tap. `FindSound.tscn` / `findsound.js`. |
 | **Flashcards** | `flashcards.py` | ✅ | ✅ | Picture + word cards for 12 animals (reusing Memory / Find Sound art). **English is spoken by OS / browser text-to-speech** (`DisplayServer.tts_*` / `speechSynthesis`); **Deutsch / Nederlands / Français / Español** play the recorded Childsplay clips we ship, with a TTS fallback in that language. No audio at all → the card still shows the picture + word. `Flashcards.tscn` / `flashcards.js`. |
-| **Pong** | `pong.py` | ✅ | ✅ | Bat and ball versus a gentle AI paddle; first to 5; 3 levels of AI speed. Pointer / arrow-key paddle, ball speeds up per hit with spin from the contact point. `Pong.tscn` / `pong.js`. |
+| **Pong** | `pong.py` | ✅ | ✅ | Bat and ball versus a gentle AI paddle; first to 5; 3 levels of AI speed. Pointer / arrow-key paddle, ball speeds up per hit with spin from the contact point. A **court-style picker** (§D.5): Modern / Retro (Atari B&W) / 90s Neon / Y2K — each ships its own light + dark, the global light/dark toggle applies on top. `Pong.tscn` / `pong.js`. |
 | **PackId** | `packid.py` | ✅ | ✅ | Open pillar maze, grid-snapped player, fruit "ghosts" with non-reversing AI, arrow **and** swipe steering, cherry pickup, friendly bump→reset (no game over), 3 sizes. |
 | **Billiard** | `billiard.py` | ✅ | ✅ | 2D ball physics (damping, elastic ball-ball, cushion restitution), drag-to-aim with a power line, 6 pockets, cue-scratch respawn, 3/6/10-ball racks. Godot uses `RigidBody2D`; web uses a substepped custom solver. |
 
 ### What's next
 
-The classic 13 and the nine shipped extras are all done. The only
-outstanding committed work is the **Quiz suite** below — one shared engine
-plus ten decks. Daily Training, Photo Album, Spin the Bottle and
-`birthday.py` are **out of scope** (rationale at the end of this file).
+Nothing outstanding. The classic 14, the nine shipped extras, and the Quiz
+suite are all done on both targets, and every playtest §L row in
+[Design-Policy.md](Design-Policy.md) is closed. Daily Training, Photo
+Album, Spin the Bottle and `birthday.py` are **out of scope** (rationale
+at the end of this file).
+
+The only remaining task is a **visual-QA pass on a real device and
+browser** — every game is verified headless (script parse + scene load),
+but the rendered output hasn't been eyeballed.
 
 ---
 
@@ -97,15 +102,15 @@ parity.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
-| Numbers | `numbers_sp.py` | ✅ | ✅ | Numbered tiles scattered on the board; study them, press Start, they go blank, then tap them in order 1→N from memory. A wrong tap flashes red and peeks the whole board for a moment — no progress lost. Six levels, 4→9 tiles. `Numbers.tscn` / `numbers.js`. |
-| Electro | `electro_sp.py` | ✅ | ✅ | The wiring board — animal pictures down the left, their names (shuffled) down the right; drag a wire from each picture to its name. Correct wires lock green, wrong ones buzz and fall away. Six levels, 3→8 pairs. Picture↔name pairs load from the hand-editable `assets/data/electro.json` (17 shipped; `tools/gen-electro-data.sh` regenerates from the art), with a baked-in fallback. `Electro.tscn` / `electro.js`. |
-| Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
-| Tic Tac Toe | `TicTacToe.py` | ✅ | ✅ | Noughts and crosses vs the computer. Three opponents: Easy (random), Medium (win / block / centre), Hard (perfect minimax). You are X and move first; beat Easy and Medium to advance, hold the perfect computer to a draw to finish. `TicTacToe.tscn` / `tictactoe.js`. |
-| Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; six levels, target length 2→7. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
+| Numbers | `numbers_sp.py` | ✅ | ✅ | Numbered tiles scattered on the board; study them, press Start, they go blank, then tap them in order 1→N from memory. A wrong tap flashes red and peeks the whole board for a moment — no progress lost. Six levels, 4→9 tiles. One-row HUD (§G.2). `Numbers.tscn` / `numbers.js`. |
+| Electro | `electro_sp.py` | ✅ | ✅ | The wiring board — animal pictures down the left, their names (shuffled) down the right; drag a wire from each picture to its name. Correct wires lock green, wrong ones buzz and fall away. Six levels, 3→8 pairs. Drag targets are fingertip-sized (§I.2): pick up a wire from within 46 px of a node, release snaps to the **nearest** node in the other column within 120 px, with a finger halo + a snap-target ring. Picture↔name pairs load from the hand-editable `assets/data/electro.json` (17 shipped; `tools/gen-electro-data.sh` regenerates from the art), with a baked-in fallback. A **say-the-names** toggle (§E.3) speaks the animal when you pick up its wire. `Electro.tscn` / `electro.js`. |
+| Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias), **or a local Pass & Play 2-player game** (§K) — a 1P/2P button before the first move, persisted; turn/colour HUD, "Red wins!" / "Yellow wins!". `FourRow.tscn` / `fourrow.js`. |
+| Tic Tac Toe | `TicTacToe.py` | ✅ | ✅ | Noughts and crosses vs the computer (Easy random / Medium win-block-centre / Hard perfect minimax), **or local Pass & Play** (§K) — 1P/2P button before the first move, persisted; "Blue wins!" / "Orange wins!". `TicTacToe.tscn` / `tictactoe.js`. |
+| Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; **ten levels, target length 2→11**. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
-| Image Changer | `ichanger.py` | ✅ | ✅ | Study the row of pictures, press Start; the cards flip down and back and one picture has changed — tap it. Four levels (3 cards, 3 + position shuffle, 4 cards, 4 + shuffle), three rounds each. Reuses the Memory animal art. `ImageChanger.tscn` / `ichanger.js`. |
-| Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. Clear the target fraction to finish — six paintings (the GPL `WipeData` set), rising target 55→84% and a shrinking sponge. Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
-| Word Maker | `synonyms.py` | ✅ | ✅ | Adapted from the senior `synonyms` drill for young English readers: given a starting letter, build words with the on-screen keyboard (or type). Scored against the bundled ~1235-word kid dictionary `assets/data/wordlist.json` (edit `tools/gen-wordlist.py` to extend). Spoken prompt on open; a **Hint** button reveals an unused word (2 per level). Five letters (S/B/C/T/P), 3→5 words. `WordMaker.tscn` / `synonyms.js`. |
+| Image Changer | `ichanger.py` | ✅ | ✅ | Study the row of pictures, press Start; the cards flip down and back and one picture has changed — tap it. Four levels (3 cards, 3 + position shuffle, 4 cards, 4 + shuffle), three rounds each. Reuses the Memory animal art. A **say-the-names** toggle (§E.3) speaks a card while studying, and the changed card on a correct guess. `ImageChanger.tscn` / `ichanger.js`. |
+| Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. **12 levels**, target fraction 0.65→0.99, sponge 54→26 px. Each level's picture is drawn from the shared 17-painting `backgrounds` pool **by difficulty tier** (`assets/data/backgrounds.json`), no-repeat shared with Puzzle (§B). Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
+| Word Maker | `synonyms.py` | ✅ | ✅ | Adapted from the senior `synonyms` drill for young English readers: given a starting letter, build words with the on-screen keyboard (or type). Scored against the bundled ~1235-word kid dictionary `assets/data/wordlist.json` (edit `tools/gen-wordlist.py` to extend). Spoken prompt on open; a **Hint** button reveals an unused word (2 per level); a `⌨` toggle switches between the device keyboard and the on-screen one (§I.3), both targets. Five letters (S/B/C/T/P), 3→5 words. `WordMaker.tscn` / `synonyms.js`. |
 
 ---
 
@@ -211,4 +216,43 @@ full 17-painting shared pool. **Pong**: Modern/Retro/Neon/Y2K court
 styles, each light+dark, picker on both targets. **Aquarium**: last five
 fish named, Material-3 parallax backdrop (SVG fish drop-in ready).
 **Numbers** HUD overlap already fixed earlier — verified one-row.
-Every game filed a `docs/assets/<id>.assets.md` (§A.7)._
+Every game filed a `docs/assets/<id>.assets.md` (§A.7).
+
+2026-08-30 (playtest follow-through — all §L rows closed):
+- **Godot letter-game parity** — `FallingLetter.gd` gained the 6-tier
+  `LEVELS` table + a Button-row on-screen keyboard + the `⌨` toggle it was
+  missing (web-only before); out-of-lives now replays the level.
+  `WordMaker.gd` got the `⌨` toggle (it already had a drawn keyboard).
+- **Electro (Godot) §I.2** — `_node_hit()` returns the nearest node within
+  a reach radius (46 px pick-up / 120 px release), plus a finger halo and
+  a snap-target ring. The web board already had this.
+- **Simon** — 8 → 10 levels, sequence length 2 → 11 (§H.2), both targets.
+- **Four in a Row + Tic Tac Toe (Godot)** — local **Pass & Play** (§K):
+  a 1P/2P button before the first move, persisted to `settings.cfg`; AI
+  skipped, alternating human turns, colour-named win text. Web already
+  had it.
+- **Spoken picture labels (§E.3)** — a "say the names" pill for Memory
+  (pictures), Find Sound, Electro and Image Changer, both targets:
+  web `util.js makeNameToggle`, Godot `GameContext.name_toggle_*` +
+  `draw_name_pill`. OFF by default, persisted, hidden where there is no
+  speech. (Aquarium and Flashcards already spoke names.)
+- **Find Sound → data file (§J)** — `assets/data/findsound.json` (levels +
+  spoken-label overrides), loaded via `loadData` / `load_json` with an
+  offline fallback.
+- **Godot HUD-bar contrast parity (§G)** — new `GameContext.style_hud_bar()`
+  paints a themed `hud` surface + `line` divider behind the top chrome and
+  recolours the HUD labels to `hud_text` / `hud_muted` (fixing fixed
+  colours that vanished in light mode). Wired into 16 games; re-applied on
+  `theme_changed`.
+- **Quiz suite** — the shared multiple-choice engine (`quiz.js` /
+  `Quiz.tscn` + `Quiz.gd`) behind one **Quiz** tile → a deck picker
+  (`quiz-menu.js` / `QuizMenu.tscn`), with 5 hand-editable JSON decks
+  (General / Pictures / Math / Words / Sayings). `AssetLoader.has_stream()`
+  added so dynamic spoken text no longer logs "missing sound" warnings on
+  its way to live TTS. Dashboard is now 20 tiles.
+- The one-session web menu tile-size tweak was reverted — the original
+  2-row layout with page arrows was better.
+
+Verified: Godot editor parse + headless scene-load of every game clean;
+`node --check` clean on every web module. Not yet visually QA'd on a real
+device / browser._
