@@ -725,9 +725,13 @@ GameContext `name_toggle_*` + `draw_name_pill`).
 
 ~~findsound §J~~ (`assets/data/findsound.json` — levels + label overrides,
 loaded via `loadData` / `load_json` with an offline fallback).
+~~Godot HUD-bar contrast parity~~ (`GameContext.style_hud_bar` — a
+themed `hud` surface + `line` divider + theme-aware HUD labels, wired into
+16 games).
 
-Still open: Godot HUD-bar contrast parity; then the Quiz suite. A visual-QA
-pass on a real device/browser is also outstanding.
+**All playtest §L rows are now closed.** Next is the Quiz suite (see
+GAME-STATUS). A visual-QA pass on a real device/browser is still
+outstanding — every game verified headless (parse + load), not eyeballed.
 
 | Game | Must change |
 | --- | --- |
