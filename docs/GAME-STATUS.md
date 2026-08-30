@@ -129,6 +129,9 @@ contrast holds. Godot parity DONE too: the 12 `_draw()` games now paint
 from `GameContext.c(role)` and repaint live on `theme_changed`; iconic
 palettes (Simon pads, brick tints, Four-in-a-Row discs → p1/p2) kept as
 literals. Verified: headless instantiate + render of every themed scene in
-both palettes, clean. Next §L items: Godot 3-way mute popover, native
-device keyboard for Falling Letter / Word Maker, §A/§C audio-pool
-migration, Pong era themes._
+both palettes, clean. Godot 3-way sound popover DONE: the menu's Sound
+button now opens a Music / Effects / Voice panel that mutes the matching
+audio bus, persists to settings.cfg `[audio]`, reloads on boot, and gates
+live TTS on the Voice channel — the desktop twin of the web popover
+(§E.3). Next §L items: native device keyboard for Falling Letter / Word
+Maker, §A/§C audio-pool migration, Pong era themes._

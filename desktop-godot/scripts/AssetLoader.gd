@@ -20,6 +20,11 @@ const BUS_SFX := "SFX"
 const BUS_VOICE := "Voice"
 const BUS_MUSIC := "Music"
 
+# Per-channel mute is persisted here and mirrors the web 3-way sound
+# popover (Design Policy §E.3): channel name -> audio bus it gates.
+const AUDIO_SETTINGS_PATH := "user://settings.cfg"
+const CHANNEL_BUSES := {"music": BUS_MUSIC, "sfx": BUS_SFX, "voice": BUS_VOICE}
+
 # Number of pooled AudioStreamPlayers for overlapping one-shot sounds.
 const SFX_VOICE_POOL := 12
 
@@ -48,6 +53,7 @@ var _seen_paths := {}
 
 func _ready() -> void:
 	_build_audio_players()
+	_load_audio_settings()
 	var start := Time.get_ticks_msec()
 	_scan_dir(ASSET_ROOT)
 	_seen_paths.clear()
@@ -250,6 +256,41 @@ func set_master_muted(muted: bool) -> void:
 func is_master_muted() -> bool:
 	var idx := AudioServer.get_bus_index("Master")
 	return idx >= 0 and AudioServer.is_bus_mute(idx)
+
+
+## Mute / unmute one channel (Music / SFX / Voice). Persisted to
+## settings.cfg under [audio] as an "on" bool for readability. The Voice
+## channel also gates live TTS via GameContext.speak().
+func set_channel_muted(channel: String, muted: bool) -> void:
+	var bus_name: String = CHANNEL_BUSES.get(channel, "")
+	if bus_name == "":
+		return
+	var idx := AudioServer.get_bus_index(bus_name)
+	if idx >= 0:
+		AudioServer.set_bus_mute(idx, muted)
+	var cfg := ConfigFile.new()
+	cfg.load(AUDIO_SETTINGS_PATH)          # keep other keys (theme, …)
+	cfg.set_value("audio", channel, not muted)
+	cfg.save(AUDIO_SETTINGS_PATH)
+
+
+func is_channel_muted(channel: String) -> bool:
+	var bus_name: String = CHANNEL_BUSES.get(channel, "")
+	if bus_name == "":
+		return false
+	var idx := AudioServer.get_bus_index(bus_name)
+	return idx >= 0 and AudioServer.is_bus_mute(idx)
+
+
+func _load_audio_settings() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(AUDIO_SETTINGS_PATH) != OK:
+		return
+	for channel in CHANNEL_BUSES:
+		var on := bool(cfg.get_value("audio", channel, true))
+		var idx := AudioServer.get_bus_index(CHANNEL_BUSES[channel])
+		if idx >= 0:
+			AudioServer.set_bus_mute(idx, not on)
 
 
 # ---------------------------------------------------------------------------

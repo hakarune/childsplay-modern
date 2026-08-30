@@ -120,6 +120,9 @@ func speak(text: String, lang_hint := "") -> void:
 		return
 	# 1) baked clip
 	var al := get_node_or_null("/root/AssetLoader")
+	# Voice channel off -> stay silent (also covers live TTS, which no bus can mute).
+	if al != null and al.has_method("is_channel_muted") and al.is_channel_muted("voice"):
+		return
 	if al != null:
 		var st: AudioStream = al.get_stream("v_" + _slug(text) + ".ogg")
 		if st != null:

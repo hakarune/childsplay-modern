@@ -112,6 +112,9 @@ const CLICK_SOUND := "wahoo.wav"
 @onready var _audio_toggle: Button = %AudioToggle
 @onready var _exit_button: Button = %ExitButton
 
+var _sound_pop: PopupPanel
+var _sound_checks := {}
+
 
 func _ready() -> void:
 	# Nothing from the game we just left may still be sounding (Policy §E.1).
@@ -119,9 +122,7 @@ func _ready() -> void:
 
 	_wire_grid()
 
-	_audio_toggle.toggled.connect(_on_audio_toggled)
-	_audio_toggle.button_pressed = AssetLoader.is_master_muted()
-	_refresh_audio_toggle_text()
+	_build_sound_popover()
 
 	# light / dark toggle, sits next to the audio toggle
 	var theme_btn := Button.new()
@@ -231,10 +232,54 @@ func _load_minigame(id: String) -> void:
 		print("[MainMenu] (stub) would launch '%s' from %s" % [id, scene_path])
 
 
-func _on_audio_toggled(muted: bool) -> void:
-	AssetLoader.set_master_muted(muted)
+## A 3-way sound panel (Music / Effects / Voice) hung off the top-bar
+## button — the desktop twin of the web mute popover (Design Policy §E.3).
+func _build_sound_popover() -> void:
+	_audio_toggle.toggle_mode = false
+	_audio_toggle.pressed.connect(_open_sound_popover)
+	_audio_toggle.focus_entered.connect(_play_hover)
+
+	_sound_pop = PopupPanel.new()
+	_sound_pop.name = "SoundPopover"
+	add_child(_sound_pop)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	box.custom_minimum_size = Vector2(220, 0)
+	_sound_pop.add_child(box)
+
+	var heading := Label.new()
+	heading.text = "Sound"
+	box.add_child(heading)
+
+	var labels := {"music": "Music", "sfx": "Effects", "voice": "Voice"}
+	for channel in ["music", "sfx", "voice"]:
+		var cb := CheckBox.new()
+		cb.text = labels[channel]
+		cb.custom_minimum_size = Vector2(200, 44)
+		cb.button_pressed = not AssetLoader.is_channel_muted(channel)
+		cb.toggled.connect(_on_channel_toggled.bind(channel))
+		box.add_child(cb)
+		_sound_checks[channel] = cb
+
 	_refresh_audio_toggle_text()
-	if not muted:
+
+
+func _open_sound_popover() -> void:
+	_play_hover()
+	for channel in _sound_checks:
+		_sound_checks[channel].set_pressed_no_signal(
+			not AssetLoader.is_channel_muted(channel))
+	var anchor := _audio_toggle.get_global_rect()
+	_sound_pop.popup(Rect2i(
+		Vector2i(int(anchor.position.x), int(anchor.position.y + anchor.size.y + 4)),
+		Vector2i(240, 210)))
+
+
+func _on_channel_toggled(pressed: bool, channel: String) -> void:
+	AssetLoader.set_channel_muted(channel, not pressed)
+	_refresh_audio_toggle_text()
+	if pressed and channel == "sfx":
 		AssetLoader.play_sound("volumecheck.wav")
 
 
@@ -252,7 +297,12 @@ func _play_hover() -> void:
 
 
 func _refresh_audio_toggle_text() -> void:
-	_audio_toggle.text = "Audio: Off" if _audio_toggle.button_pressed else "Audio: On"
+	var any_on := false
+	for channel in ["music", "sfx", "voice"]:
+		if not AssetLoader.is_channel_muted(channel):
+			any_on = true
+			break
+	_audio_toggle.text = "Sound: On" if any_on else "Sound: Off"
 
 
 func _game_by_id(id: String) -> Dictionary:
