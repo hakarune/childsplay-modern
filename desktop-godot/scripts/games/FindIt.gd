@@ -42,6 +42,7 @@ var _miss = null                # { pos: Vector2, t: float }
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	_sfx_good.stream = AssetLoader.get_stream(SND_GOOD)
 	_sfx_bad.stream = AssetLoader.get_stream(SND_BAD)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
@@ -166,11 +167,11 @@ func _draw_panel(panel: Rect2, with_diffs: bool) -> void:
 		var c := panel.position + Vector2(d["nx"] * panel.size.x, d["ny"] * panel.size.y)
 		var r: float = LEVELS[_level]["r"]
 		if d["found"]:
-			draw_arc(c, r + 4.0, 0.0, TAU, 24, Color("7be0a0"), 5.0)
+			draw_arc(c, r + 4.0, 0.0, TAU, 24, GameContext.c("good"), 5.0)
 		elif with_diffs:
 			draw_circle(c, r, d["color"])
 			draw_arc(c, r, 0.0, TAU, 24, Color(0, 0, 0, 0.35), 2.0)
-	draw_rect(panel, Color(0.35, 0.44, 0.62), false, 3.0)
+	draw_rect(panel, GameContext.c("line"), false, 3.0)
 
 
 func _update_hud() -> void:

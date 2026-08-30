@@ -36,6 +36,7 @@ var _start_btn := Rect2()
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_start.stream = al.get_stream(SND_START)
@@ -198,7 +199,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("141b26"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 	var font := ThemeDB.fallback_font
 	var show_nums := _phase == "study" or _phase == "peek"
 
@@ -206,22 +207,22 @@ func _draw() -> void:
 		var p := _pos(t)
 		var flashing: bool = t["flash"] > 0.0
 		var reveal: bool = show_nums or t["lit"]
-		var fill := Color("2b3856")
+		var fill := GameContext.c("surface")
 		if t["lit"]:
-			fill = Color("26402c")
+			fill = GameContext.c("good")
 		if flashing:
-			fill = Color("2e6b3a") if t["lit"] else Color("5b2b2b")
+			fill = GameContext.c("good") if t["lit"] else GameContext.c("bad")
 		draw_circle(p, R, fill)
-		draw_arc(p, R, 0.0, TAU, 48, Color("7be0a0") if t["lit"] else Color(1, 1, 1, 0.18), 3.0)
+		draw_arc(p, R, 0.0, TAU, 48, GameContext.c("good") if t["lit"] else Color(1, 1, 1, 0.18), 3.0)
 
 		var txt := str(t["n"]) if reveal else "?"
 		var fs := 34 if reveal else 30
-		var col := Color("eef2f7") if reveal else Color(1, 1, 1, 0.28)
+		var col := GameContext.c("text") if reveal else Color(1, 1, 1, 0.28)
 		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, p + Vector2(-tw / 2.0, fs * 0.36), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 
 	if _phase == "study" and not _popup.visible:
-		draw_rect(_start_btn, Color("4c7dff"))
+		draw_rect(_start_btn, GameContext.c("accent"))
 		var fs := 26
 		var tw := font.get_string_size("Start", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, _start_btn.position + Vector2(_start_btn.size.x / 2.0 - tw / 2.0, _start_btn.size.y / 2.0 + fs * 0.35),

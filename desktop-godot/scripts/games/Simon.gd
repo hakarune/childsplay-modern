@@ -51,6 +51,7 @@ var _tones: Array[AudioStreamWAV] = []
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	for p in PADS:
 		_tones.append(_make_tone(p["freq"], 0.42))
 	var al := get_node_or_null("/root/AssetLoader")
@@ -259,7 +260,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("161b26"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 
 	for i in _rects.size():
 		var on := _lit == i or _flash == "good" \
@@ -267,10 +268,10 @@ func _draw() -> void:
 		var col := Color(PADS[i]["on"]) if on else Color(PADS[i]["off"])
 		draw_rect(_rects[i], col)
 
-	draw_circle(_board.position + _board.size / 2.0, _board.size.x * 0.14, Color("0f131c"))
+	draw_circle(_board.position + _board.size / 2.0, _board.size.x * 0.14, GameContext.c("bg"))
 
 	if _phase == "idle" and not _popup.visible:
-		draw_rect(_start_btn, Color("4c7dff"))
+		draw_rect(_start_btn, GameContext.c("accent"))
 		var f := ThemeDB.fallback_font
 		var fs := 30
 		var tw := f.get_string_size("Start", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x

@@ -49,6 +49,7 @@ var _ptr_y = null
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	_sfx_wall.stream = AssetLoader.get_stream(SND_WALL)
 	_sfx_hit.stream = AssetLoader.get_stream(SND_HIT)
 	_sfx_goal.stream = AssetLoader.get_stream(SND_GOAL)
@@ -176,13 +177,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, HUD, size.x, size.y - HUD), Color(0.05, 0.08, 0.13))
+	draw_rect(Rect2(0, HUD, size.x, size.y - HUD), GameContext.c("bg"))
 	var dash := 0.0
 	while dash < size.y - HUD - 10.0:
 		draw_line(Vector2(size.x / 2.0, HUD + 10.0 + dash), Vector2(size.x / 2.0, HUD + 10.0 + dash + 16.0), Color(1, 1, 1, 0.18), 4.0)
 		dash += 34.0
-	draw_rect(Rect2(60, _py, PW, PH), Color("7be0a0"))
-	draw_rect(Rect2(size.x - 60 - PW, _ay, PW, PH), Color("ff9f45"))
+	draw_rect(Rect2(60, _py, PW, PH), GameContext.c("good"))
+	draw_rect(Rect2(size.x - 60 - PW, _ay, PW, PH), GameContext.c("warn"))
 	draw_circle(_ball, BR, Color.WHITE)
 
 

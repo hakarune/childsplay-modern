@@ -52,6 +52,7 @@ var _cell := 0.0
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_mark.stream = al.get_stream(SND_MARK)
@@ -270,27 +271,27 @@ func _cell_centre(i: int) -> Vector2:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("151b26"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 	var g := _grid
 
 	for k in [1, 2]:
 		draw_line(Vector2(g.position.x + k * _cell, g.position.y + 10.0),
-			Vector2(g.position.x + k * _cell, g.position.y + g.size.y - 10.0), Color("41567d"), 6.0)
+			Vector2(g.position.x + k * _cell, g.position.y + g.size.y - 10.0), GameContext.c("line"), 6.0)
 		draw_line(Vector2(g.position.x + 10.0, g.position.y + k * _cell),
-			Vector2(g.position.x + g.size.x - 10.0, g.position.y + k * _cell), Color("41567d"), 6.0)
+			Vector2(g.position.x + g.size.x - 10.0, g.position.y + k * _cell), GameContext.c("line"), 6.0)
 
 	for i in 9:
 		var c := _cell_centre(i)
 		var r := _cell * 0.28
 		if _board[i] == X:
-			draw_line(c + Vector2(-r, -r), c + Vector2(r, r), Color("5b8cff"), 14.0)
-			draw_line(c + Vector2(r, -r), c + Vector2(-r, r), Color("5b8cff"), 14.0)
+			draw_line(c + Vector2(-r, -r), c + Vector2(r, r), GameContext.c("accent"), 14.0)
+			draw_line(c + Vector2(r, -r), c + Vector2(-r, r), GameContext.c("accent"), 14.0)
 		elif _board[i] == O:
-			draw_arc(c, r, 0.0, TAU, 40, Color("ff8a5c"), 14.0)
+			draw_arc(c, r, 0.0, TAU, 40, GameContext.c("warn"), 14.0)
 
 	if _done.has("line"):
 		var ln: Array = _done["line"]
-		draw_line(_cell_centre(ln[0]), _cell_centre(ln[2]), Color("7be0a0"), 10.0)
+		draw_line(_cell_centre(ln[0]), _cell_centre(ln[2]), GameContext.c("good"), 10.0)
 
 
 func _update_hud() -> void:

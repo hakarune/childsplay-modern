@@ -45,6 +45,7 @@ var _r := 36.0
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	_sfx_drop.stream = AssetLoader.get_stream(SND_DROP)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
 	_sfx_loss.stream = AssetLoader.get_stream(SND_LOSS)
@@ -231,25 +232,25 @@ func _draw() -> void:
 	if _hover_col >= 0 and _turn == RED and not _over and _drop == null and _lowest(_hover_col) >= 0:
 		draw_circle(Vector2(_col_x(_hover_col), _by - _cell / 2.0), _r, Color(1, 0.35, 0.35, 0.35))
 
-	draw_rect(Rect2(_bx - 8.0, _by - 8.0, _cell * COLS + 16.0, _cell * ROWS + 16.0), Color("2f57c4"))
+	draw_rect(Rect2(_bx - 8.0, _by - 8.0, _cell * COLS + 16.0, _cell * ROWS + 16.0), GameContext.c("surface_alt"))
 	for r in ROWS:
 		for c in COLS:
 			var v: int = _grid[r][c]
-			var col := Color("0e1526")
+			var col := GameContext.c("bg")
 			if v == RED:
-				col = Color("ff5a5a")
+				col = GameContext.c("p1")
 			elif v == YEL:
-				col = Color("ffd93d")
+				col = GameContext.c("p2")
 			draw_circle(Vector2(_col_x(c), _row_y(r)), _r, col)
 
 	if _drop != null:
-		var dc := Color("ff5a5a") if _drop["who"] == RED else Color("ffd93d")
+		var dc := GameContext.c("p1") if _drop["who"] == RED else GameContext.c("p2")
 		draw_circle(Vector2(_col_x(_drop["col"]), _drop["y"]), _r, dc)
 
 	if _win_line != null:
 		var a: Vector2i = _win_line[0]
 		var b: Vector2i = _win_line[3]
-		draw_line(Vector2(_col_x(a.x), _row_y(a.y)), Vector2(_col_x(b.x), _row_y(b.y)), Color("7be0a0"), 8.0)
+		draw_line(Vector2(_col_x(a.x), _row_y(a.y)), Vector2(_col_x(b.x), _row_y(b.y)), GameContext.c("good"), 8.0)
 
 
 func _update_hud() -> void:

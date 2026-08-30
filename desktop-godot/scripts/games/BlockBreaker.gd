@@ -98,6 +98,7 @@ var _ptr_active := false
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_launch.stream = al.get_stream(SND_LAUNCH)
@@ -362,8 +363,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("0c1018"))
-	draw_rect(Rect2(0, HUD, size.x, size.y - HUD), Color("0a0d14"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
+	draw_rect(Rect2(0, HUD, size.x, size.y - HUD), GameContext.c("bg"))
 
 	for b in _bricks:
 		if not b["alive"]:
@@ -375,8 +376,8 @@ func _draw() -> void:
 			draw_rect(Rect2(rect.position.x + 3.0, rect.position.y + 3.0, rect.size.x - 6.0, rect.size.y - 6.0),
 				Color(1, 1, 1, 0.5), false, 2.0)
 
-	draw_rect(Rect2(_pad_x, _pad_y, PAD_W, PAD_H), Color("ffd93d"))
-	draw_circle(Vector2(_bx, _by), BALL_R, Color("ff5a5a"))
+	draw_rect(Rect2(_pad_x, _pad_y, PAD_W, PAD_H), GameContext.c("p2"))
+	draw_circle(Vector2(_bx, _by), BALL_R, GameContext.c("p1"))
 
 
 func _update_hud() -> void:

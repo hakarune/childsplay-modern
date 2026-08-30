@@ -47,6 +47,7 @@ var _drag_offset := Vector2.ZERO
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	_sfx_snap.stream = AssetLoader.get_stream(SND_SNAP)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
 	_back_button.pressed.connect(_go_home)
@@ -206,7 +207,7 @@ func _draw() -> void:
 
 	# faint whole-picture ghost + frame + per-piece home outlines
 	draw_texture_rect_region(_tex, _frame, Rect2(Vector2.ZERO, isize), Color(1, 1, 1, 0.14))
-	draw_rect(_frame, Color(0.35, 0.44, 0.62), false, 3.0)
+	draw_rect(_frame, GameContext.c("line"), false, 3.0)
 	for p in _pieces:
 		draw_rect(p["home"], Color(0.47, 0.55, 0.7, 0.35), false, 1.0)
 

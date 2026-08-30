@@ -51,6 +51,7 @@ var _tex_cache: Dictionary = {}
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_start.stream = al.get_stream(SND_START)
@@ -253,7 +254,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("151b26"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 	var font := ThemeDB.fallback_font
 
 	for c in _cards:
@@ -261,7 +262,7 @@ func _draw() -> void:
 		var sx: float = maxf(0.001, absf(1.0 - 2.0 * c["flip"]))
 		var cx: float = c["x"] + c["w"] / 2.0
 		var rect := Rect2(cx - c["w"] / 2.0 * sx, c["y"], c["w"] * sx, c["h"])
-		draw_rect(rect, Color("eef2f7") if face_up else Color("33507f"))
+		draw_rect(rect, GameContext.c("surface") if face_up else GameContext.c("surface_alt"))
 
 		if face_up:
 			var tex := _tex(c["id"])
@@ -286,7 +287,7 @@ func _draw() -> void:
 				Color(0.48, 0.88, 0.63, clampf(c["right"], 0.0, 1.0)), false, 7.0)
 
 	if _phase == "study" and not _popup.visible:
-		draw_rect(_start_btn, Color("4c7dff"))
+		draw_rect(_start_btn, GameContext.c("accent"))
 		var fs := 26
 		var tw := font.get_string_size("Start", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, _start_btn.position + Vector2(_start_btn.size.x / 2.0 - tw / 2.0, _start_btn.size.y / 2.0 + fs * 0.35),

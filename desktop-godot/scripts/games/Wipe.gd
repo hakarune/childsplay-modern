@@ -43,6 +43,7 @@ var _tex_cache: Dictionary = {}
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_wipe.stream = al.get_stream(SND_WIPE)
@@ -216,12 +217,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("12161f"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 	var f := _frame
 	if _tex != null:
 		draw_texture_rect(_tex, f, false)
 	else:
-		draw_rect(f, Color("20293a"))
+		draw_rect(f, GameContext.c("surface"))
 
 	if _cover.size() > 0:
 		var cw := f.size.x / _cols
@@ -234,7 +235,7 @@ func _draw() -> void:
 				draw_rect(Rect2(f.position.x + c * cw - 0.5, f.position.y + r * ch - 0.5, cw + 1.0, ch + 1.0),
 					Color(shade, shade + 0.016, shade + 0.04))
 
-	draw_rect(f, Color("41567d"), false, 4.0)
+	draw_rect(f, GameContext.c("line"), false, 4.0)
 
 	if _has_ptr and not _done and not _popup.visible:
 		draw_arc(_ptr, _level_sponge(_level), 0.0, TAU, 48, Color(1, 1, 1, 0.6), 3.0)

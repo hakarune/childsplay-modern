@@ -48,6 +48,7 @@ var _tex_cache: Dictionary = {}
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_pick.stream = al.get_stream(SND_PICK)
@@ -215,7 +216,7 @@ func _bezier_pts(a: Vector2, b: Vector2) -> PackedVector2Array:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("141a24"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 
 	var wrong_ids: Array = [_wrong["a"], _wrong["b"]] if _wrong else []
 
@@ -224,7 +225,7 @@ func _draw() -> void:
 		var y := _row_y(i)
 		var done := _solved.has(id)
 		var buzz := id in wrong_ids
-		var fill := Color("5b2b2b") if buzz else (Color("26402c") if done else Color("243247"))
+		var fill := GameContext.c("bad") if buzz else (GameContext.c("good") if done else GameContext.c("surface"))
 		draw_rect(Rect2(_left_x(), y, _tile_w, _tile_h), fill)
 		var tex := _tex(id)
 		if tex != null:
@@ -241,19 +242,19 @@ func _draw() -> void:
 		var y := _row_y(i)
 		var done := _solved.has(id)
 		var buzz := id in wrong_ids
-		var fill := Color("5b2b2b") if buzz else (Color("26402c") if done else Color("243247"))
+		var fill := GameContext.c("bad") if buzz else (GameContext.c("good") if done else GameContext.c("surface"))
 		draw_rect(Rect2(_right_x(), y, _tile_w, _tile_h), fill)
 		var txt := _label(id)
 		var fs := 24
 		var tw := font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, Vector2(_right_x() + _tile_w / 2.0 - tw / 2.0 + 8.0, y + _tile_h / 2.0 + fs * 0.35),
-			txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("8fd6a0") if done else Color("eef2f7"))
+			txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameContext.c("bg") if done else GameContext.c("text"))
 		_draw_node(_right_node(i), done)
 
 	for id in _solved.keys():
 		var li := _ids.find(id)
 		var ri := _right_ids.find(id)
-		draw_polyline(_bezier_pts(_left_node(li), _right_node(ri)), Color("5fce6b"), 6.0, true)
+		draw_polyline(_bezier_pts(_left_node(li), _right_node(ri)), GameContext.c("good"), 6.0, true)
 
 	if _wrong:
 		var a := _left_node(_ids.find(_wrong["a"]))
@@ -265,12 +266,12 @@ func _draw() -> void:
 		var list: Array = _ids if _drag["col"] == "L" else _right_ids
 		var i := list.find(_drag["id"])
 		var a := _left_node(i) if _drag["col"] == "L" else _right_node(i)
-		draw_polyline(_bezier_pts(a, Vector2(_drag["x"], _drag["y"])), Color("ffd93d"), 6.0, true)
+		draw_polyline(_bezier_pts(a, Vector2(_drag["x"], _drag["y"])), GameContext.c("warn"), 6.0, true)
 
 
 func _draw_node(n: Vector2, done: bool) -> void:
-	draw_circle(n, NODE_R, Color("5fce6b") if done else Color("8fa6c8"))
-	draw_circle(n, NODE_R * 0.45, Color("141a24"))
+	draw_circle(n, NODE_R, GameContext.c("good") if done else GameContext.c("text_muted"))
+	draw_circle(n, NODE_R * 0.45, GameContext.c("bg"))
 
 
 func _update_hud() -> void:

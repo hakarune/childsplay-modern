@@ -64,6 +64,7 @@ var _ok_key := {}
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(queue_redraw)
 	for w in WORD_LIST:
 		_words[w] = true
 	var al := get_node_or_null("/root/AssetLoader")
@@ -216,34 +217,36 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, size.x, size.y), Color("141b26"))
+	draw_rect(Rect2(0, 0, size.x, size.y), GameContext.c("bg"))
 	var font := ThemeDB.fallback_font
 	var lv: Dictionary = LEVELS[_level]
 
 	var prompt := "make words that start with  \"%s\"" % String(lv["letter"]).to_upper()
 	var ps := 26
 	var pw := font.get_string_size(prompt, HORIZONTAL_ALIGNMENT_LEFT, -1, ps).x
-	draw_string(font, Vector2(size.x / 2.0 - pw / 2.0, HUD + 52.0), prompt, HORIZONTAL_ALIGNMENT_LEFT, -1, ps, Color("9fb4d8"))
+	draw_string(font, Vector2(size.x / 2.0 - pw / 2.0, HUD + 52.0), prompt, HORIZONTAL_ALIGNMENT_LEFT, -1, ps, GameContext.c("text_muted"))
 
 	var tray_w: float = minf(560.0, size.x - 120.0)
 	var tray_x := size.x / 2.0 - tray_w / 2.0
 	var tray_y := HUD + 76.0
 	var sh := sin(_shake * 60.0) * 6.0 if _shake > 0.0 else 0.0
-	draw_rect(Rect2(tray_x + sh, tray_y, tray_w, 74.0), Color("5b2b2b") if _shake > 0.0 else Color("232f45"))
+	draw_rect(Rect2(tray_x + sh, tray_y, tray_w, 74.0), GameContext.c("surface"))
+	if _shake > 0.0:
+		draw_rect(Rect2(tray_x + sh, tray_y, tray_w, 74.0), GameContext.c("bad"), false, 4.0)
 	var shown := _word.to_upper() if _word != "" else "..."
 	var ts := 44
 	var tw := font.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, ts).x
-	draw_string(font, Vector2(size.x / 2.0 - tw / 2.0 + sh, tray_y + 52.0), shown, HORIZONTAL_ALIGNMENT_LEFT, -1, ts, Color("eef2f7"))
+	draw_string(font, Vector2(size.x / 2.0 - tw / 2.0 + sh, tray_y + 52.0), shown, HORIZONTAL_ALIGNMENT_LEFT, -1, ts, GameContext.c("text"))
 
 	var fy := tray_y + 100.0
 	for w in _found:
 		var fs := 22
 		var fw := font.get_string_size(w, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		draw_string(font, Vector2(size.x / 2.0 - fw / 2.0, fy), w, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("7be0a0"))
+		draw_string(font, Vector2(size.x / 2.0 - fw / 2.0, fy), w, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameContext.c("good"))
 		fy += 30.0
 	var prog := "%d / %d" % [_found.size(), int(lv["target"])]
 	var pgw := font.get_string_size(prog, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
-	draw_string(font, Vector2(size.x / 2.0 - pgw / 2.0, fy + 6.0), prog, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("9fb4d8"))
+	draw_string(font, Vector2(size.x / 2.0 - pgw / 2.0, fy + 6.0), prog, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, GameContext.c("text_muted"))
 
 	for k in _keys:
 		_draw_key(font, k, 26)
@@ -252,11 +255,11 @@ func _draw() -> void:
 
 
 func _draw_key(font: Font, k: Dictionary, fs: int) -> void:
-	draw_rect(Rect2(k["x"], k["y"], k["w"], k["h"]), Color("2b3856"))
+	draw_rect(Rect2(k["x"], k["y"], k["w"], k["h"]), GameContext.c("surface_alt"))
 	var lbl: String = k.get("label", k["ch"])
 	var tw := font.get_string_size(lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 	draw_string(font, Vector2(k["x"] + k["w"] / 2.0 - tw / 2.0, k["y"] + k["h"] / 2.0 + fs * 0.35),
-		lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("eef2f7"))
+		lbl, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, GameContext.c("text"))
 
 
 func _update_hud() -> void:

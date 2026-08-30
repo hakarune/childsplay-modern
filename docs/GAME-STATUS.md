@@ -125,5 +125,10 @@ dark (§G) with fixed-light DARK.* text on it. Iconic/decorative palettes
 (Simon pads, billiard balls, brick tints, pong/packid/aquarium atmosphere)
 kept as literals by design. WCAG: every text/surface role pair ≥4.5:1 in
 both palettes; transient wrong-answer flashes reworked to a border so text
-contrast holds. Next: Godot palette parity — sweep each `_draw()` to
-`GameContext.c(role)` and connect `theme_changed` → `queue_redraw`._
+contrast holds. Godot parity DONE too: the 12 `_draw()` games now paint
+from `GameContext.c(role)` and repaint live on `theme_changed`; iconic
+palettes (Simon pads, brick tints, Four-in-a-Row discs → p1/p2) kept as
+literals. Verified: headless instantiate + render of every themed scene in
+both palettes, clean. Next §L items: Godot 3-way mute popover, native
+device keyboard for Falling Letter / Word Maker, §A/§C audio-pool
+migration, Pong era themes._
