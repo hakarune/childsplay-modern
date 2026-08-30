@@ -714,8 +714,14 @@ targets**), ~~synonyms I.3~~ (⌨ toggle, both targets), ~~puzzle B/H~~
 (10 levels + tier tags), ~~wipe B/H~~ (tier tags + wide pool),
 ~~pong D.5~~ (era themes both targets), ~~aquarium names~~ (all fish named;
 modern parallax backdrop), ~~numbers G~~ (one-row HUD),
-~~electro I.2~~ (snap-to-nearest + finger halo, both targets). Every game
-has a `docs/assets/<id>.assets.md` (§A.7).
+~~electro I.2~~ (snap-to-nearest + finger halo, both targets),
+~~simon H~~ (10 levels, length 2 → 11), ~~fourrow K / tictactoe K~~
+(Pass & Play both targets; FourRow discs already on p1/p2 roles). Every
+game has a `docs/assets/<id>.assets.md` (§A.7).
+
+Still open: spoken picture labels (§E.3) for memory / findsound / electro /
+ichanger; findsound §J data file; Godot HUD-bar contrast parity; then the
+Quiz suite.
 
 | Game | Must change |
 | --- | --- |
