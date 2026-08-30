@@ -39,6 +39,11 @@ func setup(ch: String, speed: float, boundary_y: float, bubble_color: Color) -> 
 		_apply_visuals()
 
 
+## Move the "missed" line (e.g. when the on-screen keyboard is toggled).
+func set_boundary(boundary_y: float) -> void:
+	_boundary_y = boundary_y
+
+
 func _apply_visuals() -> void:
 	_label.text = target_char
 

@@ -38,6 +38,7 @@ const LEVELS := [
 ]
 
 const KB_ROWS := ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
+const SETTINGS_PATH := "user://settings.cfg"
 
 const SND_KEY := "pick.wav"
 const SND_GOOD := "good.ogg"
@@ -55,6 +56,8 @@ var _keys: Array = []             # { ch, x, y, w, h }
 var _del_key := {}
 var _ok_key := {}
 var _hint_btn := {}
+var _kb_btn := {}
+var _osk := false                # true = device keyboard, hide the on-screen letters
 
 @onready var _info: Label = %InfoLabel
 @onready var _status: Label = %StatusLabel
@@ -72,6 +75,7 @@ var _hint_btn := {}
 
 func _ready() -> void:
 	GameContext.theme_changed.connect(queue_redraw)
+	_load_osk()
 	_load_dict()
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
@@ -143,6 +147,8 @@ func _geo() -> void:
 	_ok_key = { "ch": "\n", "label": "Enter", "x": size.x / 2.0 + gap / 2.0, "y": ay, "w": aw, "h": kh }
 	var hint_right: float = size.x / 2.0 + minf(280.0, size.x / 2.0 - 60.0)
 	_hint_btn = { "x": hint_right - 150.0, "y": HUD + 12.0, "w": 150.0, "h": 44.0 }
+	var kb_left: float = size.x / 2.0 - minf(280.0, size.x / 2.0 - 60.0)
+	_kb_btn = { "x": kb_left, "y": HUD + 12.0, "w": 150.0, "h": 44.0 }
 
 
 func _type(ch: String) -> void:
@@ -251,16 +257,20 @@ func _gui_input(event: InputEvent) -> void:
 	if Rect2(_hint_btn["x"], _hint_btn["y"], _hint_btn["w"], _hint_btn["h"]).has_point(pos):
 		_use_hint()
 		return
+	if Rect2(_kb_btn["x"], _kb_btn["y"], _kb_btn["w"], _kb_btn["h"]).has_point(pos):
+		_set_osk(not _osk)
+		return
 	if Rect2(_del_key["x"], _del_key["y"], _del_key["w"], _del_key["h"]).has_point(pos):
 		_backspace()
 		return
 	if Rect2(_ok_key["x"], _ok_key["y"], _ok_key["w"], _ok_key["h"]).has_point(pos):
 		_submit()
 		return
-	for k in _keys:
-		if Rect2(k["x"], k["y"], k["w"], k["h"]).has_point(pos):
-			_type(k["ch"])
-			return
+	if not _osk:
+		for k in _keys:
+			if Rect2(k["x"], k["y"], k["w"], k["h"]).has_point(pos):
+				_type(k["ch"])
+				return
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -309,6 +319,14 @@ func _draw() -> void:
 	draw_string(font, Vector2(hb["x"] + hb["w"] / 2.0 - hlw / 2.0, hb["y"] + hb["h"] / 2.0 + 7.0),
 		hl, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color.WHITE if _hints_left > 0 else GameContext.c("text_muted"))
 
+	# ⌨ toggle pill (OS keyboard vs on-screen — §I.3)
+	var kb := _kb_btn
+	draw_rect(Rect2(kb["x"], kb["y"], kb["w"], kb["h"]), GameContext.c("accent") if _osk else GameContext.c("surface"))
+	var kl := "⌨ keyboard" if _osk else "⌨ on-screen"
+	var klw := font.get_string_size(kl, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+	draw_string(font, Vector2(kb["x"] + kb["w"] / 2.0 - klw / 2.0, kb["y"] + kb["h"] / 2.0 + 6.0),
+		kl, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE if _osk else GameContext.c("text"))
+
 	# active hint
 	if not _hint.is_empty():
 		draw_rect(Rect2(size.x / 2.0 - 180.0, tray_y + 84.0, 360.0, 44.0), GameContext.c("warn"))
@@ -326,8 +344,14 @@ func _draw() -> void:
 	var pgw := font.get_string_size(prog, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 	draw_string(font, Vector2(size.x / 2.0 - pgw / 2.0, fy + 6.0), prog, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, GameContext.c("text_muted"))
 
-	for k in _keys:
-		_draw_key(font, k, 26)
+	if _osk:
+		var msg := "using your device keyboard — tap  ⌨ on-screen  for the buttons"
+		var mw := font.get_string_size(msg, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+		draw_string(font, Vector2(size.x / 2.0 - mw / 2.0, _del_key["y"] - 16.0),
+			msg, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, GameContext.c("text_muted"))
+	else:
+		for k in _keys:
+			_draw_key(font, k, 26)
 	_draw_key(font, _del_key, 22)
 	_draw_key(font, _ok_key, 22)
 
@@ -347,5 +371,33 @@ func _update_hud() -> void:
 		_status.text = "tap letters, then Enter"
 
 
+func _set_osk(v: bool) -> void:
+	_osk = v
+	_save_osk()
+	if DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD):
+		if v:
+			DisplayServer.virtual_keyboard_show(_word)
+		else:
+			DisplayServer.virtual_keyboard_hide()
+	queue_redraw()
+
+
+func _load_osk() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK and cfg.has_section_key("wordmaker", "osk"):
+		_osk = bool(cfg.get_value("wordmaker", "osk"))
+	else:
+		_osk = DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD)
+
+
+func _save_osk() -> void:
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)
+	cfg.set_value("wordmaker", "osk", _osk)
+	cfg.save(SETTINGS_PATH)
+
+
 func _go_home() -> void:
+	if DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD):
+		DisplayServer.virtual_keyboard_hide()
 	get_tree().change_scene_to_file(MAIN_MENU)
