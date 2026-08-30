@@ -1,8 +1,10 @@
 extends Control
-## Four in a Row — Connect Four against the computer. You are red and go
+## Four in a Row — Connect Four. Solo vs the computer (3 skill levels), or a
+## local "Pass & Play" 2-player game (Design Policy §K). Red always goes
 ## first; drop a disc into a column, get four in a line.
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
+const SETTINGS_PATH := "user://settings.cfg"
 const COLS := 7
 const ROWS := 6
 const HUD := 64.0
@@ -27,10 +29,13 @@ var _win_line = null
 var _drop = null                # { col, row, y, vy, who }
 var _hover_col := -1
 var _ai_timer = null
+var _moves := 0
+var _two_p := false
 var _cell := 90.0
 var _bx := 0.0
 var _by := 0.0
 var _r := 36.0
+var _mode_btn: Button
 
 @onready var _info_label: Label = %InfoLabel
 @onready var _back_button: Button = %BackButton
@@ -54,7 +59,45 @@ func _ready() -> void:
 	_popup_replay.pressed.connect(func() -> void: _start_level(_level))
 	_popup_next.pressed.connect(func() -> void: _start_level(_level + 1))
 	_popup.visible = false
+
+	_two_p = _load_two_p()
+	_mode_btn = Button.new()
+	_mode_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_mode_btn.offset_left = -196.0
+	_mode_btn.offset_top = 12.0
+	_mode_btn.offset_right = -16.0
+	_mode_btn.custom_minimum_size = Vector2(180, 40)
+	_mode_btn.focus_mode = Control.FOCUS_ALL
+	_mode_btn.pressed.connect(_toggle_two_p)
+	add_child(_mode_btn)
+	_sync_mode_btn()
+
 	_start_level(0)
+
+
+func _load_two_p() -> bool:
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK:
+		return bool(cfg.get_value("fourrow", "two_p", false))
+	return false
+
+
+func _toggle_two_p() -> void:
+	if _moves > 0:
+		return
+	_two_p = not _two_p
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)
+	cfg.set_value("fourrow", "two_p", _two_p)
+	cfg.save(SETTINGS_PATH)
+	_start_level(_level)
+
+
+func _sync_mode_btn() -> void:
+	if _mode_btn == null:
+		return
+	_mode_btn.text = "2 Players" if _two_p else "1 Player"
+	_mode_btn.visible = _moves == 0 and not _over   # only choosable before move 1
 
 
 func _start_level(n: int) -> void:
@@ -70,7 +113,9 @@ func _start_level(n: int) -> void:
 	_drop = null
 	_ai_timer = null
 	_hover_col = -1
+	_moves = 0
 	_popup.visible = false
+	_sync_mode_btn()
 	_geo()
 	_update_hud()
 
@@ -98,7 +143,7 @@ func _lowest(c: int) -> int:
 
 
 func _process(delta: float) -> void:
-	if _ai_timer != null and _drop == null and not _over:
+	if not _two_p and _ai_timer != null and _drop == null and not _over:
 		_ai_timer -= delta
 		if _ai_timer <= 0.0:
 			_ai_timer = null
@@ -113,6 +158,8 @@ func _process(delta: float) -> void:
 			var who: int = _drop["who"]
 			_grid[_drop["row"]][_drop["col"]] = who
 			_drop = null
+			_moves += 1
+			_sync_mode_btn()
 			_play(_sfx_drop)
 			var line = _four(who)
 			if line != null:
@@ -121,8 +168,9 @@ func _process(delta: float) -> void:
 				_end(0, null)
 			else:
 				_turn = YEL if who == RED else RED
-				if _turn == YEL:
+				if not _two_p and _turn == YEL:
 					_ai_timer = 0.45
+				_update_hud()
 	queue_redraw()
 
 
@@ -200,12 +248,18 @@ func _end(who: int, line) -> void:
 	_over = true
 	_win_line = line
 	var you_won := who == RED
-	_play(_sfx_win if you_won else _sfx_loss)
+	_play(_sfx_win if (you_won or _two_p) and who != 0 else _sfx_loss)
 	var is_last := _level >= LEVELS.size() - 1
-	_popup_label.text = "It's a draw!" if who == 0 else ("You got four!" if you_won else "Computer wins!")
-	_popup_next.visible = you_won and not is_last
+	if who == 0:
+		_popup_label.text = "It's a draw!"
+	elif _two_p:
+		_popup_label.text = "Red wins!" if who == RED else "Yellow wins!"
+	else:
+		_popup_label.text = "You got four!" if you_won else "Computer wins!"
+	var offer_next := not _two_p and you_won and not is_last
+	_popup_next.visible = offer_next
 	_popup.visible = true
-	(_popup_replay if not (you_won and not is_last) else _popup_next).grab_focus()
+	(_popup_next if offer_next else _popup_replay).grab_focus()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -216,11 +270,13 @@ func _gui_input(event: InputEvent) -> void:
 		if event.position.x < _bx or event.position.x > _bx + _cell * COLS:
 			_hover_col = -1
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if _over or _drop != null or _turn != RED:
+		if _over or _drop != null:
 			return
+		if not _two_p and _turn != RED:
+			return   # solo: wait for the AI
 		var c := int(floor((event.position.x - _bx) / _cell))
 		if c >= 0 and c < COLS and _lowest(c) >= 0:
-			_place(c, RED)
+			_place(c, _turn)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -229,8 +285,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	if _hover_col >= 0 and _turn == RED and not _over and _drop == null and _lowest(_hover_col) >= 0:
-		draw_circle(Vector2(_col_x(_hover_col), _by - _cell / 2.0), _r, Color(1, 0.35, 0.35, 0.35))
+	var can_hover := not _over and _drop == null and (_two_p or _turn == RED)
+	if _hover_col >= 0 and can_hover and _lowest(_hover_col) >= 0:
+		var ghost := GameContext.c("p1") if _turn == RED else GameContext.c("p2")
+		ghost.a = 0.35
+		draw_circle(Vector2(_col_x(_hover_col), _by - _cell / 2.0), _r, ghost)
 
 	draw_rect(Rect2(_bx - 8.0, _by - 8.0, _cell * COLS + 16.0, _cell * ROWS + 16.0), GameContext.c("surface_alt"))
 	for r in ROWS:
@@ -254,7 +313,11 @@ func _draw() -> void:
 
 
 func _update_hud() -> void:
-	_info_label.text = "Level %d / %d  -  %s      (you are red)" % [_level + 1, LEVELS.size(), LEVELS[_level]["name"]]
+	if _two_p:
+		var whose := "Red's turn" if _turn == RED else "Yellow's turn"
+		_info_label.text = "2 players  ·  %s" % ("game over" if _over else whose)
+	else:
+		_info_label.text = "Level %d / %d  -  %s      (you are red)" % [_level + 1, LEVELS.size(), LEVELS[_level]["name"]]
 
 
 func _play(p: AudioStreamPlayer) -> void:

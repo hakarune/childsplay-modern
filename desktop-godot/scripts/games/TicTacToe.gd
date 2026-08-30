@@ -1,10 +1,10 @@
 extends Control
-## Tic Tac Toe — noughts and crosses versus the computer. Three opponents:
-## Easy (random), Medium (win / block / centre), Hard (perfect minimax).
-## You are X and move first. Beat Easy and Medium to advance; hold the
-## perfect computer to a draw to finish.
+## Tic Tac Toe — noughts and crosses. Solo vs the computer (Easy / Medium /
+## Hard) or a local "Pass & Play" 2-player game (Design Policy §K). X (blue)
+## always moves first.
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
+const SETTINGS_PATH := "user://settings.cfg"
 const HUD := 56.0
 const X := 1
 const O := 2
@@ -32,6 +32,9 @@ var _board: Array[int] = []
 var _turn := X
 var _done := {}                  # {} | { who } | { who, line }
 var _ai_wait := 0.0
+var _moves := 0
+var _two_p := false
+var _mode_btn: Button
 
 var _grid := Rect2()
 var _cell := 0.0
@@ -66,7 +69,44 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level + 1))
 	_popup.visible = false
 	resized.connect(_geo)
+
+	_two_p = _load_two_p()
+	_mode_btn = Button.new()
+	_mode_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_mode_btn.offset_left = -196.0
+	_mode_btn.offset_top = 10.0
+	_mode_btn.offset_right = -16.0
+	_mode_btn.custom_minimum_size = Vector2(180, 40)
+	_mode_btn.focus_mode = Control.FOCUS_ALL
+	_mode_btn.pressed.connect(_toggle_two_p)
+	add_child(_mode_btn)
+
 	_start_level(0)
+
+
+func _load_two_p() -> bool:
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK:
+		return bool(cfg.get_value("tictactoe", "two_p", false))
+	return false
+
+
+func _toggle_two_p() -> void:
+	if _moves > 0:
+		return
+	_two_p = not _two_p
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)
+	cfg.set_value("tictactoe", "two_p", _two_p)
+	cfg.save(SETTINGS_PATH)
+	_start_level(_level)
+
+
+func _sync_mode_btn() -> void:
+	if _mode_btn == null:
+		return
+	_mode_btn.text = "2 Players" if _two_p else "1 Player"
+	_mode_btn.visible = _moves == 0 and _done.is_empty()
 
 
 func _start_level(n: int) -> void:
@@ -75,7 +115,9 @@ func _start_level(n: int) -> void:
 	_turn = X
 	_done = {}
 	_ai_wait = 0.0
+	_moves = 0
 	_popup.visible = false
+	_sync_mode_btn()
 	_geo()
 	_update_hud()
 	queue_redraw()
@@ -196,7 +238,11 @@ func _check_end() -> void:
 		return
 	_done = w
 	var last := _level >= LEVELS.size() - 1
-	if w["who"] == X:
+	if _two_p and w["who"] != 0:
+		_play(_sfx_win)
+		_popup_label.text = "Blue wins!" if w["who"] == X else "Orange wins!"
+		_popup_next.visible = false
+	elif w["who"] == X:
 		_play(_sfx_win)
 		if last:
 			_popup_label.text = "You beat the champion!"
@@ -209,13 +255,18 @@ func _check_end() -> void:
 		_popup_label.text = "Computer wins"
 		_popup_next.visible = false
 	else:
-		if last:
+		if _two_p:
+			_play(_sfx_draw)
+			_popup_label.text = "It's a draw"
+			_popup_next.visible = false
+		elif last:
 			_play(_sfx_win)
 			_popup_label.text = "Draw — you held the champion!"
+			_popup_next.visible = false
 		else:
 			_play(_sfx_draw)
 			_popup_label.text = "It's a draw"
-		_popup_next.visible = false
+			_popup_next.visible = false
 	if _popup_next.visible:
 		_popup_next.grab_focus()
 	else:
@@ -225,7 +276,7 @@ func _check_end() -> void:
 
 
 func _process(delta: float) -> void:
-	if _done.is_empty() and _turn == O:
+	if not _two_p and _done.is_empty() and _turn == O:
 		_ai_wait += delta
 		if _ai_wait > 0.4:
 			_ai_wait = 0.0
@@ -233,8 +284,10 @@ func _process(delta: float) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if _popup.visible or not _done.is_empty() or _turn != X:
+	if _popup.visible or not _done.is_empty():
 		return
+	if not _two_p and _turn != X:
+		return   # solo: wait for the AI
 	var pos := Vector2.ZERO
 	var tapped := false
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
@@ -252,9 +305,11 @@ func _gui_input(event: InputEvent) -> void:
 	var i := row * 3 + col
 	if _board[i] != 0:
 		return
-	_board[i] = X
+	_board[i] = _turn
+	_moves += 1
+	_sync_mode_btn()
 	_play(_sfx_mark)
-	_turn = O
+	_turn = O if _turn == X else X
 	_ai_wait = 0.0
 	_check_end()
 	_update_hud()
@@ -295,12 +350,20 @@ func _draw() -> void:
 
 
 func _update_hud() -> void:
-	_info.text = "Level %d/%d - %s" % [_level + 1, LEVELS.size(), LEVELS[_level]["name"]]
-	if _status != null:
-		if not _done.is_empty():
-			_status.text = "game over"
-		else:
-			_status.text = "your turn - you are X" if _turn == X else "computer thinking..."
+	if _two_p:
+		_info.text = "2 players"
+		if _status != null:
+			if not _done.is_empty():
+				_status.text = "game over"
+			else:
+				_status.text = "Blue's turn (X)" if _turn == X else "Orange's turn (O)"
+	else:
+		_info.text = "Level %d/%d - %s" % [_level + 1, LEVELS.size(), LEVELS[_level]["name"]]
+		if _status != null:
+			if not _done.is_empty():
+				_status.text = "game over"
+			else:
+				_status.text = "your turn - you are X" if _turn == X else "computer thinking..."
 
 
 func _play(p: AudioStreamPlayer) -> void:
