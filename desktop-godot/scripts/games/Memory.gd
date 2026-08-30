@@ -54,6 +54,8 @@ var _busy := false            # blocks input during resolve / win
 var _back_tex: Texture2D
 var _front_tex: Texture2D
 var _variant := "pictures"
+var _say_names := false
+var _names_btn: Button
 
 @onready var _grid: GridContainer = %CardGrid
 @onready var _flip_label: Label = %FlipCounter
@@ -84,7 +86,32 @@ func _ready() -> void:
 	_popup_button.pressed.connect(_on_popup_button)
 	_popup.visible = false
 
+	# "say the names" toggle — pictures deck only (§E.3)
+	if _variant == "pictures" and GameContext.has_voice():
+		_say_names = GameContext.name_toggle_get("memory")
+		_names_btn = Button.new()
+		_names_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		_names_btn.offset_left = -170.0
+		_names_btn.offset_top = 12.0
+		_names_btn.offset_right = -16.0
+		_names_btn.custom_minimum_size = Vector2(154, 38)
+		_names_btn.focus_mode = Control.FOCUS_ALL
+		_names_btn.pressed.connect(_toggle_names)
+		add_child(_names_btn)
+		_sync_names_btn()
+
 	_start_level(0)
+
+
+func _toggle_names() -> void:
+	_say_names = not _say_names
+	GameContext.name_toggle_set("memory", _say_names)
+	_sync_names_btn()
+
+
+func _sync_names_btn() -> void:
+	if _names_btn:
+		_names_btn.text = "🔊 names on" if _say_names else "🔇 names off"
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +191,8 @@ func _on_card_clicked(card: MemoryCard) -> void:
 
 	card.flip_up()
 	_play(_sfx_flip)
+	if _say_names and _variant == "pictures":
+		GameContext.speak(GameContext.name_from_id(card.card_id))
 	_open_cards.append(card)
 
 	if _open_cards.size() < 2:

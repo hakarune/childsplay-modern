@@ -4,7 +4,7 @@
 // Grid grows 2x2 -> 4x3 -> 4x4 -> 5x4 across levels.
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
-import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow } from '../util.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, makeNameToggle, nameFromId } from '../util.js';
 import { theme } from '../theme.js';
 
 const LEVELS = [
@@ -49,6 +49,8 @@ export default class MemoryGame extends Scene {
     this._variant = VARIANT_LABEL[opts.variant] ? opts.variant : 'pictures';
     this._deck = deckFor(this._variant);
     this._overlay = new Overlay();
+    // "say the names" toggle — pictures deck only (§E.3)
+    this._names = makeNameToggle('memory', { x: VIEW_W - 172, y: 18, w: 150, h: 34 });
     this._level = 0;
     this._startLevel(0);
   }
@@ -102,6 +104,7 @@ export default class MemoryGame extends Scene {
 
   resize() {
     if (this._cards && this._cards.length) this._place();
+    this._names.rect.x = VIEW_W - 172;
     this._overlay.reflow(VIEW_W / 2, VIEW_H / 2 + 20);
   }
 
@@ -133,11 +136,13 @@ export default class MemoryGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
+    if (this._variant === 'pictures' && this._names.hit(x, y)) { this._names.toggle(); return; }
     if (this._cool > 0 || this._open.length >= 2) return;
     const c = this._cardAt(x, y);
     if (!c) return;
     c.up = true;
     playSound(SND_FLIP);
+    if (this._variant === 'pictures') this._names.say(nameFromId(c.face.id));
     this._open.push(c);
     if (this._open.length === 2) this._resolve();
   }
@@ -187,9 +192,8 @@ export default class MemoryGame extends Scene {
     ctx.textBaseline = 'middle';
     ctx.fillText(`Flips ${this._flips}    Pairs ${this._matched}/${this._pairs}`, VIEW_W / 2, 35);
     ctx.textAlign = 'left';
-    ctx.fillText(`Memory - ${VARIANT_LABEL[this._variant]}`, 220, 35);
-    ctx.textAlign = 'right';
-    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}`, VIEW_W - 24, 35);
+    ctx.fillText(`Memory - ${VARIANT_LABEL[this._variant]}  ·  Level ${this._level + 1}/${LEVELS.length}`, 220, 35);
+    if (this._variant === 'pictures') this._names.draw(ctx);
 
     const back = img(BACK);
     const front = img(FRONT);

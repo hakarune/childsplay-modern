@@ -4,7 +4,7 @@
 // + shuffle. Three rounds per level.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { clamp, roundRect, shuffle, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { clamp, roundRect, shuffle, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud, makeNameToggle, nameFromId } from '../util.js';
 import { theme } from '../theme.js';
 
 const HUD = 64;
@@ -35,6 +35,7 @@ export default class ImageChangerGame extends Scene {
     super(game);
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
+    this._names = makeNameToggle('ichanger', { x: VIEW_W - 172, y: 14, w: 150, h: 34 });
     this._level = 0;
     this._startLevel(0);
   }
@@ -143,8 +144,12 @@ export default class ImageChangerGame extends Scene {
       return;
     }
 
+    if (this._names.hit(x, y)) { this._names.toggle(); return; }
+
     if (this._phase === 'study') {
-      if (inRect(this._startBtn, x, y)) this._begin();
+      if (inRect(this._startBtn, x, y)) { this._begin(); return; }
+      const card = this._cards.find((c) => inRect(c, x, y));
+      if (card) this._names.say(nameFromId(card.id));   // hear a picture while studying
       return;
     }
     if (this._phase !== 'guess') return;
@@ -155,6 +160,7 @@ export default class ImageChangerGame extends Scene {
     if (hit.changed) {
       hit.right = 1;
       playSound(SND_GOOD);
+      this._names.say(nameFromId(hit.id));
       this._phase = 'result';
       this._t = 0;
       this._round += 1;
@@ -264,6 +270,9 @@ export default class ImageChangerGame extends Scene {
       : 'watch closely';
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
+
+    this._names.rect.x = VIEW_W - 172;
+    this._names.draw(ctx);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

@@ -159,6 +159,44 @@ export function drawButton(ctx, b, hover) {
 export const inRect = (b, px, py) =>
   px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h;
 
+// --- "say the names" toggle (Design Policy §E.3) --------------------------
+// A small HUD pill. OFF (default) = sound effect only; ON = the game also
+// speaks an entity's name on interaction. Persisted per game id. Renders
+// nothing and stays OFF if the platform has no speech.
+export function makeNameToggle(gameId, rect = { x: 0, y: 0, w: 150, h: 32 }) {
+  let on = false;
+  try { on = localStorage.getItem(`cp:names:${gameId}`) === '1'; } catch { /* */ }
+  return {
+    rect,
+    get on() { return on; },
+    get available() { return hasVoice(); },
+    toggle() {
+      on = !on;
+      try { localStorage.setItem(`cp:names:${gameId}`, on ? '1' : '0'); } catch { /* */ }
+      return on;
+    },
+    hit(x, y) { return hasVoice() && inRect(this.rect, x, y); },
+    say(name) { if (on && name) speak(String(name)); },
+    draw(ctx) {
+      if (!hasVoice()) return;
+      const b = this.rect;
+      roundRect(ctx, b.x, b.y, b.w, b.h, 10);
+      ctx.fillStyle = on ? theme.accent : theme.surface;
+      ctx.fill();
+      ctx.fillStyle = on ? '#ffffff' : theme.text;
+      ctx.font = '600 15px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(on ? '🔊 names on' : '🔇 names off', b.x + b.w / 2, b.y + b.h / 2);
+    },
+  };
+}
+
+// Tidy a pool id ("01_cat", "redbird", "car_horn") into a spoken label.
+export function nameFromId(id) {
+  return String(id).replace(/^\d+[_-]?/, '').replace(/[_-]+/g, ' ').trim();
+}
+
 // Shared "you did it" / "try again" overlay used by every game.
 export class Overlay {
   constructor() {

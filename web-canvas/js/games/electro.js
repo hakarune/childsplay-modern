@@ -4,7 +4,7 @@
 // fall away. Connect every pair to clear the level. Six levels, 3 → 8 pairs.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, assetURL } from '../engine.js';
-import { clamp, roundRect, shuffle, dist, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { clamp, roundRect, shuffle, dist, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud, makeNameToggle } from '../util.js';
 import { theme } from '../theme.js';
 
 const HUD = 64;
@@ -32,6 +32,7 @@ export default class ElectroGame extends Scene {
     super(game);
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
+    this._names = makeNameToggle('electro', { x: VIEW_W - 172, y: 14, w: 150, h: 34 });
     this._level = 0;
     this._setPairs(FALLBACK_PAIRS);
     this._startLevel(0);
@@ -113,10 +114,12 @@ export default class ElectroGame extends Scene {
 
   pointerdown(x, y) {
     if (this._overlay.visible) return;
+    if (this._names.hit(x, y)) { this._names.toggle(); return; }
     const hit = this._nodeHit(x, y);
     if (hit) {
       this._drag = { col: hit.col, id: hit.id, x, y };
       playSound(SND_PICK, { volume: 0.5 });
+      this._names.say(this._nameById.get(hit.id));
     }
   }
 
@@ -272,6 +275,9 @@ export default class ElectroGame extends Scene {
     ctx.fillStyle = theme.hud_muted;
     ctx.fillText('drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, 'drag a wire from each picture to its name', VIEW_W / 2, HUD / 2);
+
+    this._names.rect.x = VIEW_W - 172;
+    this._names.draw(ctx);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

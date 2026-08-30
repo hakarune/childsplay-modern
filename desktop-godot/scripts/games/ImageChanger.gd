@@ -35,6 +35,8 @@ var _result_advance := -1.0
 var _cards: Array = []            # { id, x,y,w,h, flip, changed, wrong, right }
 var _start_btn := Rect2()
 var _tex_cache: Dictionary = {}
+var _say_names := false
+var _names_rect := Rect2(0, 14, 154, 36)
 
 @onready var _info: Label = %InfoLabel
 @onready var _status: Label = %StatusLabel
@@ -64,6 +66,8 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level + 1))
 	_popup.visible = false
 	resized.connect(_geo)
+	_say_names = GameContext.name_toggle_get("ichanger")
+	_geo_names()
 	_start_level(0)
 
 
@@ -100,7 +104,12 @@ func _new_round() -> void:
 	queue_redraw()
 
 
+func _geo_names() -> void:
+	_names_rect = Rect2(size.x - 170.0, 14.0, 154.0, 36.0)
+
+
 func _geo() -> void:
+	_geo_names()
 	if _cards.is_empty():
 		return
 	var n := _cards.size()
@@ -198,9 +207,20 @@ func _gui_input(event: InputEvent) -> void:
 	if not tapped:
 		return
 
+	if _names_rect.has_point(pos):
+		_say_names = not _say_names
+		GameContext.name_toggle_set("ichanger", _say_names)
+		queue_redraw()
+		return
+
 	if _phase == "study":
 		if _start_btn.has_point(pos):
 			_begin()
+		elif _say_names:
+			for c in _cards:
+				if Rect2(c["x"], c["y"], c["w"], c["h"]).has_point(pos):
+					GameContext.speak(GameContext.name_from_id(str(c["id"])))
+					break
 		return
 	if _phase != "guess":
 		return
@@ -217,6 +237,8 @@ func _gui_input(event: InputEvent) -> void:
 		hit["right"] = 1.0
 		if _sfx_good.stream != null:
 			_sfx_good.play()
+		if _say_names:
+			GameContext.speak(GameContext.name_from_id(str(hit["id"])))
 		_phase = "result"
 		_t = 0.0
 		_round += 1
@@ -292,6 +314,8 @@ func _draw() -> void:
 		var tw := font.get_string_size("Start", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, _start_btn.position + Vector2(_start_btn.size.x / 2.0 - tw / 2.0, _start_btn.size.y / 2.0 + fs * 0.35),
 			"Start", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE)
+
+	GameContext.draw_name_pill(self, _names_rect, _say_names)
 
 
 func _update_hud() -> void:

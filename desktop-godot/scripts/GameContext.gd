@@ -195,3 +195,44 @@ func speak(text: String, lang_hint := "") -> void:
 ## We ship baked clips, so a speaker button is always worth showing.
 func has_voice() -> bool:
 	return true
+
+
+# --- "say the names" toggle (§E.3) -------------------------------------
+# A per-game OFF-by-default switch: OFF = sound effect only, ON = the game
+# also speak()s an entity's name on interaction. Persisted in settings.cfg
+# under [names]. Games cache the bool and redraw the pill via draw_name_pill.
+
+func name_toggle_get(game_id: String) -> bool:
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS_PATH) == OK:
+		return bool(cfg.get_value("names", game_id, false))
+	return false
+
+
+func name_toggle_set(game_id: String, on: bool) -> void:
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS_PATH)
+	cfg.set_value("names", game_id, on)
+	cfg.save(SETTINGS_PATH)
+
+
+## Tidy a pool id ("01_cat", "car_horn") into a spoken label.
+func name_from_id(id: String) -> String:
+	var s := id
+	var us := s.find("_")
+	if us >= 0 and s.substr(0, us).is_valid_int():
+		s = s.substr(us + 1)
+	return s.replace("_", " ").replace("-", " ").strip_edges()
+
+
+## Draw the toggle pill. Nothing is drawn where the platform has no voice.
+func draw_name_pill(ci: CanvasItem, rect: Rect2, on: bool) -> void:
+	if not has_voice():
+		return
+	var font := ThemeDB.fallback_font
+	ci.draw_rect(rect, c("accent") if on else c("surface"))
+	var label := "names on" if on else "names off"
+	var fs := 15
+	var tw := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	ci.draw_string(font, rect.position + Vector2((rect.size.x - tw) / 2.0, rect.size.y * 0.66),
+		label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color.WHITE if on else c("text"))

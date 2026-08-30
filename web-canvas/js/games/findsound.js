@@ -5,7 +5,7 @@
 // clear the level. Wrong taps just wobble — no penalty.
 
 import { Scene, VIEW_W, VIEW_H, img, playSound, loadSound } from '../engine.js';
-import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton } from '../util.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton, makeNameToggle, nameFromId } from '../util.js';
 import { theme } from '../theme.js';
 
 const LEVELS = [
@@ -29,6 +29,7 @@ export default class FindSoundGame extends Scene {
     super(game);
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
+    this._names = makeNameToggle('findsound', { x: VIEW_W - 172, y: 18, w: 150, h: 34 });
     this._level = 0;
     this._startLevel(0);
   }
@@ -98,6 +99,7 @@ export default class FindSoundGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
+    if (this._names.hit(x, y)) { this._names.toggle(); return; }
     if (inRect(this._replayBtn, x, y)) { this._playTarget(); return; }
 
     const c = this._cardAt(x, y);
@@ -105,6 +107,7 @@ export default class FindSoundGame extends Scene {
     if (c.id === this._target.id) {
       c.found = true;
       playSound(SND_GOOD);
+      this._names.say(nameFromId(c.id));
       this._nextRound();
     } else {
       this._tries++;
@@ -136,9 +139,9 @@ export default class FindSoundGame extends Scene {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     const found = this._cards.filter((c) => c.found).length;
-    ctx.fillText(`Found ${found}/${this._cards.length}`, 220, 35);
-    ctx.textAlign = 'right';
-    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}  -  ${LEVELS[this._level].name}`, VIEW_W - 24, 35);
+    ctx.fillText(`L${this._level + 1}/${LEVELS.length} ${LEVELS[this._level].name}  ·  found ${found}/${this._cards.length}`, 220, 35);
+    this._names.rect.x = VIEW_W - 172;
+    this._names.draw(ctx);
 
     if (!this._overlay.visible) drawButton(ctx, this._replayBtn, false);
 

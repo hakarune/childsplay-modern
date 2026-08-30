@@ -26,6 +26,8 @@ var _found := 0
 var _total := 0
 var _target_id := ""
 var _busy := false
+var _say_names := false
+var _names_btn: Button
 
 # card = { "button": TextureButton, "id": String, "found": bool }
 var _cards: Array = []
@@ -58,7 +60,31 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level_index + 1))
 	_popup.visible = false
 
+	if GameContext.has_voice():
+		_say_names = GameContext.name_toggle_get("findsound")
+		_names_btn = Button.new()
+		_names_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		_names_btn.offset_left = -170.0
+		_names_btn.offset_top = 12.0
+		_names_btn.offset_right = -16.0
+		_names_btn.custom_minimum_size = Vector2(154, 38)
+		_names_btn.focus_mode = Control.FOCUS_ALL
+		_names_btn.pressed.connect(_toggle_names)
+		add_child(_names_btn)
+		_sync_names_btn()
+
 	_start_level(0)
+
+
+func _toggle_names() -> void:
+	_say_names = not _say_names
+	GameContext.name_toggle_set("findsound", _say_names)
+	_sync_names_btn()
+
+
+func _sync_names_btn() -> void:
+	if _names_btn:
+		_names_btn.text = "🔊 names on" if _say_names else "🔇 names off"
 
 
 func _start_level(index: int) -> void:
@@ -126,6 +152,8 @@ func _on_card_pressed(card: Dictionary) -> void:
 		card["button"].disabled = true
 		card["button"].modulate = Color(1, 1, 1, 0.55)
 		_play(_sfx_good)
+		if _say_names:
+			GameContext.speak(GameContext.name_from_id(card["id"]))
 		_update_info()
 		_next_round()
 	else:

@@ -45,6 +45,8 @@ var _tile_h := 90.0
 var _top := 0.0
 var _gap := 14.0
 var _tex_cache: Dictionary = {}
+var _say_names := false
+var _names_rect := Rect2(0, 14, 154, 36)
 
 @onready var _info: Label = %InfoLabel
 @onready var _back_button: Button = %BackButton
@@ -73,6 +75,7 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level + 1))
 	_popup.visible = false
 	resized.connect(_geo)
+	_say_names = GameContext.name_toggle_get("electro")
 	_load_pairs()
 	_start_level(0)
 
@@ -138,6 +141,7 @@ func _geo() -> void:
 	_tile_h = minf(94.0, (avail_h - _gap * (count - 1)) / count)
 	var grid_h := count * _tile_h + _gap * (count - 1)
 	_top = HUD + 28.0 + maxf(0.0, (avail_h - grid_h) / 2.0)
+	_names_rect = Rect2(size.x - 170.0, 14.0, 154.0, 36.0)
 
 
 func _row_y(i: int) -> float:
@@ -203,10 +207,17 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _begin_drag(p: Vector2) -> void:
+	if _names_rect.has_point(p):
+		_say_names = not _say_names
+		GameContext.name_toggle_set("electro", _say_names)
+		queue_redraw()
+		return
 	var hit := _node_hit(p)
 	if hit:
 		_drag = { "col": hit["col"], "id": hit["id"], "x": p.x, "y": p.y }
 		_play(_sfx_pick)
+		if _say_names:
+			GameContext.speak(str(_name_by_id.get(hit["id"], "")))
 		queue_redraw()
 
 
@@ -308,6 +319,8 @@ func _draw() -> void:
 		var b := _right_node(_right_ids.find(_wrong["b"]))
 		var alpha: float = clampf(1.0 - _wrong["t"] / 0.5, 0.0, 1.0)
 		draw_polyline(_bezier_pts(a, b), Color(1, 0.35, 0.35, alpha), 6.0, true)
+
+	GameContext.draw_name_pill(self, _names_rect, _say_names)
 
 	if _drag:
 		var list: Array = _ids if _drag["col"] == "L" else _right_ids
