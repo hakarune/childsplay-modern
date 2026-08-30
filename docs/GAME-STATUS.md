@@ -34,15 +34,16 @@ graphics declaration uses **[docs/templates/ASSETS.template.md](templates/ASSETS
 
 ## Summary
 
-| Target | ✅ Done | 🟡 Partial | ⬜ Not started |
-| --- | --- | --- | --- |
-| Godot (of the classic-activity rows below) | 14 | 0 | 0 |
-| Web (of the classic-activity rows below)   | 14 | 0 | 0 |
+| Group | Rows | Godot | Web |
+| --- | :---: | :---: | :---: |
+| Classic Childsplay activities | 14 | ✅ 14 | ✅ 14 |
+| Extended activities — shipped | 9 | ✅ 9 | ✅ 9 |
+| Quiz suite (engine + 10 decks) | 11 | 🔜 0 | 🔜 0 |
 
-**Every classic Childsplay activity is now ported on both targets** (plus
-**Four in a Row** from the extended catalogue).
-
-Both targets are at feature parity.
+**Every classic Childsplay activity plus nine extras is ported on both
+targets, at feature parity.** The only outstanding committed work is the
+**Quiz suite** below. Daily Training, Photo Album, Spin the Bottle and
+`birthday.py` are **out of scope** (see the end of this file).
 
 ### Menu structure
 
@@ -79,21 +80,21 @@ is committed to porting first.
 
 ### What's next
 
-The classic 13 are all done. Remaining work is the **extended catalogue**
-below — Photo Album, Spin the Bottle and the Quiz decks.
+The classic 13 and the nine shipped extras are all done. The only
+outstanding committed work is the **Quiz suite** below — one shared engine
+plus ten decks. Daily Training, Photo Album, Spin the Bottle and
+`birthday.py` are **out of scope** (rationale at the end of this file).
 
 ---
 
-## Extended legacy catalogue (not committed, tracked for completeness)
+## Extended activities — shipped
 
-The original also ships these. **Four in a Row**, **Block Breaker**,
-**Simon**, **Electro**, **Tic Tac Toe**, **Wipe**, **Image Changer**,
-**Numbers** and **Word Maker** are converted so far; the rest are listed
-so nothing is lost.
+Not part of the stock kid menu, but converted from the extended legacy
+catalogue and wired into the launcher on both targets. All at feature
+parity.
 
 | Activity | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
-| Daily Training | `dltr.py` | ⬜ | ⬜ | Meta-activity — runs a scripted sequence of the other activities. Not a game in itself. |
 | Numbers | `numbers_sp.py` | ✅ | ✅ | Numbered tiles scattered on the board; study them, press Start, they go blank, then tap them in order 1→N from memory. A wrong tap flashes red and peeks the whole board for a moment — no progress lost. Six levels, 4→9 tiles. `Numbers.tscn` / `numbers.js`. |
 | Electro | `electro_sp.py` | ✅ | ✅ | The wiring board — animal pictures down the left, their names (shuffled) down the right; drag a wire from each picture to its name. Correct wires lock green, wrong ones buzz and fall away. Six levels, 3→8 pairs. Picture↔name pairs load from the hand-editable `assets/data/electro.json` (17 shipped; `tools/gen-electro-data.sh` regenerates from the art), with a baked-in fallback. `Electro.tscn` / `electro.js`. |
 | Fourrow / Four in a Row | `fourrow.py` | ✅ | ✅ | Connect Four vs the computer (3 AI levels: random → win/block → win/block + centre bias). `FourRow.tscn` / `fourrow.js`. |
@@ -101,20 +102,54 @@ so nothing is lost.
 | Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; six levels, target length 2→7. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
 | Image Changer | `ichanger.py` | ✅ | ✅ | Study the row of pictures, press Start; the cards flip down and back and one picture has changed — tap it. Four levels (3 cards, 3 + position shuffle, 4 cards, 4 + shuffle), three rounds each. Reuses the Memory animal art. `ImageChanger.tscn` / `ichanger.js`. |
-| Photo Album | `photoalbum.py` | ⬜ | ⬜ | Browse a themed set of photos. |
 | Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. Clear the target fraction to finish — six paintings (the GPL `WipeData` set), rising target 55→84% and a shrinking sponge. Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
 | Word Maker | `synonyms.py` | ✅ | ✅ | Adapted from the senior `synonyms` drill for young English readers: given a starting letter, build words with the on-screen keyboard (or type). Scored against the bundled ~1235-word kid dictionary `assets/data/wordlist.json` (edit `tools/gen-wordlist.py` to extend). Spoken prompt on open; a **Hint** button reveals an unused word (2 per level). Five letters (S/B/C/T/P), 3→5 words. `WordMaker.tscn` / `synonyms.js`. |
-| Spin the Bottle | `spinbottle.py` | ⬜ | ⬜ | Word game — name something starting with a letter. |
-| Quiz engine | `quizengine.py` / `quiz.py` | ⬜ | ⬜ | Multiple-choice quiz framework. |
-| Quiz: General | `quiz_general.py` | ⬜ | ⬜ | Trivia deck. |
-| Quiz: History | `quiz_history.py` | ⬜ | ⬜ | Trivia deck. |
-| Quiz: Math | `quiz_math.py` / `math_test.py` | ⬜ | ⬜ | Arithmetic questions. |
-| Quiz: Melody | `quiz_melody.py` | ⬜ | ⬜ | Name the tune / instrument. |
-| Quiz: Picture | `quiz_picture.py` | ⬜ | ⬜ | Identify the picture. |
-| Quiz: Royal | `quiz_royal.py` | ⬜ | ⬜ | Trivia deck (regional). |
-| Quiz: Sayings | `quiz_sayings.py` | ⬜ | ⬜ | Complete the proverb. |
-| Quiz: Text | `quiz_text.py` | ⬜ | ⬜ | Text comprehension. |
-| Quiz: Personal / Regional | `quiz_personal.py`, `quiz_regional.py` | ⬜ | ⬜ | Configurable local trivia decks. |
+
+---
+
+## Quiz suite — planned
+
+The original ships a shared quiz engine (`quizengine.py` → `quiz.py`) and a
+family of multiple-choice decks: a question at the top of the screen, tap
+the correct answer from the choices below. **One engine port unlocks every
+deck**, so this is tracked as a single body of work rather than eleven
+separate ports.
+
+**Engine port plan** — `QuizEngine.tscn` / `quiz.js`, built to the Design
+Policy: load a deck, shuffle questions and answers, N answer buttons,
+score + monotonic level ramp, the question spoken through TTS, 🔊
+read-aloud button, one-row HUD. Legacy content in `lib/CPData/Quiz*Data/`
+(`general_knowledge.xml`, per-language `.rc` files, the history photos)
+gets converted into hand-editable `assets/data/quiz/*.json`, one file per
+deck, with a `tools/gen-quiz-data.*` regenerator.
+
+| Piece | Legacy module | Godot | Web | What it is |
+| --- | --- | :---: | :---: | --- |
+| **Quiz engine** | `quizengine.py`, `quiz.py` | 🔜 | 🔜 | Shared framework described above. Not a menu tile itself — each deck below is a tile that boots the engine with its `deck` id. |
+| Quiz: General | `quiz_general.py` | 🔜 | 🔜 | General-knowledge trivia. 6 levels. Source: `general_knowledge.xml`. |
+| Quiz: Math | `quiz_math.py`, `math_test.py` | 🔜 | 🔜 | Generated arithmetic questions, order-of-operations aware. `math_test.py` is the timed-drill variant of the same content. |
+| Quiz: Picture | `quiz_picture.py` | 🔜 | 🔜 | Identify what is shown in a picture. 6 levels. Can reuse the Memory / Find Sound art pools. |
+| Quiz: Melody | `quiz_melody.py` | 🔜 | 🔜 | A short clip plays; name the tune or instrument. Needs an audio deck. |
+| Quiz: Sayings | `quiz_sayings.py` | 🔜 | 🔜 | Finish the proverb / common saying. |
+| Quiz: Text | `quiz_text.py` | 🔜 | 🔜 | Short reading-comprehension questions. |
+| Quiz: History | `quiz_history.py` | 🔜 | 🔜 | "Which decade?" — place a photo or fact in its period. 2 levels; per-language decks (de/en/fr/nl/sv) + decade photos. |
+| Quiz: Royal | `quiz_royal.py` | 🔜 | 🔜 | Trivia about royalty. 2 levels. Regional interest — low priority. |
+| Quiz: Personal | `quiz_personal.py` | 🔜 | 🔜 | Questions about the player. Needs a user-supplied config file; ships with an empty deck. |
+| Quiz: Regional | `quiz_regional.py` | 🔜 | 🔜 | Local-area trivia. Needs a user-supplied config file; ships with an empty deck. |
+
+---
+
+## Out of scope
+
+Deliberately not ported — these don't fit a pick-and-play kids' activity
+launcher. Listed so the decision is on the record.
+
+| Activity | Legacy module | Why not |
+| --- | --- | --- |
+| Daily Training | `dltr.py` | Not a game — a meta-runner that plays a fixed scripted sequence of the other activities. The launcher already lets a child pick freely, so it adds nothing. |
+| Photo Album | `photoalbum.py` | A slideshow of a bundled photo set — no interaction, no goal. |
+| Birthday | `birthday.py` | A "days until your birthday" reminder screen. Unrelated to the activities and needs a stored birth date. |
+| Spin the Bottle | `spinbottle.py` | Overlaps **Word Maker** (name dictionary words starting with a given letter). If wanted, it returns as a Word Maker mode, not a standalone tile. |
 
 ---
 
@@ -147,4 +182,15 @@ Maker rebuilt: ~1235-word bundled dictionary (assets/data/wordlist.json,
 tools/gen-wordlist.py), spoken intro, and a 2-per-level Hint button; Godot
 in parity. Next §L items: Godot HUD-bar contrast parity, native device
 keyboard for Falling Letter / Word Maker, §A/§C audio-pool migration,
-Pong era themes._
+Pong era themes.
+
+2026-08-30 (scope): quizzes promoted from "tracked for completeness" to
+committed work — new **Quiz suite — planned** section: one shared engine
+(`quizengine.py`/`quiz.py` → `QuizEngine.tscn`/`quiz.js`) plus ten decks,
+all 🔜, content to be converted into `assets/data/quiz/*.json`. The nine
+already-shipped extras split out into their own **Extended activities —
+shipped** table. New **Out of scope** section records the four dropped
+activities and why: Daily Training (`dltr.py`, meta-runner, not a game),
+Photo Album (`photoalbum.py`, no interaction), Birthday (`birthday.py`,
+reminder screen), Spin the Bottle (`spinbottle.py`, redundant with Word
+Maker). Summary table reworked to the three groups._
