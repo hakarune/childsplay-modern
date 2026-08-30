@@ -8,7 +8,7 @@
 | Game id | `findsound` (findsound.js / FindSound.tscn) |
 | Owns any art? | no |
 | Shared pools used | `soundpics` (the picture choices) + themed sound clips (audio, not covered here). |
-| Content file(s) | — (none) |
+| Content file(s) | `assets/data/findsound.json` — levels + spoken-label overrides |
 | Theme variants | light+dark from palette only |
 | Style themes | none |
 

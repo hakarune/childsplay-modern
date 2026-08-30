@@ -7,7 +7,9 @@ extends Control
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 
-const LEVELS := [
+# Levels + spoken-label overrides load from assets/data/findsound.json (§J);
+# this is only the offline fallback.
+const FALLBACK_LEVELS := [
 	{ "name": "Animals",     "ids": ["cow", "elephant", "frog", "lion", "rooster", "sheep"] },
 	{ "name": "Vehicles",    "ids": ["boat", "car", "plane", "police", "rocket"] },
 	{ "name": "Instruments", "ids": ["drum", "flute", "guitar", "harp", "piano", "violin"] },
@@ -15,6 +17,9 @@ const LEVELS := [
 	{ "name": "Noises",      "ids": ["alarm", "bird", "bubbles", "carhorn", "chiken", "clang", "cow", "dog"] },
 	{ "name": "More noises", "ids": ["duck2", "foghorn", "frogs", "hey", "horse", "plane", "sheep", "zap"] },
 ]
+
+var _levels: Array = FALLBACK_LEVELS
+var _labels: Dictionary = {}
 
 const SND_GOOD := "good.ogg"
 const SND_BAD := "wrong.ogg"
@@ -60,6 +65,12 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level_index + 1))
 	_popup.visible = false
 
+	var data := GameContext.load_json("findsound")
+	if data.get("levels", []) is Array and not data.get("levels", []).is_empty():
+		_levels = data["levels"]
+	if data.get("labels", {}) is Dictionary:
+		_labels = data["labels"]
+
 	if GameContext.has_voice():
 		_say_names = GameContext.name_toggle_get("findsound")
 		_names_btn = Button.new()
@@ -88,8 +99,8 @@ func _sync_names_btn() -> void:
 
 
 func _start_level(index: int) -> void:
-	_level_index = clampi(index, 0, LEVELS.size() - 1)
-	var lvl: Dictionary = LEVELS[_level_index]
+	_level_index = clampi(index, 0, _levels.size() - 1)
+	var lvl: Dictionary = _levels[_level_index]
 	_tries = 0
 	_found = 0
 	_total = lvl["ids"].size()
@@ -153,7 +164,7 @@ func _on_card_pressed(card: Dictionary) -> void:
 		card["button"].modulate = Color(1, 1, 1, 0.55)
 		_play(_sfx_good)
 		if _say_names:
-			GameContext.speak(GameContext.name_from_id(card["id"]))
+			GameContext.speak(str(_labels.get(card["id"], GameContext.name_from_id(card["id"]))))
 		_update_info()
 		_next_round()
 	else:
@@ -173,7 +184,7 @@ func _on_level_complete() -> void:
 	_busy = true
 	_target_id = ""
 	_play(_sfx_win)
-	var is_last := _level_index >= LEVELS.size() - 1
+	var is_last := _level_index >= _levels.size() - 1
 	_popup_label.text = "You found them all!\n%d wrong tap%s" % [_tries, "" if _tries == 1 else "s"]
 	_popup_next.visible = not is_last
 	_popup.visible = true
@@ -182,7 +193,7 @@ func _on_level_complete() -> void:
 
 func _update_info() -> void:
 	_info_label.text = "Found %d / %d      Level %d / %d  -  %s" % [
-		_found, _total, _level_index + 1, LEVELS.size(), LEVELS[_level_index]["name"]
+		_found, _total, _level_index + 1, _levels.size(), _levels[_level_index]["name"]
 	]
 
 

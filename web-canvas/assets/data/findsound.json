@@ -1,0 +1,25 @@
+{
+  "_comment": "Find Sound levels (Design Policy §J). Each id is BOTH a picture stem in assets/graphics/pools/soundpics/ and a clip stem (<id>.ogg) in the shared sound set. Add a level or extend an ids list freely — just keep a picture and a clip present for every id. `labels` overrides the spoken word (name-toggle, §E.3) for ids whose legacy filename reads oddly; anything not listed is de-slugged automatically.",
+  "levels": [
+    { "name": "Animals",     "ids": ["cow", "elephant", "frog", "lion", "rooster", "sheep"] },
+    { "name": "Vehicles",    "ids": ["boat", "car", "plane", "police", "rocket"] },
+    { "name": "Instruments", "ids": ["drum", "flute", "guitar", "harp", "piano", "violin"] },
+    { "name": "More music",  "ids": ["banjo", "cello", "chimes", "clarinette", "didjeridu", "shenai"] },
+    { "name": "Noises",      "ids": ["alarm", "bird", "bubbles", "carhorn", "chiken", "clang", "cow", "dog"] },
+    { "name": "More noises", "ids": ["duck2", "foghorn", "frogs", "hey", "horse", "plane", "sheep", "zap"] }
+  ],
+  "labels": {
+    "carhorn": "car horn",
+    "chiken": "chicken",
+    "duck2": "duck",
+    "frogs": "frogs",
+    "clarinette": "clarinet",
+    "didjeridu": "didgeridoo",
+    "shenai": "shehnai",
+    "police": "police car",
+    "chimes": "wind chimes",
+    "foghorn": "fog horn",
+    "hey": "shout",
+    "clang": "clang"
+  }
+}

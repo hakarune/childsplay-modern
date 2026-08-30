@@ -5,17 +5,22 @@
 // clear the level. Wrong taps just wobble — no penalty.
 
 import { Scene, VIEW_W, VIEW_H, img, playSound, loadSound } from '../engine.js';
-import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton, makeNameToggle, nameFromId } from '../util.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton, makeNameToggle, nameFromId, loadData } from '../util.js';
 import { theme } from '../theme.js';
 
-const LEVELS = [
-  { name: 'Animals',      ids: ['cow', 'elephant', 'frog', 'lion', 'rooster', 'sheep'] },
-  { name: 'Vehicles',     ids: ['boat', 'car', 'plane', 'police', 'rocket'] },
-  { name: 'Instruments',  ids: ['drum', 'flute', 'guitar', 'harp', 'piano', 'violin'] },
-  { name: 'More music',   ids: ['banjo', 'cello', 'chimes', 'clarinette', 'didjeridu', 'shenai'] },
-  { name: 'Noises',       ids: ['alarm', 'bird', 'bubbles', 'carhorn', 'chiken', 'clang', 'cow', 'dog'] },
-  { name: 'More noises',  ids: ['duck2', 'foghorn', 'frogs', 'hey', 'horse', 'plane', 'sheep', 'zap'] },
-];
+// Levels + spoken-label overrides live in assets/data/findsound.json (§J);
+// this is only the offline fallback.
+const FALLBACK = {
+  levels: [
+    { name: 'Animals',      ids: ['cow', 'elephant', 'frog', 'lion', 'rooster', 'sheep'] },
+    { name: 'Vehicles',     ids: ['boat', 'car', 'plane', 'police', 'rocket'] },
+    { name: 'Instruments',  ids: ['drum', 'flute', 'guitar', 'harp', 'piano', 'violin'] },
+    { name: 'More music',   ids: ['banjo', 'cello', 'chimes', 'clarinette', 'didjeridu', 'shenai'] },
+    { name: 'Noises',       ids: ['alarm', 'bird', 'bubbles', 'carhorn', 'chiken', 'clang', 'cow', 'dog'] },
+    { name: 'More noises',  ids: ['duck2', 'foghorn', 'frogs', 'hey', 'horse', 'plane', 'sheep', 'zap'] },
+  ],
+  labels: {},
+};
 
 const SND_GOOD = 'sfx/good.ogg';
 const SND_BAD = 'sfx/wrong.ogg';
@@ -30,13 +35,27 @@ export default class FindSoundGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._names = makeNameToggle('findsound', { x: VIEW_W - 172, y: 18, w: 150, h: 34 });
+    this._levels = FALLBACK.levels;
+    this._labels = FALLBACK.labels;
     this._level = 0;
     this._startLevel(0);
+    // swap in the real data; restart the level if the player hasn't begun
+    loadData('findsound', FALLBACK).then((d) => {
+      if (d && Array.isArray(d.levels) && d.levels.length) {
+        this._levels = d.levels;
+        this._labels = d.labels || {};
+        if (this._level === 0 && this._cards && this._cards.every((c) => !c.found)) {
+          this._startLevel(0);
+        }
+      }
+    });
   }
 
+  _sayName(id) { this._names.say(this._labels[id] || nameFromId(id)); }
+
   _startLevel(n) {
-    this._level = Math.max(0, Math.min(n, LEVELS.length - 1));
-    const lv = LEVELS[this._level];
+    this._level = Math.max(0, Math.min(n, this._levels.length - 1));
+    const lv = this._levels[this._level];
     this._tries = 0;
     this._wobble = null;         // { card, t }
     this._overlay.hide();
@@ -107,7 +126,7 @@ export default class FindSoundGame extends Scene {
     if (c.id === this._target.id) {
       c.found = true;
       playSound(SND_GOOD);
-      this._names.say(nameFromId(c.id));
+      this._sayName(c.id);
       this._nextRound();
     } else {
       this._tries++;
@@ -118,7 +137,7 @@ export default class FindSoundGame extends Scene {
 
   _win() {
     playSound(SND_WIN, { channel: 'music' });
-    const last = this._level >= LEVELS.length - 1;
+    const last = this._level >= this._levels.length - 1;
     const rows = [['Replay', 'replay'], ['Menu', 'menu']];
     if (!last) rows.unshift(['Next Level', 'next']);
     this._overlay.show(`You found them all!\n${this._tries} wrong tap${this._tries === 1 ? '' : 's'}`,
@@ -139,7 +158,7 @@ export default class FindSoundGame extends Scene {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     const found = this._cards.filter((c) => c.found).length;
-    ctx.fillText(`L${this._level + 1}/${LEVELS.length} ${LEVELS[this._level].name}  ·  found ${found}/${this._cards.length}`, 220, 35);
+    ctx.fillText(`L${this._level + 1}/${this._levels.length} ${this._levels[this._level].name}  ·  found ${found}/${this._cards.length}`, 220, 35);
     this._names.rect.x = VIEW_W - 172;
     this._names.draw(ctx);
 

@@ -723,8 +723,11 @@ game has a `docs/assets/<id>.assets.md` (§A.7).
 "say the names" pill, both targets; util.js `makeNameToggle` /
 GameContext `name_toggle_*` + `draw_name_pill`).
 
-Still open: findsound §J data file; Godot HUD-bar contrast parity; then the
-Quiz suite. A visual-QA pass on a real device/browser is also outstanding.
+~~findsound §J~~ (`assets/data/findsound.json` — levels + label overrides,
+loaded via `loadData` / `load_json` with an offline fallback).
+
+Still open: Godot HUD-bar contrast parity; then the Quiz suite. A visual-QA
+pass on a real device/browser is also outstanding.
 
 | Game | Must change |
 | --- | --- |

@@ -15,6 +15,7 @@ The ones that reference a bundled data file:
 | --- | --- |
 | Puzzle, Wipe | `assets/data/backgrounds.json` — difficulty tier per painting |
 | Electro | `assets/data/electro.json` — picture↔name pairs |
+| Find Sound | `assets/data/findsound.json` — levels + spoken-label overrides |
 | Word Maker | `assets/data/wordlist.json` — kid dictionary |
 
 Alternate-art overlays (Policy §C.4) go in
