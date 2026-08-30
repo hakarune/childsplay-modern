@@ -11,7 +11,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Childsplay" />
   <title>Childsplay</title>
-  <link rel="icon" href="assets/icons/memory.png" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -48,5 +50,13 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+  <script>
+    // Register the service worker so the site installs as an offline app.
+    if ('serviceWorker' in navigator) {
+      addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

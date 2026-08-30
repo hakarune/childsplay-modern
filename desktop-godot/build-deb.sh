@@ -124,7 +124,7 @@ if [ "$DO_EXPORT" -eq 1 ]; then
 	bash "$PROJECT_DIR/sync-assets.sh"
 
 	if [ ! -f "$PROJECT_DIR/export_presets.cfg" ] || [ "$FORCE_PRESET" -eq 1 ]; then
-		say "writing export_presets.cfg (preset '$EXPORT_PRESET', all resources, embedded pck)"
+		say "writing export_presets.cfg (Linux + Windows presets, all resources, embedded pck)"
 		cat > "$PROJECT_DIR/export_presets.cfg" <<'PRESET'
 [preset.0]
 
@@ -154,6 +154,51 @@ binary_format/embed_pck=true
 texture_format/s3tc_bptc=true
 texture_format/etc2_astc=false
 binary_format/architecture="x86_64"
+ssh_remote_deploy/enabled=false
+
+[preset.1]
+
+name="Windows"
+platform="Windows Desktop"
+runnable=true
+advanced_options=false
+dedicated_server=false
+custom_features=""
+export_filter="all_resources"
+include_filter="*.json"
+exclude_filter="legacy-sources/*"
+export_path=""
+encryption_include_filters=""
+encryption_exclude_filters=""
+seed=0
+encrypt_pck=false
+encrypt_directory=false
+script_export_mode=2
+
+[preset.1.options]
+
+custom_template/debug=""
+custom_template/release=""
+debug/export_console_wrapper=0
+binary_format/embed_pck=true
+texture_format/s3tc_bptc=true
+texture_format/etc2_astc=false
+binary_format/architecture="x86_64"
+codesign/enable=false
+application/modify_resources=true
+application/icon=""
+application/console_wrapper_icon=""
+application/icon_interpolation=4
+application/file_version=""
+application/product_version=""
+application/company_name="Childsplay-Modern"
+application/product_name="Childsplay Modern"
+application/file_description="Childsplay Modern educational activity suite"
+application/copyright="GPL-3.0-or-later"
+application/trademarks=""
+application/export_angle=0
+application/export_d3d12=0
+application/d3d12_agility_sdk_multiarch=true
 ssh_remote_deploy/enabled=false
 PRESET
 	fi

@@ -102,11 +102,15 @@ childsplay-modern/
 │   ├── project.godot             1280×720, canvas_items/keep stretch, Compatibility
 │   ├── default_bus_layout.tres   Master / Music / SFX / Voice audio buses
 │   ├── sync-assets.sh            Mirror ../assets → desktop-godot/assets (res://)
-│   ├── build-deb.sh             Export + package the .deb
+│   ├── build-deb.sh             Export + package the .deb (Linux)
+│   ├── build-windows.sh        Export + zip the .exe (Windows x86_64)
 │   ├── scenes/                   MainMenu.tscn, MemoryMenu.tscn, games/*.tscn
 │   └── scripts/                  AssetLoader + GameContext (autoloads), menus, games/*
-├── web-canvas/                 HTML5 / JS / Canvas implementation
+├── web-canvas/                 HTML5 / JS / Canvas implementation (PWA)
 │   ├── index.html               Responsive full-viewport canvas + chrome buttons
+│   ├── manifest.webmanifest     PWA manifest
+│   ├── sw.js                    Service worker (offline, stale-while-revalidate)
+│   ├── icons/                   App icons (icon.svg + generated PNGs)
 │   ├── sync-assets.sh           (Re)build web-canvas/assets/ from ../assets
 │   ├── serve.sh                 Local static server for development
 │   ├── assets/                  Web-sized copy of the pools (committed)
@@ -252,6 +256,13 @@ Deploying is just copying `web-canvas/` to any static host; a push to
 `main` that touches `web-canvas/**` auto-deploys to GitHub Pages via
 `.github/workflows/deploy-pages.yml`.
 
+The web target is a **PWA**: `manifest.webmanifest` + `sw.js` (a
+stale-while-revalidate service worker) make it installable and fully
+offline once visited, on Android / ChromeOS / Windows / macOS / iOS. Bump
+`CACHE` in `sw.js` on a release if you want old cache entries evicted
+immediately rather than lazily refreshed. Icons live in `web-canvas/icons/`
+(regenerate the PNGs from `icon.svg` with `rsvg-convert`).
+
 `js/` layout:
 
 | File | Role |
@@ -293,29 +304,30 @@ matching **Linux export templates**; `dpkg-deb`; optionally `fakeroot`
 `--export-release`, then stages an FHS tree and packages it. Stage under
 `$TMPDIR` or set `CHILDSPLAY_BUILD_DIR` if your checkout is on FAT/exFAT.
 
+Windows build (needs the Windows export templates for the same Godot
+version):
+
+```sh
+./desktop-godot/build-windows.sh 0.3.0
+#   -> dist/childsplay-modern_0.3.0_windows_x86_64.zip
+```
+
 To publish a release: bump `config/version` in `desktop-godot/project.godot`,
-build, then `gh release create v<x.y.z> dist/childsplay-modern_<x.y.z>_amd64.deb`.
+build both, then
+`gh release create v<x.y.z> dist/childsplay-modern_<x.y.z>_amd64.deb dist/childsplay-modern_<x.y.z>_windows_x86_64.zip`.
 
 ---
 
 ## Other platforms — is a Windows / Android / Chrome build feasible?
 
-Short version: **Windows is easy, an installable web app (PWA) is easy and
-covers almost everything, Android is medium, macOS builds easily but is
-painful to distribute, and Chrome "apps" are dead.**
-
-| Target | Effort | Notes |
+| Target | Status | Notes |
 | --- | --- | --- |
-| **Windows `.exe`** | Easy | Same Godot project, one extra export preset + the Windows export templates: `godot --headless --export-release "Windows Desktop" childsplay-modern.exe`. No code changes. Could be added to `build-deb.sh` as a sibling step. The web build already runs in any Windows browser. |
-| **Installable web app (PWA)** | Easy | Add a `manifest.webmanifest` + a small service worker to `web-canvas/`. The existing site then installs as a full-screen, offline app on **Android, ChromeOS, Windows, macOS and (via "Add to Home Screen") iOS** — one artifact, every platform. This is the highest-value next step. |
-| **Android `.apk`** | Medium | Two routes. (a) Godot Android export — needs the Android SDK + build tools + a keystore; ~30 min one-time setup, then it exports an APK/AAB. (b) Wrap the web build in a **Trusted Web Activity** (a thin APK that points at the Pages URL) — smaller, auto-updates, Play-Store-installable, but needs the PWA above first. |
-| **macOS `.app` / `.dmg`** | Build easy, ship hard | Godot exports it, but Gatekeeper wants an Apple Developer cert + notarization (and a Mac) for anyone else to run it without right-click-Open gymnastics. Fine for personal use unsigned. |
-| **Chrome App** | Don't | Chrome packaged apps were removed from Chrome on every platform except ChromeOS kiosk (itself deprecated). Not worth targeting. |
-| **Chrome Extension** | Low value | You *can* bundle `web-canvas/` in an extension that opens it in a tab, but it gains nothing over just visiting the hosted site or installing the PWA. |
-
-So nothing here needs a rewrite. If you want, the practical additions are:
-a Windows preset in the build script, and a PWA manifest + service worker
-for `web-canvas/` (which also unlocks the light-weight Android TWA route).
+| **Windows `.exe`** | **Done** — `desktop-godot/build-windows.sh [VERSION]` | Same Godot project, second export preset (`Windows`, x86_64, embedded pck). Needs the Windows export templates for the exact Godot version. Output: `dist/childsplay-modern_<version>_windows_x86_64.zip` (a single `.exe` + README). Unsigned, so SmartScreen warns once. |
+| **Installable web app (PWA)** | **Done** | `web-canvas/manifest.webmanifest` + `sw.js`. The hosted site installs as a full-screen, offline app on **Android, ChromeOS, Windows, macOS and (via "Add to Home Screen") iOS** — one artifact, every platform. |
+| **Android `.apk`** | Not built; medium effort | (a) Godot Android export — needs the Android SDK + build-tools + a keystore (~30 min one-time), then exports an APK/AAB. (b) Wrap the PWA in a **Trusted Web Activity** — a thin APK pointing at the Pages URL, auto-updating, Play-Store-installable. |
+| **macOS `.app` / `.dmg`** | Not built; build easy, ship hard | Godot exports it, but Gatekeeper wants an Apple Developer cert + notarization (and a Mac) for others to run it without right-click-Open. Fine unsigned for personal use. |
+| **Chrome App** | Won't do | Chrome packaged apps were removed everywhere except deprecated ChromeOS kiosk. |
+| **Chrome Extension** | Won't do | Would just open the page in a tab — no gain over the hosted site or the PWA. |
 
 ---
 
