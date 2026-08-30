@@ -9,6 +9,8 @@ extends Node
 # --- next-scene handoff --------------------------------------------------
 ## One of: "pictures", "lower", "upper", "numbers"
 var memory_variant := "pictures"
+## A quiz deck id — the stem of assets/data/quiz/<deck>.json
+var quiz_deck := "general"
 
 # --- theme / palette (§D) ---------------------------------------------------
 signal theme_changed
@@ -202,7 +204,7 @@ func speak(text: String, lang_hint := "") -> void:
 	# Voice channel off -> stay silent (also covers live TTS, which no bus can mute).
 	if al != null and al.has_method("is_channel_muted") and al.is_channel_muted("voice"):
 		return
-	if al != null:
+	if al != null and al.has_method("has_stream") and al.has_stream("v_" + _slug(text) + ".ogg"):
 		var st: AudioStream = al.get_stream("v_" + _slug(text) + ".ogg")
 		if st != null:
 			if _voice_player == null:

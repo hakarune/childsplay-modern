@@ -224,6 +224,10 @@ func has_texture(asset_name: String) -> bool:
 	return _texture_paths.has(asset_name.to_lower())
 
 
+func has_stream(sound_name: String) -> bool:
+	return _audio_paths.has(sound_name.to_lower())
+
+
 # ---------------------------------------------------------------------------
 # Audio
 # ---------------------------------------------------------------------------

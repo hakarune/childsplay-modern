@@ -9,6 +9,7 @@
 import { Game, loadManifest, setMuted, isMuted } from './engine.js';
 import { MainMenu } from './menu.js';
 import { MemoryMenu } from './games/memory-menu.js';
+import { QuizMenu } from './games/quiz-menu.js';
 import { getGame } from './games/index.js';
 import { resetBags } from './util.js';
 import { initTheme, toggleTheme, getTheme } from './theme.js';
@@ -104,9 +105,11 @@ backBtn.addEventListener('click', () => backHandler());
 
 game.register('MainMenu', (g) => new MainMenu(g, { onSelect }));
 game.register('MemoryMenu', (g) => new MemoryMenu(g, { onPick: launchFromMemory }));
+game.register('QuizMenu', (g) => new QuizMenu(g, { onPick: launchFromQuiz }));
 
 function onSelect(id) {
   if (id === 'memory') return openMemoryMenu();
+  if (id === 'quiz') return openQuizMenu();
   launch(id, {}, toMainMenu);
 }
 
@@ -128,6 +131,17 @@ function openMemoryMenu() {
 
 function launchFromMemory(id, opts) {
   launch(id, opts, openMemoryMenu);
+}
+
+function openQuizMenu() {
+  title.textContent = 'Quiz';
+  backHandler = toMainMenu;
+  setHud(true);
+  game.setState('QuizMenu');
+}
+
+function launchFromQuiz(id, opts) {
+  launch(id, opts, openQuizMenu);
 }
 
 async function launch(id, opts, back) {

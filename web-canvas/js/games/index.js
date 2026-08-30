@@ -28,6 +28,7 @@ export const GAMES = [
   { id: 'synonyms',      name: 'Word Maker',     load: () => import('./synonyms.js') },
   { id: 'packid',        name: 'Packid',         load: () => import('./packid.js') },
   { id: 'billiards',     name: 'Billiards',      load: () => import('./billiards.js') },
+  { id: 'quiz',          name: 'Quiz',           load: () => import('./quiz.js') },
 ];
 
 export const MENU = [
@@ -50,6 +51,7 @@ export const MENU = [
   { id: 'synonyms',      name: 'Word Maker',   icon: 'icons/synonyms.png' },
   { id: 'packid',        name: 'Packid',        icon: 'icons/packid.png' },
   { id: 'billiards',     name: 'Billiards',     icon: 'icons/billiards.png' },
+  { id: 'quiz',          name: 'Quiz',          icon: 'icons/quiz.png', submenu: true },
 ];
 
 export function getGame(id) {

@@ -38,16 +38,18 @@ graphics declaration uses **[docs/templates/ASSETS.template.md](templates/ASSETS
 | --- | :---: | :---: | :---: |
 | Classic Childsplay activities | 14 | ✅ 14 | ✅ 14 |
 | Extended activities — shipped | 9 | ✅ 9 | ✅ 9 |
-| Quiz suite (engine + 10 decks) | 11 | 🔜 0 | 🔜 0 |
+| Quiz suite (shared engine + 5 decks) | 6 | ✅ 6 | ✅ 6 |
 
-**Every classic Childsplay activity plus nine extras is ported on both
-targets, at feature parity.** The only outstanding committed work is the
-**Quiz suite** below. Daily Training, Photo Album, Spin the Bottle and
-`birthday.py` are **out of scope** (see the end of this file).
+**Every classic Childsplay activity, nine extras, and the Quiz suite are
+ported on both targets, at feature parity.** Daily Training, Photo Album,
+Spin the Bottle and `birthday.py` are **out of scope** (see the end of
+this file).
 
 ### Menu structure
 
-The main dashboard has **19 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Word Maker, Packid, Billiards.
+The main dashboard has **20 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Word Maker, Packid, Billiards, Quiz.
+The **Quiz** tile opens a deck picker (`quiz-menu.js` / `QuizMenu.tscn`)
+routing to the shared engine (`quiz.js` / `Quiz.tscn`) with a `deck` id.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)
 with five decks — **Pictures, lowercase, UPPERCASE, Numbers, Sounds** —
 routing to `Memory.tscn`/`memory.js` (with a `variant`) or, for Sounds, to
@@ -107,35 +109,34 @@ parity.
 
 ---
 
-## Quiz suite — planned
+## Quiz suite
 
-The original ships a shared quiz engine (`quizengine.py` → `quiz.py`) and a
-family of multiple-choice decks: a question at the top of the screen, tap
-the correct answer from the choices below. **One engine port unlocks every
-deck**, so this is tracked as a single body of work rather than eleven
-separate ports.
+A shared multiple-choice engine (`web-canvas/js/games/quiz.js` /
+`desktop-godot/scenes/games/Quiz.tscn` + `Quiz.gd`) behind one **Quiz**
+menu tile that opens a deck picker (`quiz-menu.js` / `QuizMenu.tscn` — the
+§F.3.4 "bundle a family behind one tile" pattern). The engine loads
+`assets/data/quiz/<deck>.json`, groups questions by `level`, shuffles the
+answer order, speaks the question through TTS (🔊 re-read button), runs a
+one-row HUD (§G), and never penalises a wrong tap — it just shakes
+(§H.1.3). Clear a level's questions to advance; clear the last to win.
 
-**Engine port plan** — `QuizEngine.tscn` / `quiz.js`, built to the Design
-Policy: load a deck, shuffle questions and answers, N answer buttons,
-score + monotonic level ramp, the question spoken through TTS, 🔊
-read-aloud button, one-row HUD. Legacy content in `lib/CPData/Quiz*Data/`
-(`general_knowledge.xml`, per-language `.rc` files, the history photos)
-gets converted into hand-editable `assets/data/quiz/*.json`, one file per
-deck, with a `tools/gen-quiz-data.*` regenerator.
+Decks are hand-editable JSON (§J): `{ name, prompt, questions:[{ level,
+q, choices, answer, image? }] }`.
 
 | Piece | Legacy module | Godot | Web | What it is |
 | --- | --- | :---: | :---: | --- |
-| **Quiz engine** | `quizengine.py`, `quiz.py` | 🔜 | 🔜 | Shared framework described above. Not a menu tile itself — each deck below is a tile that boots the engine with its `deck` id. |
-| Quiz: General | `quiz_general.py` | 🔜 | 🔜 | General-knowledge trivia. 6 levels. Source: `general_knowledge.xml`. |
-| Quiz: Math | `quiz_math.py`, `math_test.py` | 🔜 | 🔜 | Generated arithmetic questions, order-of-operations aware. `math_test.py` is the timed-drill variant of the same content. |
-| Quiz: Picture | `quiz_picture.py` | 🔜 | 🔜 | Identify what is shown in a picture. 6 levels. Can reuse the Memory / Find Sound art pools. |
-| Quiz: Melody | `quiz_melody.py` | 🔜 | 🔜 | A short clip plays; name the tune or instrument. Needs an audio deck. |
-| Quiz: Sayings | `quiz_sayings.py` | 🔜 | 🔜 | Finish the proverb / common saying. |
-| Quiz: Text | `quiz_text.py` | 🔜 | 🔜 | Short reading-comprehension questions. |
-| Quiz: History | `quiz_history.py` | 🔜 | 🔜 | "Which decade?" — place a photo or fact in its period. 2 levels; per-language decks (de/en/fr/nl/sv) + decade photos. |
-| Quiz: Royal | `quiz_royal.py` | 🔜 | 🔜 | Trivia about royalty. 2 levels. Regional interest — low priority. |
-| Quiz: Personal | `quiz_personal.py` | 🔜 | 🔜 | Questions about the player. Needs a user-supplied config file; ships with an empty deck. |
-| Quiz: Regional | `quiz_regional.py` | 🔜 | 🔜 | Local-area trivia. Needs a user-supplied config file; ships with an empty deck. |
+| **Quiz engine** | `quizengine.py`, `quiz.py` | ✅ | ✅ | Shared framework above + the deck picker. Not itself a tile. |
+| Quiz: General | `quiz_general.py` | ✅ | ✅ | Kid-friendly general knowledge, 5 levels. `assets/data/quiz/general.json`. |
+| Quiz: Pictures | `quiz_picture.py` | ✅ | ✅ | "Which animal is this?" over the shared `animals` art, 5 levels. `quiz/picture.json`. |
+| Quiz: Math | `quiz_math.py`, `math_test.py` | ✅ | ✅ | Arithmetic, counting → add/subtract → mixed, 5 levels. `quiz/math.json`. |
+| Quiz: Words | `quiz_text.py` | ✅ | ✅ | Rhymes, opposites, first sounds, categories, 3 levels. `quiz/words.json`. |
+| Quiz: Sayings | `quiz_sayings.py` | ✅ | ✅ | Finish the common saying, 3 levels. `quiz/sayings.json`. |
+
+Not shipped (each needs content the port can't synthesise): **Melody**
+(needs an audio deck), **History** (per-language decks + decade photos),
+**Royal** (regional trivia), **Personal / Regional** (need a user-supplied
+config file). Adding any of them is now just a JSON file — the engine and
+picker already handle it.
 
 ---
 

@@ -27,6 +27,7 @@ const GAMES := [
 	{"id": "synonyms", "title": "Word Maker", "scene": "res://scenes/games/WordMaker.tscn"},
 	{"id": "billiards", "title": "Billiards", "scene": "res://scenes/games/Billiards.tscn"},
 	{"id": "packid", "title": "Packid", "scene": "res://scenes/games/Packid.tscn"},
+	{"id": "quiz", "title": "Quiz", "scene": "res://scenes/QuizMenu.tscn"},
 ]
 
 const TILE_SCRIPT := preload("res://scripts/MenuTile.gd")

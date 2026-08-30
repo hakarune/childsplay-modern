@@ -36,6 +36,7 @@ cp "$POOLS/ui/"*                "$DST/ui/"
 cp "$POOLS/soundpics/"*         "$DST/soundpics/"
 cp "$POOLS/icons/"*             "$DST/icons/"
 cp "$SRC/data/"*.json           "$DST/data/" 2>/dev/null || true
+[ -d "$SRC/data/quiz" ] && { mkdir -p "$DST/data/quiz"; cp "$SRC/data/quiz/"*.json "$DST/data/quiz/" 2>/dev/null || true; }
 cp "$POOLS/sprites/packid/"*    "$DST/sprites/packid/"
 cp "$POOLS/sprites/billiards/"* "$DST/sprites/billiards/"
 cp "$POOLS/sprites/aquarium/"*  "$DST/sprites/aquarium/"

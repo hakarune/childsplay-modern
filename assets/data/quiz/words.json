@@ -1,0 +1,24 @@
+{
+  "name": "Words",
+  "prompt": "listen, then tap the right answer",
+  "_comment": "Little language / reading questions — rhymes, opposites, first sounds, categories. `answer` is the index into `choices`.",
+  "questions": [
+    { "level": 1, "q": "Which word rhymes with 'cat'?", "choices": ["hat", "dog", "sun"], "answer": 0 },
+    { "level": 1, "q": "Which word rhymes with 'bee'?", "choices": ["car", "tree", "moon"], "answer": 1 },
+    { "level": 1, "q": "What is the opposite of 'hot'?", "choices": ["cold", "big", "fast"], "answer": 0 },
+    { "level": 1, "q": "What is the opposite of 'up'?", "choices": ["down", "in", "over"], "answer": 0 },
+    { "level": 1, "q": "Which word starts with the 'b' sound?", "choices": ["ball", "sock", "tree"], "answer": 0 },
+
+    { "level": 2, "q": "Which word rhymes with 'star'?", "choices": ["car", "cup", "bed"], "answer": 0 },
+    { "level": 2, "q": "What is the opposite of 'day'?", "choices": ["night", "week", "sun"], "answer": 0 },
+    { "level": 2, "q": "Which one is NOT an animal?", "choices": ["chair", "horse", "rabbit"], "answer": 0 },
+    { "level": 2, "q": "Which word starts with the 's' sound?", "choices": ["snake", "apple", "moon"], "answer": 0 },
+    { "level": 2, "q": "'Big', 'huge' and 'giant' all mean...", "choices": ["large", "tiny", "loud"], "answer": 0 },
+
+    { "level": 3, "q": "Which word means the same as 'happy'?", "choices": ["glad", "tired", "angry"], "answer": 0 },
+    { "level": 3, "q": "Which one is a colour?", "choices": ["purple", "spoon", "jump"], "answer": 0 },
+    { "level": 3, "q": "The plural of 'mouse' is...", "choices": ["mouses", "mice", "mouse"], "answer": 1 },
+    { "level": 3, "q": "Which word is a 'doing' word (a verb)?", "choices": ["run", "table", "green"], "answer": 0 },
+    { "level": 3, "q": "Apple, banana and grape are all...", "choices": ["fruit", "toys", "colours"], "answer": 0 }
+  ]
+}
