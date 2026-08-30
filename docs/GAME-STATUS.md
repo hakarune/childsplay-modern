@@ -133,5 +133,18 @@ both palettes, clean. Godot 3-way sound popover DONE: the menu's Sound
 button now opens a Music / Effects / Voice panel that mutes the matching
 audio bus, persists to settings.cfg `[audio]`, reloads on boot, and gates
 live TTS on the Voice channel — the desktop twin of the web popover
-(§E.3). Next §L items: native device keyboard for Falling Letter / Word
-Maker, §A/§C audio-pool migration, Pong era themes._
+(§E.3).
+
+2026-08-30 (canvas playtest round 2): contrast rework — the HUD bar is now
+a real themed surface (`hud` role + divider) instead of a near-invisible
+scrim, HUD text follows the theme, and puzzle / packid / fallingletter got
+the light/dark pass they were still missing. New roles: hud / card /
+board. Flashcards + Image Changer cards stay white in both themes on a
+`surface_alt` backdrop; Pong + Block Breaker play on a framed dark
+"screen". Electro's picture↔name pairs moved to a hand-editable
+assets/data/electro.json (both targets, +tools/gen-electro-data.sh). Word
+Maker rebuilt: ~1235-word bundled dictionary (assets/data/wordlist.json,
+tools/gen-wordlist.py), spoken intro, and a 2-per-level Hint button; Godot
+in parity. Next §L items: Godot HUD-bar contrast parity, native device
+keyboard for Falling Letter / Word Maker, §A/§C audio-pool migration,
+Pong era themes._
