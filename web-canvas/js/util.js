@@ -89,6 +89,36 @@ export function bag(key, items) {
   return b;
 }
 
+/** Difficulty-tiered pool draw (Policy §B.1.4 / §B.4). `tierOf` maps an item
+ *  to 'easy' | 'med' | 'hard' (or a falsy value = eligible at every tier).
+ *  Each tier gets its own no-repeat bag under `<poolKey>:<tier>`, so Puzzle
+ *  and Wipe sharing `backgrounds` never show the same painting twice in a
+ *  session. */
+export function tierBag(poolKey, items, tierOf, tier) {
+  const key = `${poolKey}:${tier}`;
+  let b = _bags.get(key);
+  if (!b) {
+    b = new Bag(items);
+    b.filter = (x) => { const t = tierOf && tierOf(x); return !t || t === tier; };
+    _bags.set(key, b);
+  }
+  return b;
+}
+
+/** Load & cache a JSON data file (assets/data/<name>.json). Resolves to the
+ *  parsed object, or `fallback` if the fetch/parse fails. */
+const _dataCache = new Map();
+export async function loadData(name, fallback = null) {
+  if (_dataCache.has(name)) return _dataCache.get(name);
+  let out = fallback;
+  try {
+    const r = await fetch(new URL(`../assets/data/${name}.json`, import.meta.url));
+    if (r.ok) out = await r.json();
+  } catch { /* offline / missing — use fallback */ }
+  _dataCache.set(name, out);
+  return out;
+}
+
 export function resetBags(prefix) {
   if (!prefix) { _bags.clear(); return; }
   for (const k of [..._bags.keys()]) if (k.startsWith(prefix)) _bags.delete(k);

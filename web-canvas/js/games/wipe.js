@@ -3,19 +3,23 @@
 // level. Six paintings; the target rises and the sponge shrinks.
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { clamp, Overlay, buttonRow, bag, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { clamp, Overlay, buttonRow, tierBag, loadData, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 import { theme } from '../theme.js';
 
 const HUD = 64;
 
-// Shared painting pool (Wipe + Puzzle draw from the same bag so one session
-// playing both won't see the same picture twice) — Design Policy §B.4.
+// Shared painting pool (Wipe + Puzzle draw from the same bags so one session
+// playing both won't see the same picture twice) — Design Policy §B.4. Tier
+// per painting: assets/data/backgrounds.json (hand-editable, §B.1.4).
 const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
+let TIERS = {};
 
-// 12 levels: target rises 0.65 → 0.99, sponge shrinks 54 → 26.
+// 12 levels: target rises 0.65 → 0.99, sponge shrinks 54 → 26; tier steps
+// easy (1-4) → med (5-8) → hard (9-12) for the shared-pool picture draw.
 const LEVELS = Array.from({ length: 12 }, (_, i) => ({
   target: 0.65 + (0.99 - 0.65) * (i / 11),
   sponge: Math.round(54 - (54 - 26) * (i / 11)),
+  tier: i < 4 ? 'easy' : i < 8 ? 'med' : 'hard',
 }));
 
 const CELL = 20;                    // target cover-cell size (px, world units)
@@ -29,8 +33,12 @@ export default class WipeGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
+    this._tiersReady = loadData('backgrounds', { tiers: {} })
+      .then((d) => { TIERS = (d && d.tiers) || {}; });
     this._startLevel(0);
   }
+
+  _tierOf(stem) { return TIERS[stem]; }
 
   _startLevel(n) {
     this._level = clamp(n, 0, LEVELS.length - 1);
@@ -42,12 +50,17 @@ export default class WipeGame extends Scene {
     this._cols = 0;
     this._rows = 0;
     this._overlay.hide();
-    this._imgName = bag('backgrounds', PAINTINGS).draw();
-    const want = this._imgName;
-    loadImage(`backgrounds/${want}`).then((im) => {
-      if (this._imgName !== want) return;
-      this._img = im;
-      this._geo();
+    const lv = LEVELS[this._level];
+    const forLevel = this._level;
+    this._tiersReady.then(() => {
+      if (this._level !== forLevel) return;
+      const want = tierBag('backgrounds', PAINTINGS, this._tierOf, lv.tier).draw();
+      this._imgName = want;
+      loadImage(`backgrounds/${want}`).then((im) => {
+        if (this._imgName !== want) return;
+        this._img = im;
+        this._geo();
+      });
     });
     this._geo();
   }

@@ -7,16 +7,23 @@ const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
 const CELL := 20.0
 
-const PAINTINGS := ["renoir0.jpg", "monet0.jpg", "bruegel0.jpg", "gogh0.jpg", "pieck0.jpg", "vermeer1.jpg"]
+# Shared painting pool with Puzzle; tier per painting from
+# assets/data/backgrounds.json, no-repeat shared across a session (§B.4).
+const PAINTINGS := ["bruegel0", "bruegel1", "gogh0", "gogh1", "gogh3", "monet0", "monet1", "monet3", "pieck0", "pieck1", "pieck2", "rembrandt0", "rembrandt1", "renoir0", "vermeer1", "vermeer2", "vermeer3"]
 const LEVEL_COUNT := 12
 const SND_WIPE := "pick.wav"
 const SND_WIN := "winner.ogg"
+
+var _tiers: Dictionary = {}
 
 func _level_target(i: int) -> float:
 	return 0.65 + (0.99 - 0.65) * (float(i) / float(LEVEL_COUNT - 1))
 
 func _level_sponge(i: int) -> float:
 	return round(54.0 - (54.0 - 26.0) * (float(i) / float(LEVEL_COUNT - 1)))
+
+func _level_tier(i: int) -> String:
+	return "easy" if i < 4 else ("med" if i < 8 else "hard")
 
 var _level := 0
 var _tex: Texture2D = null
@@ -43,6 +50,7 @@ var _tex_cache: Dictionary = {}
 
 
 func _ready() -> void:
+	_tiers = GameContext.load_json("backgrounds").get("tiers", {})
 	GameContext.theme_changed.connect(queue_redraw)
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
@@ -72,7 +80,7 @@ func _start_level(n: int) -> void:
 	_cover = PackedByteArray()
 	_cols = 0
 	_rows = 0
-	_tex = _tex_for(str(GameContext.draw_from_pool("backgrounds", PAINTINGS, 1)[0]))
+	_tex = _tex_for(str(GameContext.draw_tiered("backgrounds", PAINTINGS, _tiers, _level_tier(_level), 1)[0]))
 	_popup.visible = false
 	_geo()
 	_update_hud()

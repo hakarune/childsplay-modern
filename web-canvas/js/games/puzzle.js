@@ -5,25 +5,28 @@
 // no grid to lean on.
 
 import { Scene, VIEW_W, VIEW_H, loadImage, playSound } from '../engine.js';
-import { roundRect, clamp, rand, shuffle, bag, Overlay, buttonRow } from '../util.js';
+import { roundRect, clamp, rand, shuffle, tierBag, loadData, Overlay, buttonRow } from '../util.js';
 import { theme } from '../theme.js';
 
-// Shared painting pool (Wipe + Puzzle draw from the same bag so a session
-// playing both won't repeat a picture) — Design Policy §B.4.
+// Shared painting pool (Wipe + Puzzle draw from the same bags so a session
+// playing both won't repeat a picture) — Design Policy §B.4. Difficulty tier
+// per painting comes from assets/data/backgrounds.json (hand-editable §B.1.4).
 const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
+let TIERS = {};   // stem -> 'easy'|'med'|'hard'  (filled from the data file)
 
-// 9 levels: 3 regular grids, then progressively finer irregular cuts. The
-// picture for each level is drawn from the shared pool, not hard-coded.
+// 10 levels: 3 regular grids (easy), 4 irregular cuts (med), 3 fine cuts
+// (hard). `tier` picks which slice of the painting pool the level draws from.
 const LEVELS = [
-  { name: '2 x 2',       kind: 'grid', cols: 2, rows: 2 },
-  { name: '3 x 3',       kind: 'grid', cols: 3, rows: 3 },
-  { name: '4 x 4',       kind: 'grid', cols: 4, rows: 4 },
-  { name: 'Odd shapes',  kind: 'free', pieces: 6,  min: 0.17 },
-  { name: '5 x 5',       kind: 'grid', cols: 5, rows: 5 },
-  { name: 'More shapes', kind: 'free', pieces: 9,  min: 0.135 },
-  { name: 'Puzzler',     kind: 'free', pieces: 12, min: 0.11 },
-  { name: '6 x 5',       kind: 'grid', cols: 6, rows: 5 },
-  { name: 'Master',      kind: 'free', pieces: 16, min: 0.09 },
+  { name: '2 x 2',       kind: 'grid', cols: 2, rows: 2, tier: 'easy' },
+  { name: '3 x 3',       kind: 'grid', cols: 3, rows: 3, tier: 'easy' },
+  { name: '4 x 4',       kind: 'grid', cols: 4, rows: 4, tier: 'easy' },
+  { name: 'Odd shapes',  kind: 'free', pieces: 6,  min: 0.17,  tier: 'med' },
+  { name: '5 x 5',       kind: 'grid', cols: 5, rows: 5, tier: 'med' },
+  { name: 'More shapes', kind: 'free', pieces: 9,  min: 0.135, tier: 'med' },
+  { name: 'Puzzler',     kind: 'free', pieces: 12, min: 0.11,  tier: 'med' },
+  { name: '6 x 5',       kind: 'grid', cols: 6, rows: 5, tier: 'hard' },
+  { name: 'Tricky',      kind: 'free', pieces: 16, min: 0.09,  tier: 'hard' },
+  { name: 'Master',      kind: 'free', pieces: 20, min: 0.075, tier: 'hard' },
 ];
 
 const SND_SNAP = 'sfx/pick.wav';
@@ -75,8 +78,12 @@ export default class PuzzleGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
+    this._tiersReady = loadData('backgrounds', { tiers: {} })
+      .then((d) => { TIERS = (d && d.tiers) || {}; });
     this._startLevel(0);
   }
+
+  _tierOf(stem) { return TIERS[stem]; }
 
   _startLevel(n) {
     this._level = Math.max(0, Math.min(n, LEVELS.length - 1));
@@ -87,12 +94,18 @@ export default class PuzzleGame extends Scene {
     this._overlay.hide();
 
     const lv = LEVELS[this._level];
-    this._imgName = bag('backgrounds', PAINTINGS).draw();
-    const want = this._imgName;
-    loadImage(`backgrounds/${want}`).then((im) => {
-      if (this._imgName !== want) return; // stale
-      this._image = im;
-      this._build(lv);
+    const forLevel = this._level;
+    // Draw the painting from this level's difficulty tier once the tier map
+    // has loaded (instant after the first level).
+    this._tiersReady.then(() => {
+      if (this._level !== forLevel) return;               // level changed while waiting
+      const want = tierBag('backgrounds', PAINTINGS, this._tierOf, lv.tier).draw();
+      this._imgName = want;
+      loadImage(`backgrounds/${want}`).then((im) => {
+        if (this._imgName !== want) return;               // stale
+        this._image = im;
+        this._build(lv);
+      });
     });
   }
 

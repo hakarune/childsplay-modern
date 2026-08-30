@@ -98,6 +98,43 @@ func reset_pools(prefix := "") -> void:
 			_bags.erase(k)
 
 
+## Draw `n` distinct entries from the subset of `candidates` whose difficulty
+## tier (looked up in `tier_of`: item -> "easy"|"med"|"hard") equals `tier`.
+## Items missing from `tier_of` are eligible at every tier. Each tier keeps
+## its own no-repeat memory under `<pool_key>:<tier>` so Puzzle and Wipe
+## sharing the paintings pool never repeat a picture in a session (§B.4).
+func draw_tiered(pool_key: String, candidates: Array, tier_of: Dictionary, tier: String, n := 1) -> Array:
+	var eligible: Array = []
+	for item in candidates:
+		var t: String = str(tier_of.get(item, ""))
+		if t == "" or t == tier:
+			eligible.append(item)
+	if eligible.is_empty():
+		eligible = candidates.duplicate()
+	return draw_from_pool("%s:%s" % [pool_key, tier], eligible, n)
+
+
+# --- JSON data files (§J) ------------------------------------------------
+var _json_cache: Dictionary = {}
+
+## Load & cache a data file. Accepts "backgrounds" or a full res:// path;
+## returns the parsed Dictionary, or {} on any failure.
+func load_json(name: String) -> Dictionary:
+	var path := name
+	if not path.begins_with("res://"):
+		path = "res://assets/data/%s.json" % name
+	if _json_cache.has(path):
+		return _json_cache[path]
+	var out: Dictionary = {}
+	if FileAccess.file_exists(path):
+		var txt := FileAccess.get_file_as_string(path)
+		var parsed = JSON.parse_string(txt)
+		if parsed is Dictionary:
+			out = parsed
+	_json_cache[path] = out
+	return out
+
+
 # --- "say this" (§E) --------------------------------------------------------
 # Baked clips first (res://…/voice/<slug>.ogg via tools/gen-voice.sh), then
 # live DisplayServer TTS, then silence. Respects nothing here — the menu's

@@ -11,6 +11,7 @@ import {
 } from '../util.js';
 import { theme } from '../theme.js';
 import { say } from '../tts.js';
+import { TextInput } from '../textinput.js';
 
 const HUD = 56;
 
@@ -45,10 +46,13 @@ export default class WordMakerGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._dict = new Set(FALLBACK_WORDS);
+    this._text = new TextInput('synonyms', (ch) => this._type(ch));
     this._level = 0;
     this._startLevel(0);
     this._loadDict();
   }
+
+  exit() { this._text.stop(); }
 
   _loadDict() {
     fetch(assetURL('data/wordlist.json'))
@@ -60,7 +64,7 @@ export default class WordMakerGame extends Scene {
       .catch(() => {});
   }
 
-  enter() { this._announce(); }
+  enter() { this._text.start(); this._announce(); }
 
   _announce() {
     const lv = LEVELS[this._level];
@@ -101,6 +105,8 @@ export default class WordMakerGame extends Scene {
     this._kw = kw;
     // hint pill sits above the tray, right-aligned
     this._hintBtn = { x: VIEW_W / 2 + Math.min(280, VIEW_W / 2 - 60) - 150, y: HUD + 12, w: 150, h: 44 };
+    // ⌨ toggle sits top-left, mirroring the hint pill
+    this._kbToggle = { x: VIEW_W / 2 - Math.min(280, VIEW_W / 2 - 60), y: HUD + 12, w: 150, h: 44 };
   }
 
   resize() {
@@ -178,7 +184,7 @@ export default class WordMakerGame extends Scene {
     if (this._overlay.visible) return;
     if (e.key === 'Backspace') { this._backspace(); e.preventDefault?.(); }
     else if (e.key === 'Enter' || e.key === ' ') { this._submit(); e.preventDefault?.(); }
-    else if (/^[a-zA-Z]$/.test(e.key)) this._type(e.key);
+    else if (!this._text.osk && /^[a-zA-Z]$/.test(e.key)) this._type(e.key);
   }
 
   pointerup(x, y) {
@@ -190,9 +196,11 @@ export default class WordMakerGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
+    if (inRect(this._kbToggle, x, y)) { this._text.toggle(); return; }
     if (inRect(this._hintBtn, x, y)) return this._useHint();
     if (inRect(this._delKey, x, y)) return this._backspace();
     if (inRect(this._okKey, x, y)) return this._submit();
+    if (!this._text.showCanvasKeyboard) return;
     const k = this._keys.find((kk) => inRect(kk, x, y));
     if (k) this._type(k.ch);
   }
@@ -235,6 +243,15 @@ export default class WordMakerGame extends Scene {
     ctx.font = '600 20px system-ui, sans-serif';
     ctx.fillText(`Hint (${this._hintsLeft})`, hb.x + hb.w / 2, hb.y + hb.h / 2 + 1);
 
+    // ⌨ toggle (OS keyboard vs on-screen — Policy §I.3)
+    const kt = this._kbToggle;
+    roundRect(ctx, kt.x, kt.y, kt.w, kt.h, 12);
+    ctx.fillStyle = this._text.osk ? theme.accent : theme.surface;
+    ctx.fill();
+    ctx.fillStyle = this._text.osk ? '#fff' : theme.text;
+    ctx.font = '600 18px system-ui, sans-serif';
+    ctx.fillText(this._text.osk ? '⌨ keyboard' : '⌨ on-screen', kt.x + kt.w / 2, kt.y + kt.h / 2 + 1);
+
     // active hint
     if (this._hint) {
       const a = clamp(1 - (this._hint.t - 3) / 1.5, 0, 1);
@@ -269,7 +286,16 @@ export default class WordMakerGame extends Scene {
       ctx.textBaseline = 'middle';
       ctx.fillText(k.label || k.ch, k.x + k.w / 2, k.y + k.h / 2 + 1);
     };
-    for (const k of this._keys) drawKey(k, false);
+    // in-canvas letters are the accessibility path; hidden when OS kbd is on.
+    if (this._text.showCanvasKeyboard) {
+      for (const k of this._keys) drawKey(k, false);
+    } else {
+      ctx.fillStyle = theme.text_muted;
+      ctx.font = '500 18px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('using your device keyboard — tap ⌨ for the on-screen one',
+        VIEW_W / 2, this._delKey.y - 18);
+    }
     drawKey(this._delKey, true);
     drawKey(this._okKey, true);
 
