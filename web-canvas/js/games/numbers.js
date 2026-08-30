@@ -185,7 +185,7 @@ export default class NumbersGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     const msg = this._phase === 'study' ? 'remember where the numbers are, then press Start'
-      : this._phase === 'peek' ? 'take another look…'
+      : this._phase === 'peek' ? 'take another look'
       : `tap number ${this._next}`;
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);

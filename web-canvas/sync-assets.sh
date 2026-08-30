@@ -24,8 +24,11 @@ SICONS="$SRC/graphics/lib/SPData/themes/seniorplay/menuicons"
 A="$SRC/audio/lib/CPData"
 
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,aquarium,soundmemory/img,soundmemory/snd,sfx}
+mkdir -p "$DST"/{icons,fonts,memory,packid,billiards,puzzle,aquarium,soundmemory/img,soundmemory/snd,sfx,voice}
 mkdir -p "$DST"/flashcards/{de,nl,fr,es}
+
+# --- baked voice pack (Design Policy §E) — instructions & names as audio --
+cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack — run tools/gen-voice.sh)"
 
 # --- launcher icons (renamed to our game ids) ---------------------------
 cp "$ICONS/packid.icon.png"         "$DST/icons/packid.png"

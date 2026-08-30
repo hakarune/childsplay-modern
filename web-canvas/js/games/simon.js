@@ -249,8 +249,8 @@ export default class SimonGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     const msg = this._phase === 'idle' ? 'press Start, then repeat the sequence'
-      : (this._phase === 'show' || this._phase === 'pause') ? 'watch and listen…'
-      : 'your turn — tap the colours in order';
+      : (this._phase === 'show' || this._phase === 'pause') ? 'watch and listen'
+      : 'your turn, tap the colours in order';
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
 

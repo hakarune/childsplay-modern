@@ -8,6 +8,7 @@
 
 import { Scene, VIEW_W, VIEW_H, img, loadImage, loadSound, playSound } from '../engine.js';
 import { roundRect, drawImageFit, inRect } from '../util.js';
+import { say } from '../tts.js';
 
 const DECK = [
   { word: 'bear', img: 'memory/03_bear.png' },
@@ -61,27 +62,13 @@ export default class FlashcardsGame extends Scene {
     this._unlocked = true;
     const card = DECK[this._i];
     const L = LANGS[this._lang];
-    if (L.code === 'en') return this._tts(card.word, L.bcp);
-    // recorded clip; fall back to TTS if it can't be played
+    // English: baked clip → live TTS (say() handles the fallback chain).
+    if (L.code === 'en') return say(card.word, { lang: L.bcp, rate: 0.85 });
+    // de/nl/fr/es: the recorded Childsplay clip, else TTS in that language.
     loadSound(`flashcards/${L.code}/${card.word}.ogg`).then((a) => {
       if (a && (a.duration > 0 || a.readyState >= 2)) playSound(`flashcards/${L.code}/${card.word}.ogg`, { channel: 'voice' });
-      else this._tts(card.word, L.bcp);
+      else say(card.word, { lang: L.bcp, rate: 0.82 });
     });
-  }
-
-  _tts(text, bcp) {
-    const S = typeof window !== 'undefined' && window.speechSynthesis;
-    if (!S) return;
-    try {
-      S.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = bcp;
-      u.rate = 0.82;
-      u.pitch = 1.05;
-      S.speak(u);
-    } catch {
-      /* ignore */
-    }
   }
 
   _go(delta) {

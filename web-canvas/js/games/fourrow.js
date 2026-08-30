@@ -243,7 +243,7 @@ export default class FourRowGame extends Scene {
     ctx.textAlign = 'center';
     const _msg = this._over ? 'game over'
       : this._twoP ? (this._turn === RED ? "red's turn" : "yellow's turn")
-      : this._turn === RED ? 'your turn (red)' : 'computer thinking…';
+      : this._turn === RED ? 'your turn' : 'computer thinking';
     ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
 

@@ -251,9 +251,9 @@ export default class ImageChangerGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     const msg = this._phase === 'study' ? 'remember the pictures, then press Start'
-      : this._phase === 'guess' ? 'which picture changed?'
+      : this._phase === 'guess' ? 'which picture changed'
       : this._phase === 'result' ? 'nice!'
-      : 'watch closely…';
+      : 'watch closely';
     ctx.fillText(msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
 

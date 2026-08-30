@@ -294,8 +294,8 @@ export default class TicTacToeGame extends Scene {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#9fb4d8';
     const _msg = this._done ? 'game over'
-      : this._twoP ? (this._turn === X ? "blue's turn (✕)" : "orange's turn (◯)")
-      : this._turn === X ? 'your turn — you are ✕' : 'computer thinking…';
+      : this._twoP ? (this._turn === X ? "blue's turn" : "orange's turn")
+      : this._turn === X ? 'your turn' : 'computer thinking';
     ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
 

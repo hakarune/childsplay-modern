@@ -204,12 +204,24 @@ export const HUD_H = 64;   // one HUD height for every game (Policy §G.1)
 
 let _hudText = '';
 let _hudBtn = { x: 0, y: 0, w: 0, h: 0 };
+let _lastAnnounced = '';
+let _announceAt = 0;
 
 export function hudSpeakButton(ctx, centre, cx, cy) {
+  // auto-announce a NEW instruction once, debounced (Policy §E.2.3)
+  if (centre && centre !== _lastAnnounced) {
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (now - _announceAt > 1600) {
+      _lastAnnounced = centre;
+      _announceAt = now;
+      speak(centre);
+    }
+  }
   _hudText = centre || '';
   _hudBtn = { x: 0, y: 0, w: 0, h: 0 };
   if (!centre || !hasVoice()) return;
-  const tw = ctx.measureText(centre).width;   // caller has already set the font
+  const m = ctx.measureText && ctx.measureText(centre);
+  const tw = (m && m.width) || centre.length * 11;   // caller has set the font
   const bx = cx + tw / 2 + 14;
   _hudBtn = { x: bx - 3, y: cy - 17, w: 34, h: 34 };
   roundRect(ctx, _hudBtn.x, _hudBtn.y, 34, 34, 9);

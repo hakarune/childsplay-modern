@@ -94,10 +94,43 @@ func reset_pools(prefix := "") -> void:
 			_bags.erase(k)
 
 
-# --- text to speech (§E.2) ---------------------------------------------
+# --- "say this" (§E) --------------------------------------------------------
+# Baked clips first (res://…/voice/<slug>.ogg via tools/gen-voice.sh), then
+# live DisplayServer TTS, then silence. Respects nothing here — the menu's
+# voice-mute would gate at the bus, TODO when the Godot menu grows a 3-way
+# mute. Slug MUST match tts.js `slug()` and tools/gen-voice.sh `slug()`.
 var _tts_voice := ""
+var _voice_player: AudioStreamPlayer
+
+func _slug(text: String) -> String:
+	var out := ""
+	var prev_dash := true
+	for ch in text.to_lower():
+		if (ch >= "a" and ch <= "z") or (ch >= "0" and ch <= "9"):
+			out += ch
+			prev_dash = false
+		elif not prev_dash:
+			out += "-"
+			prev_dash = true
+	out = out.rstrip("-")
+	return out.substr(0, 48)
 
 func speak(text: String, lang_hint := "") -> void:
+	if text == "":
+		return
+	# 1) baked clip
+	var al := get_node_or_null("/root/AssetLoader")
+	if al != null:
+		var st: AudioStream = al.get_stream("v_" + _slug(text) + ".ogg")
+		if st != null:
+			if _voice_player == null:
+				_voice_player = AudioStreamPlayer.new()
+				_voice_player.bus = "Voice" if AudioServer.get_bus_index("Voice") >= 0 else "Master"
+				add_child(_voice_player)
+			_voice_player.stream = st
+			_voice_player.play()
+			return
+	# 2) live TTS
 	if not DisplayServer.has_method("tts_get_voices"):
 		return
 	var voices: Array = DisplayServer.tts_get_voices()
@@ -115,6 +148,6 @@ func speak(text: String, lang_hint := "") -> void:
 	DisplayServer.tts_stop()
 	DisplayServer.tts_speak(text, voice)
 
-## True when a voice exists — games hide the 🔊 button when this is false.
+## We ship baked clips, so a speaker button is always worth showing.
 func has_voice() -> bool:
-	return DisplayServer.has_method("tts_get_voices") and not DisplayServer.tts_get_voices().is_empty()
+	return true
