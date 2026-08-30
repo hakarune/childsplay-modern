@@ -24,9 +24,11 @@ const SPECIES = [
   { id: 'six_barred', name: 'wrasse', base: 1.2 },
   { id: 'cichlid1', name: 'cichlid', base: 1.3 },
   { id: 'newf1', name: 'goldfish', base: 1.0 },
-  { id: 'f01', name: 'fish', base: 1.2 }, { id: 'f04', name: 'fish', base: 1.2 },
-  { id: 'f06', name: 'fish', base: 1.1 }, { id: 'f09', name: 'fish', base: 1.2 },
-  { id: 'f13', name: 'fish', base: 1.1 },
+  { id: 'f01', name: 'emperor angelfish', base: 1.2 },
+  { id: 'f04', name: 'Moorish idol', base: 1.2 },
+  { id: 'f06', name: 'bass', base: 1.1 },
+  { id: 'f09', name: 'pomfret', base: 1.2 },
+  { id: 'f13', name: 'snapper', base: 1.1 },
 ];
 
 const SND_BLUB = 'sfx/blub0.wav';
@@ -54,6 +56,12 @@ export default class AquariumGame extends Scene {
 
     loadImage(this._tank);
     loadImage(BUBBLE);
+
+    // Material-3 parallax backdrop: two depths of drifting particulate.
+    this._motes = Array.from({ length: 48 }, () => ({
+      x: rand(0, VIEW_W), y: rand(BAND.top, VIEW_H),
+      r: rand(1.4, 5), depth: Math.random() < 0.5 ? 0.35 : 0.85, ph: rand(0, 6.28),
+    }));
 
     const pool = shuffle(SPECIES.flatMap((s) => (s.rare ? [s] : [s, s])));
     this._fish = [];
@@ -123,7 +131,52 @@ export default class AquariumGame extends Scene {
     for (const l of this._labels) { l.y -= 26 * dt; l.t += dt; }
     this._labels = this._labels.filter((l) => l.t < 1.6);
 
+    for (const m of this._motes) {
+      m.y -= m.depth * 9 * dt;
+      if (m.y < BAND.top - 10) { m.y = VIEW_H + 10; m.x = rand(0, VIEW_W); }
+    }
+
     for (const f of this._fish) this._stepFish(f, dt);
+  }
+
+  // Deep tonal gradient + light shafts + particulate, all parallaxed.
+  _drawBackdrop(ctx) {
+    const light = theme.mode === 'light';
+    const g = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+    if (light) {
+      g.addColorStop(0, '#0d6b7a'); g.addColorStop(0.55, '#2a97a0'); g.addColorStop(1, '#57bcbe');
+    } else {
+      g.addColorStop(0, '#052b36'); g.addColorStop(0.55, '#0c4d5d'); g.addColorStop(1, '#12707a');
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    // god rays — slow-drifting translucent shafts
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 3; i++) {
+      const cx = VIEW_W * (0.25 + i * 0.28) + Math.sin(this._t * 0.05 + i * 2) * 60;
+      ctx.beginPath();
+      ctx.moveTo(cx - 40, 0);
+      ctx.lineTo(cx + 40, 0);
+      ctx.lineTo(cx + 150, VIEW_H);
+      ctx.lineTo(cx + 60, VIEW_H);
+      ctx.closePath();
+      ctx.fillStyle = light ? 'rgba(255,255,255,0.09)' : 'rgba(150,230,255,0.06)';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // particulate at two depths, swaying with the parallax
+    for (const m of this._motes) {
+      const x = m.x + Math.sin(this._t + m.ph) * 7 * m.depth + this._parallax * m.depth;
+      ctx.globalAlpha = (light ? 0.16 : 0.22) * m.depth + 0.05;
+      ctx.fillStyle = light ? '#eafcff' : '#bff0ff';
+      ctx.beginPath();
+      ctx.arc(x, m.y, m.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   }
 
   _stepFish(f, dt) {
@@ -212,18 +265,18 @@ export default class AquariumGame extends Scene {
 
   // --- render ---
   render(ctx) {
-    // background (cover-fit, slow parallax)
+    // Material-3 parallax backdrop, then the legacy tank photo blended on
+    // top at low opacity for a little texture (drop an SVG/PNG in
+    // backgrounds/aquarium_* to change it; svg wins via the manifest).
+    this._drawBackdrop(ctx);
     const bg = img(this._tank);
-    ctx.fillStyle = theme.bg;
-    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     if (bg && bg.naturalWidth) {
       const s = Math.max((VIEW_W + 80) / bg.naturalWidth, VIEW_H / bg.naturalHeight);
       const dw = bg.naturalWidth * s, dh = bg.naturalHeight * s;
+      ctx.globalAlpha = 0.38;
       ctx.drawImage(bg, (VIEW_W - dw) / 2 + this._parallax, (VIEW_H - dh) / 2, dw, dh);
+      ctx.globalAlpha = 1;
     }
-    // blue wash
-    ctx.fillStyle = 'rgba(20,90,130,0.18)';
-    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     this._drawSeaweed(ctx);
 

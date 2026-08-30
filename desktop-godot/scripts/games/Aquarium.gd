@@ -20,8 +20,8 @@ const SPECIES := [
 	["butfish", "butterfly fish", 1.1], ["blueking2", "blue tang", 1.0],
 	["collaris", "tang", 1.3], ["six_barred", "wrasse", 1.2],
 	["cichlid1", "cichlid", 1.3], ["newf1", "goldfish", 1.0],
-	["f01", "fish", 1.2], ["f04", "fish", 1.2], ["f06", "fish", 1.1],
-	["f09", "fish", 1.2], ["f13", "fish", 1.1],
+	["f01", "emperor angelfish", 1.2], ["f04", "Moorish idol", 1.2], ["f06", "bass", 1.1],
+	["f09", "pomfret", 1.2], ["f13", "snapper", 1.1],
 ]
 
 var _bounds := Rect2(0, 84, 1280, 720 - 84 - 40)
@@ -55,15 +55,42 @@ func _ready() -> void:
 		_ambient.stream = amb
 		_ambient.play()
 
-	# cover-fit the tank background
+	# cover-fit the tank photo, then fade it back so the procedural
+	# Material-3 gradient in _draw() reads through it (drop an svg/png into
+	# backgrounds/aquarium_* to replace the photo layer).
 	if _background.texture:
 		var isize := _background.texture.get_size()
 		var s: float = maxf((1280.0 + 60.0) / isize.x, 720.0 / isize.y)
 		_background.scale = Vector2(s, s)
 	_background.position = Vector2(640, 360)
+	_background.modulate.a = 0.4
 	_bg_home = _background.position
 
+	GameContext.theme_changed.connect(queue_redraw)
 	_spawn_fish()
+
+
+func _draw() -> void:
+	# deep tonal gradient (Material-3 flavour), painted under the child
+	# Sprite2D / fish nodes
+	var light := GameContext.theme_mode == "light"
+	var top_col := Color("0d6b7a") if light else Color("052b36")
+	var mid_col := Color("2a97a0") if light else Color("0c4d5d")
+	var bot_col := Color("57bcbe") if light else Color("12707a")
+	var h := size.y
+	var bands := 24
+	for i in bands:
+		var f := float(i) / float(bands - 1)
+		var col := top_col.lerp(mid_col, minf(1.0, f * 2.0)) if f < 0.5 \
+			else mid_col.lerp(bot_col, (f - 0.5) * 2.0)
+		draw_rect(Rect2(0, h * f, size.x, h / float(bands) + 1.0), col)
+	# three slow light shafts
+	for i in 3:
+		var cx := size.x * (0.25 + i * 0.28) + sin(_t * 0.05 + i * 2.0) * 60.0
+		var pts := PackedVector2Array([
+			Vector2(cx - 40, 0), Vector2(cx + 40, 0),
+			Vector2(cx + 150, size.y), Vector2(cx + 60, size.y)])
+		draw_colored_polygon(pts, Color(0.6, 0.9, 1.0, 0.05 if not light else 0.08))
 
 
 func _spawn_fish() -> void:
@@ -85,6 +112,7 @@ func _spawn_fish() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	_background.position.x = _bg_home.x + sin(_t * 0.12) * 22.0
+	queue_redraw()   # animate the light shafts in _draw()
 
 	# hover pulse under the mouse
 	var m := get_local_mouse_position()
