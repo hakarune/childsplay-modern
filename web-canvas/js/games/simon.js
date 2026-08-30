@@ -1,5 +1,5 @@
-// simon.js — repeat the growing colour-and-tone sequence. Six levels; the
-// target length grows 2 → 7. A wrong tap just replays the same sequence
+// simon.js — repeat the growing colour-and-tone sequence. Ten levels; the
+// target length grows 2 → 11. A wrong tap just replays the same sequence
 // (no lives, no game-over) — only forward progress.
 
 import { Scene, VIEW_W, VIEW_H, playSound } from '../engine.js';
@@ -7,7 +7,7 @@ import { clamp, roundRect, inRect, Overlay, buttonRow, hudSpeakButton, hudSpeakH
 import { theme } from '../theme.js';
 
 const HUD = 64;
-const TARGETS = [2, 3, 4, 5, 6, 7, 8, 9];
+const TARGETS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 // quadrant: colour + tone (Hz). Index order = TL, TR, BL, BR.
 const PADS = [

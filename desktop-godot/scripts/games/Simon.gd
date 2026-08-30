@@ -1,11 +1,11 @@
 extends Control
-## Simon — repeat the growing colour-and-tone sequence. Six levels; the
-## target length grows 2 → 7. A wrong tap just replays the same sequence
+## Simon — repeat the growing colour-and-tone sequence. Ten levels; the
+## target length grows 2 → 11. A wrong tap just replays the same sequence
 ## (no lives, no game-over) — only forward progress.
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
-const TARGETS := [2, 3, 4, 5, 6, 7, 8, 9]
+const TARGETS := [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 # quadrant colour (on / off) + tone frequency. Order = TL, TR, BL, BR.
 const PADS := [
