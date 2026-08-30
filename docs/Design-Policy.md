@@ -719,9 +719,12 @@ modern parallax backdrop), ~~numbers G~~ (one-row HUD),
 (Pass & Play both targets; FourRow discs already on p1/p2 roles). Every
 game has a `docs/assets/<id>.assets.md` (§A.7).
 
-Still open: spoken picture labels (§E.3) for memory / findsound / electro /
-ichanger; findsound §J data file; Godot HUD-bar contrast parity; then the
-Quiz suite.
+~~E.3 spoken labels~~ (memory pictures / findsound / electro / ichanger —
+"say the names" pill, both targets; util.js `makeNameToggle` /
+GameContext `name_toggle_*` + `draw_name_pill`).
+
+Still open: findsound §J data file; Godot HUD-bar contrast parity; then the
+Quiz suite. A visual-QA pass on a real device/browser is also outstanding.
 
 | Game | Must change |
 | --- | --- |
