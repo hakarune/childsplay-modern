@@ -50,7 +50,8 @@ var _mode_btn: Button
 
 
 func _ready() -> void:
-	GameContext.theme_changed.connect(queue_redraw)
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_sfx_drop.stream = AssetLoader.get_stream(SND_DROP)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
 	_sfx_loss.stream = AssetLoader.get_stream(SND_LOSS)
@@ -327,3 +328,10 @@ func _play(p: AudioStreamPlayer) -> void:
 
 func _go_home() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU)
+
+
+## Themed HUD bar + divider so the top chrome reads against the play
+## area in both palettes (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, HUD, [_info_label], [])
+	queue_redraw()

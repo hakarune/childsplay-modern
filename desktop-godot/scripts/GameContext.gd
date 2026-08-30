@@ -53,6 +53,44 @@ func toggle_theme() -> void:
 	set_theme("dark" if theme_mode == "light" else "light")
 
 
+## In-game HUD bar (Design Policy §G) — paint a real `hud` surface with a
+## `line` divider behind the top chrome so it reads against the play area
+## in BOTH palettes, and colour the HUD labels (`hud_text` / `hud_muted`).
+## Idempotent: call from _ready() AND from the game's theme_changed handler.
+##   text  — labels shown in the primary HUD colour
+##   muted — secondary / hint labels
+func style_hud_bar(host: Control, hud_h: float, text: Array = [], muted: Array = []) -> void:
+	var bg: ColorRect = host.get_node_or_null("HudBarBg")
+	if bg == null:
+		bg = ColorRect.new()
+		bg.name = "HudBarBg"
+		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bg.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		host.add_child(bg)
+		host.move_child(bg, 1)                 # just above the Background rect
+	bg.offset_bottom = hud_h
+	bg.color = c("hud")
+
+	var line: ColorRect = host.get_node_or_null("HudBarLine")
+	if line == null:
+		line = ColorRect.new()
+		line.name = "HudBarLine"
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		host.add_child(line)
+		host.move_child(line, 2)
+	line.offset_top = hud_h - 1.0
+	line.offset_bottom = hud_h
+	line.color = c("line")
+
+	for l in text:
+		if l is Label:
+			l.add_theme_color_override("font_color", c("hud_text"))
+	for l in muted:
+		if l is Label:
+			l.add_theme_color_override("font_color", c("hud_muted"))
+
+
 func _ready() -> void:
 	_load_settings()
 

@@ -42,7 +42,8 @@ var _miss = null                # { pos: Vector2, t: float }
 
 
 func _ready() -> void:
-	GameContext.theme_changed.connect(queue_redraw)
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_sfx_good.stream = AssetLoader.get_stream(SND_GOOD)
 	_sfx_bad.stream = AssetLoader.get_stream(SND_BAD)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
@@ -192,3 +193,10 @@ func _go_home() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_go_home()
+
+
+## Themed HUD bar + divider so the top chrome reads against the play
+## area in both palettes (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, HUD, [_info_label], [])
+	queue_redraw()

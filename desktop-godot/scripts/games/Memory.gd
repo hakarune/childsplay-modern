@@ -72,6 +72,8 @@ var _names_btn: Button
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_variant = GameContext.memory_variant
 	if not VARIANT_LABEL.has(_variant):
 		_variant = "pictures"
@@ -275,3 +277,8 @@ func _play(player: AudioStreamPlayer) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_go_home()
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, 80.0, [_flip_label, _level_label], [])

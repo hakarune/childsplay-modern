@@ -55,6 +55,8 @@ var _idle_tex: Texture2D
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_idle_tex = AssetLoader.get_texture(IDLE_ICON)
 	_sfx_match.stream = AssetLoader.get_stream(SND_MATCH)
 	_sfx_mismatch.stream = AssetLoader.get_stream(SND_MISMATCH)
@@ -216,3 +218,8 @@ func _play(player: AudioStreamPlayer) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_go_home()
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, 80.0, [_level_label], [])

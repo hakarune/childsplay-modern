@@ -53,7 +53,8 @@ var _names_rect := Rect2(0, 14, 154, 36)
 
 
 func _ready() -> void:
-	GameContext.theme_changed.connect(queue_redraw)
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	var al := get_node_or_null("/root/AssetLoader")
 	if al != null:
 		_sfx_start.stream = al.get_stream(SND_START)
@@ -332,3 +333,10 @@ func _update_hud() -> void:
 
 func _go_home() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU)
+
+
+## Themed HUD bar + divider so the top chrome reads against the play
+## area in both palettes (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, HUD, [_info], [_status])
+	queue_redraw()

@@ -47,6 +47,8 @@ var _tts_voice := ""
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_back_button.pressed.connect(_go_home)
 	_prev_button.pressed.connect(func() -> void: _show(_i - 1))
 	_next_button.pressed.connect(func() -> void: _show(_i + 1))
@@ -128,3 +130,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _go_home() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU)
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, 72.0, [_info_label], [])

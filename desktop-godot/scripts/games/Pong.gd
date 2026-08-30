@@ -79,7 +79,8 @@ var _ptr_y = null
 
 
 func _ready() -> void:
-	GameContext.theme_changed.connect(queue_redraw)
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_sfx_wall.stream = AssetLoader.get_stream(SND_WALL)
 	_sfx_hit.stream = AssetLoader.get_stream(SND_HIT)
 	_sfx_goal.stream = AssetLoader.get_stream(SND_GOAL)
@@ -272,3 +273,9 @@ func _play(p: AudioStreamPlayer) -> void:
 
 func _go_home() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU)
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, HUD, [_score_label, _info_label], [])
+	queue_redraw()

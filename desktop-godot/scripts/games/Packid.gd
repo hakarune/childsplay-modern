@@ -59,6 +59,8 @@ var _ghost_starts: Array[Vector2i] = []
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_sfx_eat.stream = AssetLoader.get_stream(SND_EAT)
 	_sfx_caught.stream = AssetLoader.get_stream(SND_CAUGHT)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
@@ -255,3 +257,8 @@ func _go_home() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_go_home()
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, 72.0, [_info_label], [])

@@ -62,6 +62,8 @@ var _bump_cd := 0.0
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_sfx_cue.stream = AssetLoader.get_stream(SND_CUE)
 	_sfx_bump.stream = AssetLoader.get_stream(SND_BUMP)
 	_sfx_pocket.stream = AssetLoader.get_stream(SND_POCKET)
@@ -328,3 +330,8 @@ func _update_info() -> void:
 func _play(player: AudioStreamPlayer) -> void:
 	if player.stream != null:
 		player.play()
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, 72.0, [_info], [])

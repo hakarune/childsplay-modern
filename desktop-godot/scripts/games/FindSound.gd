@@ -54,6 +54,8 @@ var _cards: Array = []
 
 
 func _ready() -> void:
+	GameContext.theme_changed.connect(_style_hud)
+	_style_hud()
 	_sfx_good.stream = AssetLoader.get_stream(SND_GOOD)
 	_sfx_bad.stream = AssetLoader.get_stream(SND_BAD)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
@@ -209,3 +211,8 @@ func _go_home() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_go_home()
+
+
+## Themed HUD bar + divider (Design Policy §G).
+func _style_hud() -> void:
+	GameContext.style_hud_bar(self, 80.0, [_info_label], [])
