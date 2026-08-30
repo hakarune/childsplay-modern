@@ -7,14 +7,13 @@ import { MENU } from './games/index.js';
 import { roundRect, drawImageFit, inRect, tint } from './util.js';
 import { theme } from './theme.js';
 
-const PAD = 32;
-const TITLE_H = 96;
-const PAGER_H = 44;
-const GAP = 20;
+const PAD = 44;
+const TITLE_H = 112;
+const PAGER_H = 46;
+const GAP = 22;
 const TARGET_TILE = 260;   // §F.3.1
 const MIN_ICON = 96;       // §F.1.4
-const MAX_TILE = 340;      // roomier tiles on phones / few-column layouts
-const TILE_H_FRAC = 0.52;  // share of the grid height one tile may take
+const MAX_TILE = 300;
 
 export class MainMenu extends Scene {
   constructor(game, opts = {}) {
@@ -40,8 +39,8 @@ export class MainMenu extends Scene {
     const cols = Math.max(2, Math.min(5, Math.floor(VIEW_W / TARGET_TILE)));
     const widthEdge = (availW - GAP * (cols - 1)) / cols;
     // cap the tile so at least ~2 rows are visible, and by an absolute max
-    let edge = Math.min(widthEdge, MAX_TILE, availH * TILE_H_FRAC);
-    edge = Math.max(edge, MIN_ICON + 40);        // room for icon + label band
+    let edge = Math.min(widthEdge, MAX_TILE, availH * 0.46);
+    edge = Math.max(edge, MIN_ICON + 44);        // room for icon + label band
 
     const rowsPerPage = Math.max(1, Math.floor((availH + GAP) / (edge + GAP)));
     this._perPage = cols * rowsPerPage;
@@ -121,7 +120,7 @@ export class MainMenu extends Scene {
     ctx.font = '400 23px system-ui, sans-serif';
     ctx.fillText('pick a game', VIEW_W / 2, TITLE_H / 2 + 38);
 
-    const iconMargin = Math.max(10, Math.min(24, this._edge * 0.09));
+    const iconMargin = Math.max(12, Math.min(28, this._edge * 0.10));
 
     this._tiles.forEach((t, i) => {
       const pressed = i === this._press;
@@ -144,7 +143,7 @@ export class MainMenu extends Scene {
       }
 
       // icon — square, uniform margin, label band reserved at the bottom
-      const labelBand = Math.max(26, h * 0.17);
+      const labelBand = Math.max(30, h * 0.20);
       const iconBox = Math.min(w, h - labelBand) - iconMargin * 2;
       const icon = img(t.game.icon);
       const ix = x + (w - iconBox) / 2;
@@ -165,7 +164,7 @@ export class MainMenu extends Scene {
       ctx.fillStyle = g;
       ctx.fillRect(x, bandY, w, labelBand);
       ctx.fillStyle = pressed ? '#ffffff' : theme.text;
-      ctx.font = `600 ${Math.max(15, Math.round(labelBand * 0.54))}px system-ui, sans-serif`;
+      ctx.font = `600 ${Math.round(labelBand * 0.5)}px system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(t.game.name, x + w / 2, bandY + labelBand * 0.56);
