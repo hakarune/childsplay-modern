@@ -23,8 +23,8 @@ const LEVELS := [
 	{ "name": "Hard",    "cols": 5, "rows": 4 },
 ]
 
-# Picture pool: tileset_2 has unique filenames, so AssetLoader resolves
-# each unambiguously. 21 pictures cover the largest deck (10 pairs).
+# Picture pool: unique filenames, so AssetLoader resolves each
+# unambiguously. 22 pictures; the largest deck needs 10 pairs.
 const CARD_IMAGES := [
 	"cat", "pig", "bear", "hippopotamus",
 	"penguin", "cow", "sheep", "turtle",
