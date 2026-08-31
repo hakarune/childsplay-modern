@@ -173,7 +173,9 @@ PHRASES=(
   # --- animal-pool names (Flashcards deck + Memory/Image Changer nameFromId) ---
   "bear" "cow" "dog" "elephant" "fox" "frog" "hippopotamus" "horse" "lion"
   "pig" "penguin" "rooster" "cat" "sheep" "panda" "wolf" "monkey"
-  "turtle" "chicken" "redbird" "bluebirds" "gnu" "bluebaby" "greenbaby"
+  "turtle" "chicken" "redbird" "bluebirds" "gnu"
+  # bluebaby / greenbaby → friendly names (GameContext.NAME_OVERRIDES / util.js)
+  "baby blue bird" "baby green bird"
   # --- letters & digits: served from the human en_GB pack (HUMAN_SRC) ---
   a b c d e f g h i j k l m n o p q r s t u v w x y z
   0 1 2 3 4 5 6 7 8 9

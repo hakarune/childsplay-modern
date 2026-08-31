@@ -256,13 +256,21 @@ func name_toggle_set(game_id: String, on: bool) -> void:
 	cfg.save(SETTINGS_PATH)
 
 
+## Friendlier spoken labels for pool ids whose auto-name reads oddly.
+## Keyed on the result of the generic tidy below.
+const NAME_OVERRIDES := {
+	"bluebaby": "baby blue bird",
+	"greenbaby": "baby green bird",
+}
+
 ## Tidy a pool id ("01_cat", "car_horn") into a spoken label.
 func name_from_id(id: String) -> String:
 	var s := id
 	var us := s.find("_")
 	if us >= 0 and s.substr(0, us).is_valid_int():
 		s = s.substr(us + 1)
-	return s.replace("_", " ").replace("-", " ").strip_edges()
+	s = s.replace("_", " ").replace("-", " ").strip_edges()
+	return NAME_OVERRIDES.get(s, s)
 
 
 ## Draw the toggle pill. Nothing is drawn where the platform has no voice.

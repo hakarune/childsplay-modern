@@ -192,9 +192,17 @@ export function makeNameToggle(gameId, rect = { x: 0, y: 0, w: 150, h: 32 }) {
   };
 }
 
+// Friendlier spoken labels for pool ids whose auto-name reads oddly.
+// Keyed on the result of the generic tidy below.
+const NAME_OVERRIDES = {
+  bluebaby: 'baby blue bird',
+  greenbaby: 'baby green bird',
+};
+
 // Tidy a pool id ("01_cat", "redbird", "car_horn") into a spoken label.
 export function nameFromId(id) {
-  return String(id).replace(/^\d+[_-]?/, '').replace(/[_-]+/g, ' ').trim();
+  const s = String(id).replace(/^\d+[_-]?/, '').replace(/[_-]+/g, ' ').trim();
+  return NAME_OVERRIDES[s] || s;
 }
 
 // Shared "you did it" / "try again" overlay used by every game.

@@ -339,3 +339,11 @@ indexed); both `sync-assets.sh` clean; web + Godot voice dirs both 106._
 Verified: 12 new clips valid audio, 0 existing clips re-churned; both
 `sync-assets.sh` clean; `godot --headless` import + boot clean (223 audio
 indexed); web + Godot voice dirs both 118._
+
+2026-08-31 (spoken-name overrides):
+- `nameFromId` (`util.js`) / `name_from_id` (`GameContext.gd`) gain a
+  `NAME_OVERRIDES` map for pool ids whose auto-name reads oddly. First
+  entries: `bluebaby` → "baby blue bird", `greenbaby` → "baby green
+  bird" (the `19_/20_` baby-bird sprites in the Memory / Image Changer
+  deck). `gen-voice.sh` bakes the friendly phrases; the `v_bluebaby.ogg`
+  / `v_greenbaby.ogg` clips are removed. Pack stays 118._
