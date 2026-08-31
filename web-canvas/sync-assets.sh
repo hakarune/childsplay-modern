@@ -94,4 +94,15 @@ for root, _dirs, files in os.walk(dst):
 print(json.dumps(best, separators=(",", ":"), sort_keys=True))
 PY
 
-echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)"
+# --- bust the service-worker cache -----------------------------------
+# Stamp CACHE in sw.js with a hash of everything it caches (code + assets)
+# minus sw.js itself, so a deploy that changes any of it makes the SW's
+# activate handler purge the old cache instead of serving it stale.
+HASH="$(
+  { find "$HERE"/{js,css,icons} -type f \( -name '*.js' -o -name '*.css' -o -name '*.svg' -o -name '*.png' \) -print0
+    printf '%s\0' "$HERE/index.html" "$HERE/manifest.webmanifest" "$DST/manifest.json"; } \
+  | sort -z | xargs -0 cat | sha1sum | cut -c1-10
+)"
+sed -i "s/const CACHE = 'cp-cache-[^']*'/const CACHE = 'cp-cache-$HASH'/" "$HERE/sw.js"
+
+echo "web assets rebuilt: $(find "$DST" -type f | wc -l) files, $(du -sh "$DST" | cut -f1)  |  sw cache: cp-cache-$HASH"

@@ -144,12 +144,17 @@ export function stopAllAudio() {
 }
 
 /** Overlapping one-shot playback. Safe to call before the first user
- *  gesture (the play() rejection is swallowed). */
+ *  gesture (the play() rejection is swallowed). Returns a handle with
+ *  `.stop()` so a caller can cut a still-playing clip short (e.g. Sound
+ *  Memory killing the previous card's clip when the next is tapped). */
 export function playSound(path, { volume = 1, rate = 1, channel = 'sfx' } = {}) {
-  if (_muted[channel]) return;
+  if (_muted[channel]) return { stop() {} };
+  let shot = null;
+  let stopped = false;
   loadSound(path).then((base) => {
+    if (stopped) return;
     try {
-      const shot = base.cloneNode(true);
+      shot = base.cloneNode(true);
       shot.__cpChannel = channel;
       shot.volume = volume;
       shot.playbackRate = rate;
@@ -160,6 +165,12 @@ export function playSound(path, { volume = 1, rate = 1, channel = 'sfx' } = {}) 
       /* ignore */
     }
   });
+  return {
+    stop() {
+      stopped = true;
+      if (shot) { try { shot.pause(); shot.currentTime = 0; } catch { /* */ } _live.delete(shot); }
+    },
+  };
 }
 
 /** Looping playback (ambient beds, BGM). Returns a handle with .stop(); the

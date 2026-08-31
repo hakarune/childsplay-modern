@@ -108,7 +108,9 @@ export default class SoundMemoryGame extends Scene {
     const c = this._cardAt(x, y);
     if (!c || c === this._first) return;
 
-    playSound(`soundmemory/snd/${c.id}.ogg`);
+    // cut the previous card's clip the instant a new one is tapped
+    if (this._clip) this._clip.stop();
+    this._clip = playSound(`soundmemory/snd/${c.id}.ogg`);
     this._playing = c;
     this._pulse = 0;
 

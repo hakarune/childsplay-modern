@@ -8,7 +8,7 @@
  * Bump CACHE on a release if you want old entries evicted immediately
  * rather than lazily refreshed.
  */
-const CACHE = 'cp-cache-v1';
+const CACHE = 'cp-cache-34af95c0a2';
 
 // The app shell - enough to boot the menu offline even if a game module
 // was never opened. Game modules and assets are cached on first use.

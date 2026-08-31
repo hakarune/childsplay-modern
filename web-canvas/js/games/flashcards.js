@@ -143,10 +143,11 @@ export default class FlashcardsGame extends Scene {
 
     // language chips
     this._langBtns.forEach((b, k) => {
+      const sel = k === this._lang;
       roundRect(ctx, b.x, b.y, b.w, b.h, 12);
-      ctx.fillStyle = k === this._lang ? theme.accent : theme.surface;
+      ctx.fillStyle = sel ? theme.accent : theme.surface;
       ctx.fill();
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = sel ? '#fff' : theme.text;   // white only on the accent fill
       ctx.font = '600 20px system-ui, sans-serif';
       ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 1);
     });

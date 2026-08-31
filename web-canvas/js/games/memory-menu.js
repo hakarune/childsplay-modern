@@ -92,7 +92,7 @@ export class MemoryMenu extends Scene {
       ctx.font = `700 ${Math.round(t.h * 0.34)}px system-ui, sans-serif`;
       ctx.fillText(t.v.sample, t.x + t.w / 2, t.y + t.h * 0.42);
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = pressed ? '#ffffff' : theme.text;   // white only on the accent fill
       ctx.font = `600 ${Math.round(t.h * 0.15)}px system-ui, sans-serif`;
       ctx.fillText(t.v.label, t.x + t.w / 2, t.y + t.h - t.h * 0.16);
     });
