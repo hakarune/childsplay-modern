@@ -154,6 +154,9 @@ PHRASES=(
   "remember where the numbers are, then press Start"
   "take another look"
   "tap letters, then Enter"
+  "match the pictures"
+  "match the letters"
+  "match the numbers"
   # --- numbers game: tap number N ---
   "tap number 1" "tap number 2" "tap number 3" "tap number 4" "tap number 5"
   "tap number 6" "tap number 7" "tap number 8" "tap number 9"

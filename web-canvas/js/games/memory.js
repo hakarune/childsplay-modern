@@ -4,7 +4,8 @@
 // Grid grows 2x2 -> 4x3 -> 4x4 -> 5x4 across levels.
 
 import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
-import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, makeNameToggle, nameFromId } from '../util.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, makeNameToggle, nameFromId,
+  HUD_H, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 import { theme } from '../theme.js';
 
 const LEVELS = [
@@ -23,6 +24,8 @@ const BACK = 'ui/card_back';
 const FRONT = 'ui/card_front';
 
 const VARIANT_LABEL = { pictures: 'Pictures', lower: 'lowercase', upper: 'UPPERCASE', numbers: 'Numbers' };
+// One HUD instruction line per variant (§G.2).
+const HINT = { pictures: 'match the pictures', lower: 'match the letters', upper: 'match the letters', numbers: 'match the numbers' };
 
 const SND_FLIP = 'sfx/dealcard1.wav';
 const SND_MATCH = 'sfx/good.ogg';
@@ -136,6 +139,7 @@ export default class MemoryGame extends Scene {
       else if (act === 'menu') this._exit();
       return;
     }
+    if (hudSpeakHit(x, y)) return speakHud();
     if (this._variant === 'pictures' && this._names.hit(x, y)) { this._names.toggle(); return; }
     if (this._cool > 0 || this._open.length >= 2) return;
     const c = this._cardAt(x, y);
@@ -183,16 +187,24 @@ export default class MemoryGame extends Scene {
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     ctx.fillStyle = theme.hud;
-    ctx.fillRect(0, 0, VIEW_W, 70);
+    ctx.fillRect(0, 0, VIEW_W, HUD_H);
     ctx.fillStyle = theme.line;
-    ctx.fillRect(0, 70 - 1, VIEW_W, 1);
-    ctx.fillStyle = theme.hud_text;
+    ctx.fillRect(0, HUD_H - 1, VIEW_W, 1);
     ctx.font = '600 24px system-ui, sans-serif';
-    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`Flips ${this._flips}    Pairs ${this._matched}/${this._pairs}`, VIEW_W / 2, 35);
+    // left: just the level (kept short so it never reaches the centre line
+    // on a 4:3 viewport — live pair count is shown by the board itself and
+    // in the win screen). §G.2.
+    ctx.fillStyle = theme.hud_text;
     ctx.textAlign = 'left';
-    ctx.fillText(`Memory - ${VARIANT_LABEL[this._variant]}  ·  Level ${this._level + 1}/${LEVELS.length}`, 220, 35);
+    ctx.fillText(`Level ${this._level + 1}/${LEVELS.length}`, 220, HUD_H / 2);
+    // centre: the single instruction line + speak button
+    const hint = HINT[this._variant];
+    ctx.textAlign = 'center';
+    ctx.fillStyle = theme.hud_muted;
+    ctx.fillText(hint, VIEW_W / 2, HUD_H / 2);
+    hudSpeakButton(ctx, hint, VIEW_W / 2, HUD_H / 2);
+    // right: the "say the names" pill (pictures only)
     if (this._variant === 'pictures') this._names.draw(ctx);
 
     const back = img(BACK);

@@ -133,9 +133,7 @@ func _start_level(index: int) -> void:
 	var faces: Array = _deck_faces()
 	_total_pairs = mini(int(lvl["cols"] * lvl["rows"] / 2.0), faces.size())
 	_grid.columns = lvl["cols"]
-	_level_label.text = "Memory - %s      Level %d / %d  -  %s" % [
-		VARIANT_LABEL[_variant], _level_index + 1, LEVELS.size(), lvl["name"]
-	]
+	_level_label.text = "Level %d / %d" % [_level_index + 1, LEVELS.size()]
 	_update_flip_label()
 	_build_deck(faces)
 
@@ -266,7 +264,7 @@ func _go_home() -> void:
 # ---------------------------------------------------------------------------
 
 func _update_flip_label() -> void:
-	_flip_label.text = "Flips: %d    Pairs: %d / %d" % [_flips, _matched_pairs, _total_pairs]
+	_flip_label.text = "Pairs: %d / %d" % [_matched_pairs, _total_pairs]
 
 
 func _play(player: AudioStreamPlayer) -> void:
