@@ -45,7 +45,10 @@ Why two implementations instead of one exported everywhere:
   locked-down Chromebook or a parent's phone. A stripped hand-written canvas
   engine keeps the payload far smaller than a WebAssembly engine export.
 
-`assets/` is the single source of truth they both consume.
+`assets/` is the single source of truth they both consume. See
+[**docs/ASSETS.md**](docs/ASSETS.md) for the full layout, the sync/build
+flow, and the naming rules — read it before moving or adding any art or
+audio.
 
 ---
 
@@ -82,19 +85,23 @@ Launch it from your desktop menu ("Childsplay Modern") or run
 
 ```
 childsplay-modern/
-├── assets/                     Shared source assets
+├── assets/                     Shared source of truth — see docs/ASSETS.md
 │   ├── graphics/
 │   │   ├── pools/                Flat, purpose-named art the games actually use
 │   │   │   ├── backgrounds/        paintings + aquarium_1..6
 │   │   │   ├── animals/            01_cat.png … 21_frog.png, dog/horse/rooster
-│   │   │   ├── ui/                 card faces, sponge, bubble
+│   │   │   ├── ui/                 card faces, sponge, bubble, soundbut
 │   │   │   ├── soundpics/          Find Sound / Sound Memory pictures
 │   │   │   ├── icons/              one <game-id>.png per menu tile
 │   │   │   └── sprites/<game>/     packid / billiards / aquarium sprite sheets
-│   │   └── lib/                  Untouched legacy dump (provenance only)
+│   │   └── lib/                  Untouched legacy dump — provenance only, NOT synced
 │   ├── audio/
-│   │   ├── lib/                  Legacy sound tree (effects, clips)
-│   │   └── voice/                Baked spoken lines: v_<slug>.ogg
+│   │   ├── sfx/                  Flat effect clips (referenced by bare filename)
+│   │   ├── voice/               Baked spoken lines: v_<slug>.ogg
+│   │   ├── soundmemory/         Shared Find Sound / Sound Memory clip set: <id>.ogg
+│   │   ├── flashcards/<lang>/   Recorded animal names (de/nl/fr/es)
+│   │   ├── lib/                  Legacy sound tree — provenance only, NOT synced
+│   │   └── alphabet-sounds/     Legacy locale packs — provenance only, NOT synced
 │   ├── data/                    Editable game content (see "Customising content")
 │   │   ├── electro.json           Electro picture↔name pairs
 │   │   ├── findsound.json         Find Sound levels + spoken-label overrides
@@ -105,7 +112,7 @@ childsplay-modern/
 ├── desktop-godot/              Godot 4 engine source
 │   ├── project.godot             1280×720, canvas_items/keep stretch, Compatibility
 │   ├── default_bus_layout.tres   Master / Music / SFX / Voice audio buses
-│   ├── sync-assets.sh            Mirror ../assets → desktop-godot/assets (res://)
+│   ├── sync-assets.sh            Mirror curated ../assets pools → desktop-godot/assets (res://)
 │   ├── build-deb.sh             Export + package the .deb (Linux)
 │   ├── build-windows.sh        Export + zip the .exe (Windows x86_64)
 │   ├── scenes/                   MainMenu.tscn, MemoryMenu.tscn, QuizMenu.tscn, games/*.tscn
@@ -122,13 +129,16 @@ childsplay-modern/
 │                                 textinput.js, menu.js, main.js, games/*
 ├── tools/                      Content generators (see below)
 │   ├── migrate-assets.sh         Build assets/graphics/pools/ from the legacy dump
+│   ├── migrate-audio.sh          Build assets/audio/{sfx,soundmemory,flashcards}/ from the legacy dump
 │   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg
 │   ├── gen-electro-data.sh       Rebuild assets/data/electro.json from the art
 │   └── gen-wordlist.py           Rebuild assets/data/wordlist.json
 ├── build-deb.sh                Thin wrapper → desktop-godot/build-deb.sh
 ├── docs/
+│   ├── ASSETS.md                 Where assets live + the sync/build flow (source of truth)
 │   ├── Design-Policy.md          The cross-cutting rules every game follows (§A–§L)
 │   ├── GAME-STATUS.md            Per-activity conversion tracker + changelog
+│   ├── assets/<id>.assets.md     Per-game graphics declaration (§A.7)
 │   └── templates/ASSETS.template.md
 ├── .github/workflows/deploy-pages.yml   Auto-deploys web-canvas/ to Pages on push
 ├── legacy-sources/             Upstream checkout for asset extraction (git-ignored)
@@ -280,12 +290,17 @@ same rule in `tts.js` (`slug()`) and `GameContext._slug()`, so `say("Tap
 number 3")` finds `v_tap-number-3.ogg` automatically. If a clip is missing
 the games fall back to live TTS, then to silence.
 
-### Art pools
+### Asset pools
 
-`assets/graphics/pools/` is built from the legacy dump by
-**`tools/migrate-assets.sh`** (see `docs/Design-Policy.md` §A for the
-naming rules). To add or swap art, either drop correctly-named files
-straight into a pool folder, or edit `migrate-assets.sh` and re-run it.
+`assets/graphics/pools/` and `assets/audio/{sfx,soundmemory,flashcards}/`
+are the curated pools the games actually reference. They are built from the
+legacy dumps by **`tools/migrate-assets.sh`** and **`tools/migrate-audio.sh`**
+(see [`docs/ASSETS.md`](docs/ASSETS.md) for the whole picture and
+`docs/Design-Policy.md` §A for the naming rules). To add or swap an asset,
+either drop a correctly-named file straight into a pool folder, or edit the
+relevant `migrate-*.sh` mapping table and re-run it. The legacy trees
+(`graphics/lib/`, `audio/lib/`, `audio/alphabet-sounds/`) stay in the repo
+for provenance but are **not** synced to either target.
 
 ### After editing anything under `assets/`
 

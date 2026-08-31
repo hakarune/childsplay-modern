@@ -53,7 +53,11 @@ assets/graphics/
   icons/           one per game id (menu tiles) + menu chrome
   sprites/<game>/  DENSE single-game sprite/frame sets only (packid tiles, billiards balls, fish swim frames)
 assets/audio/
-  sfx/ voice/ music/    (mirrors the three Godot buses)
+  sfx/          flat effect clips, referenced by bare filename
+  voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh)
+  soundmemory/  shared Find Sound / Sound Memory clip set, <id>.ogg
+  flashcards/<lang>/   recorded animal names (de/nl/fr/es)
+  (no music/ — win stingers live in sfx/ and play on the Music bus)
 assets/data/       content files — see §J
 ```
 
@@ -94,28 +98,32 @@ Rules:
 
 ### A.4 How each target resolves it
 
-- **Web** (`sync-assets.sh`): curates the legacy tree into the pools above and
+- **Web** (`sync-assets.sh`): curates the pools into `web-canvas/assets/` and
   writes `web-canvas/assets/manifest.json` (see §C.2). Games reference a pool
   path **without extension** (`backgrounds/castle`); `engine.resolveImage()`
-  picks the best available.
-- **Godot** (`sync-assets.sh`): MUST switch from "rsync the whole legacy tree"
-  to "curate the same pools into `res://assets/`". Flat unique names make the
-  1668-collision warning go away. `AssetLoader` keeps filename indexing and
-  gains: (a) extension-preference on stem collisions (§C.3), (b)
-  `pick_from_pool(prefix, {difficulty})` (§B).
+  picks the best available. Audio is referenced by explicit path.
+- **Godot** (`sync-assets.sh`): mirrors **only** the curated pools into
+  `res://assets/` (`graphics/{pools,themes}`, `audio/{sfx,voice,soundmemory,
+  flashcards}`, `fonts`, `data`). `AssetLoader` keeps filename indexing with
+  (a) extension-preference on stem collisions (§C.3), (b)
+  `pick_from_pool(prefix, {difficulty})` (§B), and (c) a
+  `SCAN_SKIP_DIRS` list (`flashcards/` — same stems in four languages,
+  loaded by explicit path only). With `lib/` out of `res://` the old
+  ~1668-collision warning is down to 3 known pool-vs-pool overlaps.
 
-### A.5 Migration plan (one-time)
+### A.5 Migration plan — **DONE** (2026-08-31)
 
-1. Add `tools/migrate-assets.sh` (or a `migrate` mode in `sync-assets.sh`)
-   that copies+renames legacy files into `assets/graphics/{backgrounds,animals,…}`
-   per a mapping table kept in that script. Keep the table in the script so it
-   is reviewable.
-2. Point **both** `sync-assets.sh` scripts at the new pools only.
-3. Rewrite each game's asset paths to pool paths (mechanical; do it per game
-   as that game is touched for other policy items).
-4. Delete the per-game curated dirs (`web-canvas/assets/puzzle/`, `/memory/`, …)
-   — they become `backgrounds/`, `animals/`, etc.
-5. Leave `assets/graphics/lib/` in the repo, drop it from the sync globs.
+1. ✅ `tools/migrate-assets.sh` builds `graphics/pools/**`; `tools/migrate-audio.sh`
+   builds `audio/{sfx,soundmemory,flashcards}/**`. Mapping tables kept inline.
+2. ✅ Both `sync-assets.sh` scripts curate the pools only. The Godot one no
+   longer rsyncs the whole tree.
+3. ✅ Game asset paths point at pools (the last explicit `.tscn` refs in
+   `Packid.tscn` / `Aquarium.tscn` were repointed; `Flashcards.gd` and the
+   `FourRow` / `Aquarium` sound constants renamed to the pool names).
+4. ✅ Per-game curated web dirs collapsed into the shared pools.
+5. ✅ `graphics/lib/`, `audio/lib/`, `audio/alphabet-sounds/` stay in the
+   repo for provenance, dropped from both syncs. See
+   [`ASSETS.md`](ASSETS.md) for the full flow.
 
 ### A.6 First mapping decisions (do these first — they unblock §B/§H)
 

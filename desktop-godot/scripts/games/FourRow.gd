@@ -18,8 +18,8 @@ const LEVELS := [
 ]
 
 const SND_DROP := "pick.wav"
-const SND_WIN := "won.ogg"
-const SND_LOSS := "loss.ogg"
+const SND_WIN := "fourrow_win.ogg"
+const SND_LOSS := "fourrow_loss.ogg"
 
 var _level := 0
 var _grid: Array = []

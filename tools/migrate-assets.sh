@@ -52,11 +52,12 @@ for a in dog horse rooster; do
   [ -n "$f" ] && cp "$f" "$POOL/animals/$a.png"
 done
 
-# --- ui: card faces, sponge, bubble ------------------------------------
+# --- ui: card faces, sponge, bubble, sound-card face -----------------
 cp "$AN_SRC/CP_cardfront.png"                 "$POOL/ui/card_front.png"
 cp "$AN_SRC/CP_cardback.png"                  "$POOL/ui/card_back.png"
 cp "$LIB/WipeData/sponge.png"                 "$POOL/ui/sponge.png"
 cp "$LIB/FishtankData/backgrounds/childsplay/blub0.png" "$POOL/ui/bubble.png"
+cp "$LIB/soundbut.png"                        "$POOL/ui/soundbut.png"
 
 # --- soundpics: the Find Sound / Sound Memory picture set (deduped) ----
 for f in "$LIB/FindsoundData/Images/"level*/*.png; do
@@ -103,6 +104,7 @@ declare -A ICONMAP=(
   [ichanger]=childsplay/menuicons/ichanger.icon.png
   [numbers]=childsplay/menuicons/numbers_sp.icon.png
   [synonyms]=seniorplay/menuicons/synonyms.icon.png
+  [quiz]=seniorplay/menuicons/quiz_general.icon.png
 )
 for id in "${!ICONMAP[@]}"; do
   src="$SP/${ICONMAP[$id]}"

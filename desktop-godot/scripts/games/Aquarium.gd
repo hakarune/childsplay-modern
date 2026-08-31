@@ -6,10 +6,10 @@ extends Control
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const FISH_SCENE := preload("res://scenes/components/AquariumFish.tscn")
 
-const BUBBLE_TEX := "blub0.png"
+const BUBBLE_TEX := "bubble.png"
 const SND_BLUB := "blub0.wav"
 const SND_SPLASH := "poolsplash.wav"
-const SND_AMBIENT := "glockenschmoutz.ogg"
+const SND_AMBIENT := "aqua_ambient.ogg"
 
 const FISH_COUNT := 12
 

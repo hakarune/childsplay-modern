@@ -13,6 +13,13 @@ extends Node
 
 const ASSET_ROOT := "res://assets"
 
+# Directories skipped by the filename index. `flashcards/` holds the same
+# animal-name stems in four languages (cow.ogg, dog.ogg, …) which both
+# collide with each other and with the Find Sound / Sound Memory clip set
+# under `soundmemory/`. Flashcards is only ever loaded by explicit path
+# (Flashcards.gd), so it never needs to be in the bare-name index.
+const SCAN_SKIP_DIRS := ["flashcards"]
+
 # Resolution order (Design Policy §C.2): a newer `castle.svg` dropped next to
 # `castle.jpg` wins. IMAGE_EXTS is listed best-first and EXT_PRIORITY lets
 # _register() prefer the higher-priority extension on a name collision
@@ -106,6 +113,9 @@ func _scan_dir(path: String) -> void:
 
 		var full := path.path_join(entry)
 		if dir.current_is_dir():
+			if entry in SCAN_SKIP_DIRS:
+				entry = dir.get_next()
+				continue
 			_scan_dir(full)
 		else:
 			_index_file(full, entry)

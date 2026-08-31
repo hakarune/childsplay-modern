@@ -1,8 +1,8 @@
 [gd_scene load_steps=7 format=3 uid="uid://dpackidgame000"]
 
 [ext_resource type="Script" path="res://scripts/games/Packid.gd" id="1_pk"]
-[ext_resource type="Texture2D" path="res://assets/graphics/lib/CPData/PackidData/brick.png" id="2_brick"]
-[ext_resource type="Texture2D" path="res://assets/graphics/lib/CPData/PackidData/kers.png" id="3_kers"]
+[ext_resource type="Texture2D" path="res://assets/graphics/pools/sprites/packid/brick.png" id="2_brick"]
+[ext_resource type="Texture2D" path="res://assets/graphics/pools/sprites/packid/kers.png" id="3_kers"]
 
 [sub_resource type="TileSetAtlasSource" id="TSAS_wall"]
 texture = ExtResource("2_brick")

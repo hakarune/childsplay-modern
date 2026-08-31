@@ -256,3 +256,39 @@ Every game filed a `docs/assets/<id>.assets.md` (§A.7).
 Verified: Godot editor parse + headless scene-load of every game clean;
 `node --check` clean on every web module. Not yet visually QA'd on a real
 device / browser._
+
+2026-08-31 (asset-layout cleanup — Design Policy §A migration finished):
+- **New `docs/ASSETS.md`** — the source-of-truth doc: the three asset
+  trees (`/assets/` canonical, `desktop-godot/assets/` git-ignored mirror,
+  `web-canvas/assets/` committed web build), the sync/build flow, and the
+  runtime-resolution rules. README head now points at it.
+- **Godot `sync-assets.sh` rewritten to curate** — mirrors only
+  `graphics/{pools,themes}` + `audio/{sfx,voice,soundmemory,flashcards}` +
+  `fonts` + `data`, with a prune step for stale legacy dirs. The mirror
+  drops **65 MB → 9.4 MB** and `AssetLoader`'s duplicate-filename warning
+  goes **1668 → 3** (known pool-vs-pool overlaps).
+- **Audio pool migration** — new `tools/migrate-audio.sh` builds
+  `assets/audio/sfx/` (21 clips), `assets/audio/soundmemory/` (the 36
+  shared Find Sound / Sound Memory clips) and `assets/audio/flashcards/<lang>/`
+  (12 animal names × de/nl/fr/es) from the legacy dumps. Both
+  `sync-assets.sh` scripts now read those instead of
+  `assets/audio/lib/CPData/…` long paths. `audio/lib/` and
+  `audio/alphabet-sounds/` stay for provenance, unsynced (twins of
+  `graphics/lib/`).
+- **Code repoints** — the 4 hard-coded `res://assets/graphics/lib/…` paths
+  in `Packid.tscn` / `Aquarium.tscn` now point at pool twins;
+  `Aquarium.gd` `BUBBLE_TEX`/`SND_AMBIENT` and `FourRow.gd`
+  `SND_WIN`/`SND_LOSS` renamed to the pool names; `Flashcards.gd` loads
+  `res://assets/audio/flashcards/<lang>/<word>.ogg`.
+- **`AssetLoader.SCAN_SKIP_DIRS`** — `flashcards/` is excluded from the
+  filename index (same stems in four languages, collides with the
+  `soundmemory/` set); it's loaded by explicit path only.
+- `tools/migrate-assets.sh` gains `ui/soundbut.png` (Sound Memory card
+  face, previously served only from `lib/`).
+- Web build is byte-identical after the change apart from `manifest.json`
+  (+`ui/soundbut`) and the new `ui/soundbut.png`.
+
+Verified: `godot --headless` import pass clean; headless scene-load of all
+20 games + 3 menus clean (`fails: 0`); both `sync-assets.sh` + both
+`migrate-*.sh` run clean; every `sfx/*` path referenced in web JS resolves.
+Still not visually QA'd on a real device / browser._

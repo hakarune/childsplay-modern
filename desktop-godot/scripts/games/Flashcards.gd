@@ -95,9 +95,7 @@ func _say() -> void:
 	var lang: Dictionary = LANGS[_lang]
 
 	if lang["code"] != "en":
-		var path := "res://assets/audio/alphabet-sounds/alphabet-sounds_%s/FlashCardsSounds/%s/%s.ogg" % [
-			lang["code"], lang["code"], word
-		]
+		var path := "res://assets/audio/flashcards/%s/%s.ogg" % [lang["code"], word]
 		if ResourceLoader.exists(path):
 			_clip.stream = load(path)
 			_clip.play()

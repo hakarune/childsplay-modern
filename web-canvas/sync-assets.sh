@@ -3,9 +3,10 @@
 # sync-assets.sh - (re)build web-canvas/assets/ from the shared ../assets/.
 #
 # Graphics come entirely from the flat, purpose-named pools built by
-# tools/migrate-assets.sh (Design Policy §A) — this script no longer
-# touches the legacy `assets/graphics/lib/` tree. Audio still comes from
-# ../assets/audio/lib/ until an audio-pool migration lands.
+# tools/migrate-assets.sh; audio from the pools built by
+# tools/migrate-audio.sh (Design Policy §A). This script no longer touches
+# the legacy `assets/graphics/lib/`, `assets/audio/lib/` or
+# `assets/audio/alphabet-sounds/` trees — they are provenance only.
 #
 # Run after cloning or whenever ../assets/ changes. The result is checked
 # in so `web-canvas/` deploys as-is.
@@ -19,9 +20,10 @@ DST="$HERE/assets"
 [ -d "$SRC" ] || { echo "error: $SRC not found" >&2; exit 1; }
 
 POOLS="$SRC/graphics/pools"
-A="$SRC/audio/lib/CPData"
+APOOL="$SRC/audio"
 
-[ -d "$POOLS" ] || { echo "error: $POOLS not found — run tools/migrate-assets.sh" >&2; exit 1; }
+[ -d "$POOLS" ]        || { echo "error: $POOLS not found — run tools/migrate-assets.sh" >&2; exit 1; }
+[ -d "$APOOL/sfx" ]    || { echo "error: $APOOL/sfx not found — run tools/migrate-audio.sh" >&2; exit 1; }
 
 rm -rf "$DST"
 mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,soundpics,sfx,voice,data}
@@ -57,28 +59,16 @@ cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack 
 # --- UI font ---------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
 
-# --- Sound Memory / Find Sound: the sound clips --------------------
-cp "$A/SoundmemoryData/Sounds/"*.ogg "$DST/soundmemory/snd/"
-
-# --- shared sound effects ------------------------------------------
-cp "$A/good.ogg" "$A/wrong.ogg" "$A/wahoo.wav" "$A/bummer.wav" \
-   "$A/dealcard1.wav" "$A/volumecheck.wav" "$A/button_hover.wav" \
-   "$A/PackidData/eat.wav" "$A/PackidData/waka.wav" "$A/PackidData/finlevel.wav" \
-   "$A/PongData/winner.ogg" "$A/PongData/bump.wav" "$A/PongData/pick.wav" \
-   "$A/BilliardData/sndh.wav" "$A/BilliardData/sndt.wav" \
-   "$A/FishtankData/sounds/blub0.wav" "$A/FishtankData/sounds/poolsplash.wav" \
-   "$A/PongData/goal.wav" \
-   "$DST/sfx/"
-cp "$A/FishtankData/sounds/glockenschmoutz.ogg" "$DST/sfx/aqua_ambient.ogg"
-cp "$A/FourrowData/won.ogg"  "$DST/sfx/fourrow_win.ogg"
-cp "$A/FourrowData/loss.ogg" "$DST/sfx/fourrow_loss.ogg"
-
-# --- Flashcards: recorded animal-name clips (de / nl / fr / es) -------
+# --- audio: straight from the pools (tools/migrate-audio.sh) ---------
+# sfx/ and flashcards/ keep their pool names 1:1; the shared named-clip
+# set lands under soundmemory/snd/ where findsound.js + soundmemory.js
+# expect it.
+cp "$APOOL/sfx/"*                 "$DST/sfx/"
+cp "$APOOL/soundmemory/"*.ogg     "$DST/soundmemory/snd/"
 for lang in de nl fr es; do
-  for w in bear cow dog elephant fox frog hippopotamus horse lion pig penguin rooster; do
-    src="$SRC/audio/alphabet-sounds/alphabet-sounds_$lang/FlashCardsSounds/$lang/$w.ogg"
-    [ -f "$src" ] && cp "$src" "$DST/flashcards/$lang/$w.ogg"
-  done
+  [ -d "$APOOL/flashcards/$lang" ] || continue
+  mkdir -p "$DST/flashcards/$lang"
+  cp "$APOOL/flashcards/$lang/"*.ogg "$DST/flashcards/$lang/"
 done
 
 # --- image manifest: stem -> best available file (svg > png > jpg > …) ---
