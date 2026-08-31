@@ -95,9 +95,11 @@ func _say() -> void:
 	var lang: Dictionary = LANGS[_lang]
 
 	if lang["code"] != "en":
-		var path := "res://assets/audio/flashcards/%s/%s.ogg" % [lang["code"], word]
-		if ResourceLoader.exists(path):
-			_clip.stream = load(path)
+		# flashcards/<word>_<lang>.ogg — flat, unique names, so the normal
+		# AssetLoader index resolves it like any other clip.
+		var key := "%s_%s.ogg" % [word, lang["code"]]
+		if AssetLoader.has_stream(key):
+			_clip.stream = AssetLoader.get_stream(key)
 			_clip.play()
 			return
 

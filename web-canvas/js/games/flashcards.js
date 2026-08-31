@@ -66,8 +66,10 @@ export default class FlashcardsGame extends Scene {
     // English: baked clip → live TTS (say() handles the fallback chain).
     if (L.code === 'en') return say(card.word, { lang: L.bcp, rate: 0.85 });
     // de/nl/fr/es: the recorded Childsplay clip, else TTS in that language.
-    loadSound(`flashcards/${L.code}/${card.word}.ogg`).then((a) => {
-      if (a && (a.duration > 0 || a.readyState >= 2)) playSound(`flashcards/${L.code}/${card.word}.ogg`, { channel: 'voice' });
+    // flashcards/<word>_<lang>.ogg — flat folder, language as a suffix.
+    const clip = `flashcards/${card.word}_${L.code}.ogg`;
+    loadSound(clip).then((a) => {
+      if (a && (a.duration > 0 || a.readyState >= 2)) playSound(clip, { channel: 'voice' });
       else say(card.word, { lang: L.bcp, rate: 0.82 });
     });
   }

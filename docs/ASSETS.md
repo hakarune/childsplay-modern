@@ -52,7 +52,7 @@ assets/
     sfx/              flat effect clips, referenced by bare filename on both targets
     voice/            baked spoken lines, v_<slug>.ogg — owned by tools/gen-voice.sh
     soundmemory/      shared Find Sound / Sound Memory clip set, <id>.ogg
-    flashcards/<lang>/ recorded animal names for Flashcards (de, nl, fr, es)
+    flashcards/        recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
     lib/              legacy CPData sound dump — PROVENANCE ONLY, not synced
     alphabet-sounds/  legacy per-locale letter/word packs — PROVENANCE ONLY, not synced
 
@@ -133,10 +133,9 @@ and Windows build scripts run `sync-assets.sh` themselves.
 
 - On a filename collision it prefers a `/pools/` path and the
   higher-priority extension (§C.3).
-- The `flashcards/` directory is **skipped** by the index
-  (`AssetLoader.SCAN_SKIP_DIRS`): it holds the same animal-name stems in
-  four languages, which would collide with each other and with the
-  `soundmemory/` clip set. `Flashcards.gd` loads those by explicit path.
+- Flashcard clips are named `<word>_<lang>.ogg` (flat), so every name is
+  globally unique and they index like any other clip — `Flashcards.gd`
+  asks `AssetLoader.get_stream("cow_fr.ogg")`.
 - A few textures are still referenced by an explicit `res://…/pools/…`
   path in a `.tscn` (`Packid.tscn`, `Aquarium.tscn`) — always a pools
   path, never `lib/`.
@@ -152,7 +151,7 @@ Find Sound picture share the name; harmless, different callers).
 can reference `backgrounds/castle` with no extension and get the
 best-available file. Audio is referenced by explicit path
 (`sfx/good.ogg`, `soundmemory/snd/<id>.ogg`, `voice/v_<slug>.ogg`,
-`flashcards/<lang>/<word>.ogg`).
+`flashcards/<word>_<lang>.ogg`).
 
 ---
 
@@ -170,6 +169,26 @@ the clearer (web) name and the Godot constant was updated to match:
 
 `sfx/eat.wav` (Godot Pac-Man chomp) and `sfx/waka.wav` (web Pac-Man
 chomp) are two *different* legacy clips; both are kept.
+
+---
+
+## Adding a Flashcards language
+
+Flashcard audio lives in one flat folder as `<word>_<lang>.ogg`
+(`cow_fr.ogg`, `bear_de.ogg`, …). English is browser/OS TTS — no file.
+To add, say, Japanese:
+
+1. Drop a `FlashCardsSounds/ja/<word>.ogg` set under
+   `assets/audio/alphabet-sounds/alphabet-sounds_ja/` (or hand-record the
+   12 DECK words straight into the pool as `<word>_ja.ogg`).
+2. Add `ja` to `FLASH_LANGS` in `tools/migrate-audio.sh` and re-run it.
+3. Add `{ code: 'ja', label: '日本語', bcp: 'ja-JP' }` to the `LANGS`
+   array in **both** `desktop-godot/scripts/games/Flashcards.gd` and
+   `web-canvas/js/games/flashcards.js` — a button appears automatically.
+4. Re-run both `sync-assets.sh`.
+
+Missing clips fall back to TTS in that language, so a partial set still
+works.
 
 ---
 

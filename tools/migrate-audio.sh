@@ -9,7 +9,10 @@
 #                   filename on both targets (Godot resolves by basename,
 #                   web by `sfx/<name>`)
 #     soundmemory/  the shared Find Sound / Sound Memory clip set: <id>.ogg
-#     flashcards/<lang>/<word>.ogg   recorded animal-name clips (de/nl/fr/es)
+#     flashcards/<word>_<lang>.ogg   recorded animal-name clips (de/nl/fr/es);
+#                   flat, language as a filename suffix so every name is
+#                   globally unique and adding a language later is just
+#                   "drop <word>_ja.ogg files + a JA button"
 #     voice/        baked spoken lines — owned by tools/gen-voice.sh, NOT
 #                   touched here
 #
@@ -67,17 +70,19 @@ done
 #     Falling Letter's "zap"). One flat folder, keyed by id. ------------
 cp "$LIB/SoundmemoryData/Sounds/"*.ogg "$AUDIO/soundmemory/"
 
-# --- flashcards: recorded animal names, de / nl / fr / es -------------
+# --- flashcards: recorded animal names, <word>_<lang>.ogg (flat) -----
 # Only the words in the Flashcards DECK (desktop-godot Flashcards.gd /
 # web-canvas flashcards.js — the two lists are kept identical). Extend
-# DECK_WORDS here in the same commit that extends the DECK.
+# DECK_WORDS here in the same commit that extends the DECK. To add a
+# language: add its FlashCardsSounds pack under assets/audio/alphabet-sounds/,
+# add its code to FLASH_LANGS, re-run, and add the button in both games.
 DECK_WORDS=(bear cow dog elephant fox frog hippopotamus horse lion pig penguin rooster)
-for lang in de nl fr es; do
+FLASH_LANGS=(de nl fr es)
+for lang in "${FLASH_LANGS[@]}"; do
   src="$ALPHA/alphabet-sounds_$lang/FlashCardsSounds/$lang"
   [ -d "$src" ] || { echo "  WARN missing flashcard set: $lang" >&2; continue; }
-  mkdir -p "$AUDIO/flashcards/$lang"
   for w in "${DECK_WORDS[@]}"; do
-    [ -f "$src/$w.ogg" ] && cp "$src/$w.ogg" "$AUDIO/flashcards/$lang/$w.ogg"
+    [ -f "$src/$w.ogg" ] && cp "$src/$w.ogg" "$AUDIO/flashcards/${w}_${lang}.ogg"
   done
 done
 

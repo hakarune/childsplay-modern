@@ -99,7 +99,7 @@ childsplay-modern/
 │   │   ├── sfx/                  Flat effect clips (referenced by bare filename)
 │   │   ├── voice/               Baked spoken lines: v_<slug>.ogg
 │   │   ├── soundmemory/         Shared Find Sound / Sound Memory clip set: <id>.ogg
-│   │   ├── flashcards/<lang>/   Recorded animal names (de/nl/fr/es)
+│   │   ├── flashcards/          Recorded animal names, <word>_<lang>.ogg (de/nl/fr/es)
 │   │   ├── lib/                  Legacy sound tree — provenance only, NOT synced
 │   │   └── alphabet-sounds/     Legacy locale packs — provenance only, NOT synced
 │   ├── data/                    Editable game content (see "Customising content")

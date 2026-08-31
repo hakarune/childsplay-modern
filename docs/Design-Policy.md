@@ -56,7 +56,7 @@ assets/audio/
   sfx/          flat effect clips, referenced by bare filename
   voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh)
   soundmemory/  shared Find Sound / Sound Memory clip set, <id>.ogg
-  flashcards/<lang>/   recorded animal names (de/nl/fr/es)
+  flashcards/   recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
   (no music/ — win stingers live in sfx/ and play on the Music bus)
 assets/data/       content files — see §J
 ```
@@ -105,11 +105,11 @@ Rules:
 - **Godot** (`sync-assets.sh`): mirrors **only** the curated pools into
   `res://assets/` (`graphics/{pools,themes}`, `audio/{sfx,voice,soundmemory,
   flashcards}`, `fonts`, `data`). `AssetLoader` keeps filename indexing with
-  (a) extension-preference on stem collisions (§C.3), (b)
-  `pick_from_pool(prefix, {difficulty})` (§B), and (c) a
-  `SCAN_SKIP_DIRS` list (`flashcards/` — same stems in four languages,
-  loaded by explicit path only). With `lib/` out of `res://` the old
-  ~1668-collision warning is down to 3 known pool-vs-pool overlaps.
+  (a) extension-preference on stem collisions (§C.3) and (b)
+  `pick_from_pool(prefix, {difficulty})` (§B). Every pool filename is
+  globally unique (flashcards carry a `_<lang>` suffix), so with `lib/`
+  out of `res://` the old ~1668-collision warning is down to 3 known
+  pool-vs-pool image overlaps (`dog/horse/rooster.png`).
 
 ### A.5 Migration plan — **DONE** (2026-08-31)
 

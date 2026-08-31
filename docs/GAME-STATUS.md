@@ -269,20 +269,24 @@ device / browser._
   goes **1668 → 3** (known pool-vs-pool overlaps).
 - **Audio pool migration** — new `tools/migrate-audio.sh` builds
   `assets/audio/sfx/` (21 clips), `assets/audio/soundmemory/` (the 36
-  shared Find Sound / Sound Memory clips) and `assets/audio/flashcards/<lang>/`
+  shared Find Sound / Sound Memory clips) and `assets/audio/flashcards/`
   (12 animal names × de/nl/fr/es) from the legacy dumps. Both
   `sync-assets.sh` scripts now read those instead of
   `assets/audio/lib/CPData/…` long paths. `audio/lib/` and
   `audio/alphabet-sounds/` stay for provenance, unsynced (twins of
   `graphics/lib/`).
+- **Flashcard audio is flat + language-suffixed** — `flashcards/<word>_<lang>.ogg`
+  (`cow_fr.ogg`), one folder, every name globally unique. Both games build
+  the key as `"%s_%s.ogg" % [word, code]`; adding a language is "drop the
+  `_<code>` clips + a `LANGS` entry". This removes the earlier
+  `AssetLoader.SCAN_SKIP_DIRS` special case — flashcards now index like
+  any other clip.
 - **Code repoints** — the 4 hard-coded `res://assets/graphics/lib/…` paths
   in `Packid.tscn` / `Aquarium.tscn` now point at pool twins;
   `Aquarium.gd` `BUBBLE_TEX`/`SND_AMBIENT` and `FourRow.gd`
-  `SND_WIN`/`SND_LOSS` renamed to the pool names; `Flashcards.gd` loads
-  `res://assets/audio/flashcards/<lang>/<word>.ogg`.
-- **`AssetLoader.SCAN_SKIP_DIRS`** — `flashcards/` is excluded from the
-  filename index (same stems in four languages, collides with the
-  `soundmemory/` set); it's loaded by explicit path only.
+  `SND_WIN`/`SND_LOSS` renamed to the pool names; `Flashcards.gd` /
+  `flashcards.js` load `flashcards/<word>_<lang>.ogg` via the normal
+  loader.
 - `tools/migrate-assets.sh` gains `ui/soundbut.png` (Sound Memory card
   face, previously served only from `lib/`).
 - Web build is byte-identical after the change apart from `manifest.json`

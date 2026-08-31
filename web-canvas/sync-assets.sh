@@ -29,7 +29,7 @@ rm -rf "$DST"
 mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,soundpics,sfx,voice,data}
 mkdir -p "$DST"/sprites/{packid,billiards,aquarium}
 mkdir -p "$DST"/soundmemory/snd
-mkdir -p "$DST"/flashcards/{de,nl,fr,es}
+mkdir -p "$DST"/flashcards
 
 # --- graphics: straight from the pools (Design Policy §A) ------------
 cp "$POOLS/backgrounds/"*       "$DST/backgrounds/"
@@ -60,16 +60,12 @@ cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack 
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
 
 # --- audio: straight from the pools (tools/migrate-audio.sh) ---------
-# sfx/ and flashcards/ keep their pool names 1:1; the shared named-clip
-# set lands under soundmemory/snd/ where findsound.js + soundmemory.js
-# expect it.
+# sfx/ and flashcards/ keep their pool names 1:1 (flashcards are flat,
+# <word>_<lang>.ogg); the shared named-clip set lands under
+# soundmemory/snd/ where findsound.js + soundmemory.js expect it.
 cp "$APOOL/sfx/"*                 "$DST/sfx/"
 cp "$APOOL/soundmemory/"*.ogg     "$DST/soundmemory/snd/"
-for lang in de nl fr es; do
-  [ -d "$APOOL/flashcards/$lang" ] || continue
-  mkdir -p "$DST/flashcards/$lang"
-  cp "$APOOL/flashcards/$lang/"*.ogg "$DST/flashcards/$lang/"
-done
+cp "$APOOL/flashcards/"*.ogg      "$DST/flashcards/"
 
 # --- image manifest: stem -> best available file (svg > png > jpg > …) ---
 # engine.resolveImage() reads this so a game can reference `backgrounds/castle`
