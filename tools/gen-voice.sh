@@ -3,22 +3,43 @@
 # gen-voice.sh — bake the spoken lines into audio files so the games never
 # depend on the OS / browser having a speech engine (Design Policy §E).
 #
-# Every phrase a game may pass to `say()` is rendered here with espeak-ng
-# and encoded to OGG Vorbis at assets/audio/voice/<slug>.ogg. The <slug>
-# is computed the SAME way in tools/gen-voice.sh, web-canvas/js/tts.js and
-# desktop-godot GameContext.gd, so a runtime lookup by phrase finds the
-# clip. If a clip is missing, the runtime falls back to live TTS, then to
-# silence.
+# Each phrase a game may pass to `say()` becomes assets/audio/voice/<slug>.ogg.
+# The <slug> is computed the SAME way here, in web-canvas/js/tts.js and in
+# desktop-godot GameContext.gd, so a runtime lookup by phrase finds the clip.
+# At runtime the baked clip plays first; live TTS and then silence are the
+# fallbacks.
 #
-# Re-run whenever a spoken string changes; commit the .ogg files.
+# Source for each clip, best first:
+#   1. an original human recording, if we have one  (HUMAN_SRC map below)
+#   2. piper  — offline neural TTS, natural voice   (set PIPER_MODEL / PATH)
+#   3. espeak-ng  — robotic last resort so the script always runs
+#
+# Re-run whenever a spoken string changes; commit the .ogg files. To get
+# the good synthetic voice, install piper + a voice model and re-run:
+#   pipx install piper-tts       # or: pip install piper-tts
+#   mkdir -p ~/.local/share/piper && cd ~/.local/share/piper
+#   # download <voice>.onnx + <voice>.onnx.json from
+#   #   https://huggingface.co/rhasspy/piper-voices  (e.g. en_US-lessac-medium)
+#   PIPER_MODEL=~/.local/share/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT="$HERE/../assets/audio/voice"
+EN_GB="$HERE/../assets/audio/alphabet-sounds/alphabet-sounds_en_GB/AlphabetSounds/en_GB"
 mkdir -p "$OUT"
 
-command -v espeak-ng >/dev/null || { echo "need espeak-ng (pkg install espeak-ng)"; exit 1; }
-command -v ffmpeg    >/dev/null || { echo "need ffmpeg"; exit 1; }
+command -v ffmpeg >/dev/null || { echo "need ffmpeg"; exit 1; }
+
+PIPER_MODEL="${PIPER_MODEL:-$HOME/.local/share/piper/en_US-lessac-medium.onnx}"
+have_piper() { command -v piper >/dev/null 2>&1 && [ -f "$PIPER_MODEL" ]; }
+
+if have_piper; then
+  ENGINE="piper ($(basename "$PIPER_MODEL" .onnx))"
+elif command -v espeak-ng >/dev/null 2>&1; then
+  ENGINE="espeak-ng (robotic — install piper for a natural voice)"
+else
+  echo "need piper (+ PIPER_MODEL) or espeak-ng"; exit 1
+fi
 
 # slug: lowercase, drop everything but a-z 0-9, collapse to single dashes,
 # trim, cap length. MUST match tts.js `slug()` and GameContext.gd `_slug()`.
@@ -28,14 +49,52 @@ slug() {
   printf '%s' "${s:0:48}"
 }
 
+# slug -> original human recording. Letters + digits come from the GPL
+# en_GB AlphabetSounds pack (files are named by codepoint: U0061 = 'a').
+declare -A HUMAN_SRC=()
+for n in 0 1 2 3 4 5 6 7 8 9; do
+  HUMAN_SRC["$n"]="$(printf '%s/U%04x.ogg' "$EN_GB" $((48 + n)))"
+done
+for c in {a..z}; do
+  HUMAN_SRC["$c"]="$(printf '%s/U%04x.ogg' "$EN_GB" "'$c")"
+done
+
+encode() {  # $1 = input audio  ->  $2 = v_<slug>.ogg
+  ffmpeg -y -loglevel error -i "$1" -ac 1 -ar 22050 -c:a libvorbis -q:a 4 "$2"
+}
+
+synth() {   # $1 = text  ->  $2 = wav
+  if have_piper; then
+    printf '%s\n' "$1" | piper --model "$PIPER_MODEL" --output_file "$2" >/dev/null 2>&1
+  else
+    # slower, a touch higher, small word gap — friendlier for young ears
+    espeak-ng -v en-us -s 150 -p 55 -g 4 -w "$2" "$1"
+  fi
+}
+
 say_line() {
-  local text="$1" sl
+  local text="$1" sl human tmp
   sl="$(slug "$text")"
   [ -n "$sl" ] || return 0
-  local tmp="$OUT/.v_$sl.wav"
-  # slower, a touch higher, small word gap — friendlier for young ears
-  espeak-ng -v en-us -s 150 -p 55 -g 4 -w "$tmp" "$text"
-  ffmpeg -y -loglevel error -i "$tmp" -ac 1 -ar 22050 -c:a libvorbis -q:a 3 "$OUT/v_$sl.ogg"
+
+  human="${HUMAN_SRC[$sl]:-}"
+  if [ -n "$human" ] && [ -f "$human" ]; then
+    encode "$human" "$OUT/v_$sl.ogg"
+    printf '  %-40s v_%s.ogg   (human)\n' "$text" "$sl"
+    return 0
+  fi
+
+  # On the espeak-ng fallback, don't re-churn clips that already exist — the
+  # output is not worth a new binary diff. A piper run (or FORCE=1) rebakes
+  # everything; a plain run just fills in what's missing / new.
+  if ! have_piper && [ "${FORCE:-0}" != "1" ] && [ -f "$OUT/v_$sl.ogg" ]; then
+    printf '  %-40s v_%s.ogg   (kept)\n' "$text" "$sl"
+    return 0
+  fi
+
+  tmp="$OUT/.v_$sl.wav"
+  synth "$text" "$tmp"
+  encode "$tmp" "$OUT/v_$sl.ogg"
   rm -f "$tmp"
   printf '  %-40s v_%s.ogg\n' "$text" "$sl"
 }
@@ -66,7 +125,6 @@ PHRASES=(
   "remember where the numbers are, then press Start"
   "take another look"
   "tap letters, then Enter"
-  "remember the pictures"
   # --- numbers game: tap number N ---
   "tap number 1" "tap number 2" "tap number 3" "tap number 4" "tap number 5"
   "tap number 6" "tap number 7" "tap number 8" "tap number 9"
@@ -84,8 +142,11 @@ PHRASES=(
   "tang" "wrasse" "cichlid" "goldfish" "fish"
   "bear" "cow" "dog" "elephant" "fox" "frog" "hippopotamus" "horse" "lion"
   "pig" "penguin" "rooster" "cat" "sheep" "panda" "wolf" "monkey"
+  # --- letters & digits: served from the human en_GB pack (HUMAN_SRC) ---
+  a b c d e f g h i j k l m n o p q r s t u v w x y z
+  0 1 2 3 4 5 6 7 8 9
 )
 
-echo "rendering ${#PHRASES[@]} phrases -> $OUT"
+echo "rendering ${#PHRASES[@]} phrases with $ENGINE -> $OUT"
 for p in "${PHRASES[@]}"; do say_line "$p"; done
 echo "voice pack: $(find "$OUT" -name '*.ogg' | wc -l) files, $(du -sh "$OUT" | cut -f1)"

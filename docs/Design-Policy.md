@@ -54,7 +54,7 @@ assets/graphics/
   sprites/<game>/  DENSE single-game sprite/frame sets only (packid tiles, billiards balls, fish swim frames)
 assets/audio/
   sfx/          flat effect clips, referenced by bare filename
-  voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh)
+  voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh: human → piper → espeak-ng)
   soundmemory/  shared Find Sound / Sound Memory clip set, <id>.ogg
   flashcards/   recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
   (no music/ — win stingers live in sfx/ and play on the Music bus)
@@ -422,19 +422,24 @@ Result: animal sounds / BGM keep playing on the menu after you quit.
   Memory (pictures). Toggle lives on the game's start screen or a small
   in-HUD control; default **off**.
 
-### E.4 Flashcards recorded packs — recommendation
+### E.4 Flashcards recorded packs — SUPERSEDED (2026-08-31)
 
-**Keep TTS as the baseline on both targets; treat the recorded `de/nl/fr/es`
-`.ogg` packs as an optional enhancement.**
-
-- English already uses TTS. Make de/nl/fr/es default to TTS too.
-- If a recorded clip exists it is used (higher quality); if not, TTS in that
-  language; if no voice at all, the card still shows picture + word.
-- Do **not** add new recorded languages — new languages get TTS only.
-- Rationale: `speechSynthesis` (browser) and `speechd`/`espeak` (Linux `.deb`,
-  works on an old netbook) cover the need; the packs are 694 KB and already
-  vendored, so keeping them costs nothing, but requiring them would block
-  every new language.
+> The original recommendation ("TTS baseline, packs optional, no new
+> recorded languages") was reversed: a live speech engine is not
+> dependable enough to be anyone's primary path (`speechSynthesis` no-ops
+> on iOS without a gesture / on much of Android WebView; stock Linux ships
+> no `speechd` voice). So **every phrase needs a baked `.ogg`**, and that
+> file is played first.
+>
+> Current rules — see [`ASSETS.md`](ASSETS.md):
+> - Flashcards ships the full `de/nl/fr/es` recorded packs (all 48 clips);
+>   `flashcards/<word>_<lang>.ogg`, flat.
+> - English Flashcards words play `voice/v_<word>.ogg` (baked by
+>   `gen-voice.sh`) first, then live TTS, then silence — via
+>   `GameContext.speak()` / `tts.js say()`.
+> - Adding a language **is** adding its recordings (+ a `LANGS` entry).
+>   Missing clips fall back to TTS in that language, then silence.
+> - The baked English pack is sourced human → piper → espeak-ng.
 
 ### E.5 Audio buses / mute
 

@@ -50,7 +50,7 @@ assets/
 
   audio/
     sfx/              flat effect clips, referenced by bare filename on both targets
-    voice/            baked spoken lines, v_<slug>.ogg — owned by tools/gen-voice.sh
+    voice/            baked spoken lines + letters/digits, v_<slug>.ogg — tools/gen-voice.sh
     soundmemory/      shared Find Sound / Sound Memory clip set, <id>.ogg
     flashcards/        recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
     lib/              legacy CPData sound dump — PROVENANCE ONLY, not synced
@@ -73,7 +73,7 @@ purpose-named subset the games actually load, produced by:
 | --- | --- | --- |
 | `tools/migrate-assets.sh` | `graphics/pools/**` | `graphics/lib/CPData/**` + `graphics/lib/SPData/themes/**` |
 | `tools/migrate-audio.sh` | `audio/sfx/`, `audio/soundmemory/`, `audio/flashcards/**` | `audio/lib/CPData/**` + `audio/alphabet-sounds/**` |
-| `tools/gen-voice.sh` | `audio/voice/**` | espeak/pico TTS of the line list in the script |
+| `tools/gen-voice.sh` | `audio/voice/**` | per phrase, best-first: a human recording (`HUMAN_SRC` — the GPL en_GB `a`–`z` / `0`–`9`), then **piper** neural TTS, then `espeak-ng` |
 
 Each `migrate-*` script keeps its mapping table inline so it is
 reviewable. **To add or change an asset**: either drop a correctly-named
@@ -194,10 +194,15 @@ works.
 
 ## Known debt
 
+- **The synthetic `voice/` phrase clips are still `espeak-ng`.** The
+  build host (termux/Python 3.14) can't install piper, so `gen-voice.sh`
+  fell back. Re-run it on any machine with piper + a voice model to
+  upgrade every non-human clip in one pass — the letters/digits are
+  already the human en_GB recordings and won't change.
 - **`assets/audio/alphabet-sounds/` is ~24 MB** but only the 48 clips in
-  `flashcards/` (12 animal names × de/nl/fr/es) are used. The rest is
-  kept purely as provenance. It could be dropped from the repo entirely
-  if provenance is captured elsewhere.
+  `flashcards/` + the 36 en_GB letters/digits (now folded into `voice/`)
+  are used. The rest is kept purely as provenance. It could be dropped
+  from the repo entirely if provenance is captured elsewhere.
 - `assets/graphics/pools/objects/` is named in Design-Policy §A.2 but not
   yet created — no game needs a non-animal cutout pool yet.
 - No `assets/audio/music/` — there are no background-music tracks; the

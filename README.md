@@ -130,7 +130,7 @@ childsplay-modern/
 ├── tools/                      Content generators (see below)
 │   ├── migrate-assets.sh         Build assets/graphics/pools/ from the legacy dump
 │   ├── migrate-audio.sh          Build assets/audio/{sfx,soundmemory,flashcards}/ from the legacy dump
-│   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg
+│   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg (human → piper → espeak-ng)
 │   ├── gen-electro-data.sh       Rebuild assets/data/electro.json from the art
 │   └── gen-wordlist.py           Rebuild assets/data/wordlist.json
 ├── build-deb.sh                Thin wrapper → desktop-godot/build-deb.sh
@@ -156,10 +156,12 @@ childsplay-modern/
   remembered. Contrast is WCAG-checked in both themes.
 * **Spoken instructions, baked in** — short lines ("drag a wire from each
   picture to its name", number and animal names, …) are pre-rendered to
-  `assets/audio/voice/v_<slug>.ogg` with `espeak-ng` and ship with both
-  targets, so pre-readers get audio help even with **no TTS engine
-  installed**. Each game's HUD has a 🔊 button that re-speaks the current
-  prompt; live OS/browser TTS is used only as a fallback. Games with named
+  `assets/audio/voice/v_<slug>.ogg` and ship with both targets, so
+  pre-readers get audio help even with **no TTS engine installed**. Clips
+  are sourced best-first: an original human recording (the GPL en_GB
+  letters + digits), else **piper** neural TTS, else `espeak-ng`. Each
+  game's HUD has a 🔊 button that re-speaks the current prompt; live
+  OS/browser TTS is used only as a fallback. Games with named
   pictures (Memory, Find Sound, Electro, Image Changer, Aquarium) have a
   **"say the names"** toggle — off by default, on speaks the picture on
   interaction.
@@ -279,11 +281,20 @@ and `wipe.js` / `Wipe.gd`.
 ### Spoken lines (voice pack)
 
 `assets/audio/voice/v_<slug>.ogg`, produced by **`tools/gen-voice.sh`**
-(needs `espeak-ng` + `ffmpeg`). Add strings to the `PHRASES` array and run:
+(needs `ffmpeg`). Add strings to the `PHRASES` array and run:
 
 ```sh
-tools/gen-voice.sh
+# best voice — install piper once, then:
+PIPER_MODEL=~/.local/share/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
+# or just `tools/gen-voice.sh` — falls back to espeak-ng (robotic)
 ```
+
+Each clip is sourced **best-first**: an original human recording if
+`HUMAN_SRC` has one (the GPL en_GB letters `a`–`z` and digits `0`–`9`),
+then **piper** neural TTS, then `espeak-ng`. On the espeak fallback an
+existing clip is kept as-is (no pointless re-encode) unless `FORCE=1`;
+piper always re-bakes. Commit the regenerated `.ogg`s and re-run both
+`sync-assets.sh`.
 
 The slug is `lowercase, non-alphanumerics → "-", trimmed, 48 chars` — the
 same rule in `tts.js` (`slug()`) and `GameContext._slug()`, so `say("Tap
