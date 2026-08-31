@@ -29,6 +29,14 @@ export default class FourRowGame extends Scene {
     this._level = 0;
     try { this._twoP = localStorage.getItem(KEY_2P) === '1'; } catch { this._twoP = false; }
     this._startLevel(0);
+    this._pickMode();
+  }
+
+  // Ask up front, before the first move (§K) — not a corner toggle.
+  _pickMode() {
+    this._choosing = true;
+    this._overlay.show('Who is playing?',
+      buttonRow([['1 Player', 'solo'], ['2 Players', 'duo']], VIEW_W / 2, VIEW_H / 2, 240));
   }
 
   _startLevel(n) {
@@ -51,7 +59,6 @@ export default class FourRowGame extends Scene {
     this._bx = (VIEW_W - cell * COLS) / 2;
     this._by = HUD + (VIEW_H - HUD - cell * ROWS) / 2;
     this._r = cell * 0.4;
-    this._modeBtn = { x: VIEW_W - 92, y: 14, w: 76, h: 36 };
   }
   resize() { this._geo(); }
 
@@ -167,16 +174,11 @@ export default class FourRowGame extends Scene {
     if (hudSpeakHit(x, y)) return speakHud();
     if (this._overlay.visible) {
       const act = this._overlay.pointerup(x, y);
-      if (act === 'next') this._startLevel(this._level + 1);
+      if (act === 'solo' || act === 'duo') { this._choosing = false; this._setTwoP(act === 'duo'); }
+      else if (act === 'next') this._startLevel(this._level + 1);
       else if (act === 'replay') this._startLevel(this._level);
       else if (act === 'menu') this._exit();
       return;
-    }
-    // mode toggle — only before the first move of a game
-    if (this._moves === 0 && !this._drop &&
-        x >= this._modeBtn.x && x <= this._modeBtn.x + this._modeBtn.w &&
-        y >= this._modeBtn.y && y <= this._modeBtn.y + this._modeBtn.h) {
-      return this._setTwoP(!this._twoP);
     }
     if (this._over || this._drop) return;
     if (!this._twoP && this._turn !== RED) return;   // solo: wait for the AI
@@ -248,17 +250,6 @@ export default class FourRowGame extends Scene {
       : this._turn === RED ? 'your turn' : 'computer thinking';
     ctx.fillText(_msg, VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, _msg, VIEW_W / 2, HUD / 2);
-
-    // mode pill (only tappable before the first move)
-    const mb = this._modeBtn;
-    ctx.fillStyle = this._moves === 0 ? theme.accent : 'rgba(255,255,255,0.12)';
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(mb.x, mb.y, mb.w, mb.h, 10);
-    else ctx.rect(mb.x, mb.y, mb.w, mb.h);
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '600 18px system-ui, sans-serif';
-    ctx.fillText(this._twoP ? '2P' : '1P', mb.x + mb.w / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);
   }

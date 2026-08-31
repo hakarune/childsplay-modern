@@ -103,10 +103,9 @@ export default class WordMakerGame extends Scene {
     this._delKey = { ch: '\b', label: '⌫', x: VIEW_W / 2 - aw - gap / 2, y: ay, w: aw, h: kh };
     this._okKey = { ch: '\n', label: 'Enter', x: VIEW_W / 2 + gap / 2, y: ay, w: aw, h: kh };
     this._kw = kw;
-    // hint pill sits above the tray, right-aligned
-    this._hintBtn = { x: VIEW_W / 2 + Math.min(280, VIEW_W / 2 - 60) - 150, y: HUD + 12, w: 150, h: 44 };
-    // ⌨ toggle sits top-left, mirroring the hint pill
-    this._kbToggle = { x: VIEW_W / 2 - Math.min(280, VIEW_W / 2 - 60), y: HUD + 12, w: 150, h: 44 };
+    // pinned to the far edges so they never overlap the centred prompt
+    this._hintBtn = { x: VIEW_W - 24 - 150, y: HUD + 10, w: 150, h: 44 };
+    this._kbToggle = { x: 24, y: HUD + 10, w: 150, h: 44 };
   }
 
   resize() {
