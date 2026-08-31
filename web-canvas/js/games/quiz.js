@@ -56,6 +56,7 @@ export default class QuizGame extends Scene {
     this._qi = 0;
     this._shake = null;             // { i, t }
     this._locked = false;          // brief pause after a correct answer
+    this._pending = -1;            // choice armed by a first tap (§J two-tap)
     this._overlay.hide();
     this._loadQuestion();
   }
@@ -68,6 +69,7 @@ export default class QuizGame extends Scene {
     this._choices = order.map((i) => q.choices[i]);
     this._answer = order.indexOf(q.answer);
     this._image = q.image || null;
+    this._pending = -1;
     if (this._image) loadImage(this._image);
     this._geo();
     this._speak();
@@ -126,6 +128,18 @@ export default class QuizGame extends Scene {
     if (!this._ready || this._locked) return;
     const i = this._btns.findIndex((b) => inRect(b, x, y));
     if (i < 0) return;
+
+    // Two-tap answering (§J): the first tap on a choice reads it aloud and
+    // arms it; a second tap on the SAME choice commits. Tapping a different
+    // choice just moves the arm and speaks the new one.
+    if (this._pending !== i) {
+      this._pending = i;
+      this._shake = null;
+      speak(this._choices[i]);
+      return;
+    }
+
+    this._pending = -1;
     if (i === this._answer) {
       playSound(SND_GOOD);
       this._locked = 0.45;
@@ -191,13 +205,14 @@ export default class QuizGame extends Scene {
     this._btns.forEach((b, i) => {
       const dx = (this._shake && this._shake.i === i)
         ? Math.sin(this._shake.t * 50) * 8 * (1 - this._shake.t / 0.4) : 0;
+      const armed = this._pending === i;
       roundRect(ctx, b.x + dx, b.y, b.w, b.h, 14);
-      ctx.fillStyle = theme.surface_alt;
+      ctx.fillStyle = armed ? theme.accent : theme.surface_alt;
       ctx.fill();
-      ctx.strokeStyle = theme.line;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = armed ? theme.accent : theme.line;
+      ctx.lineWidth = armed ? 4 : 2;
       ctx.stroke();
-      ctx.fillStyle = theme.text;
+      ctx.fillStyle = armed ? '#fff' : theme.text;
       ctx.textAlign = 'center';
       ctx.fillText(this._choices[i], b.x + dx + b.w / 2, b.y + b.h / 2 + 1);
     });
@@ -215,7 +230,7 @@ export default class QuizGame extends Scene {
     const msg = q.q || this._deck.prompt || 'tap the right answer';
     ctx.textAlign = 'center';
     ctx.fillStyle = theme.hud_muted;
-    ctx.fillText('tap the right answer', VIEW_W / 2, HUD / 2);
+    ctx.fillText('tap to hear it, tap again to choose', VIEW_W / 2, HUD / 2);
     hudSpeakButton(ctx, msg, VIEW_W / 2, HUD / 2);
 
     this._overlay.render(ctx, VIEW_W, VIEW_H);

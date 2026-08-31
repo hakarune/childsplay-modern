@@ -154,6 +154,7 @@ PHRASES=(
   "remember where the numbers are, then press Start"
   "take another look"
   "tap letters, then Enter"
+  "tap to hear it, tap again to choose"
   "match the pictures"
   "match the letters"
   "match the numbers"
@@ -190,6 +191,32 @@ if [ -d "$AQ_SPRITES" ]; then
     stem="$(basename "$f" _0.png)"
     PHRASES+=("${stem//-/ }")
   done
+fi
+
+# --- Quiz answer choices: spoken on the first tap of the two-tap confirm
+#     (Design Policy §J). Every distinct `choices` string across
+#     assets/data/quiz/*.json gets a clip so the answer is read aloud even
+#     with no speech engine. Add a question, get its answers voiced for free.
+QUIZ_DATA="$HERE/../assets/data/quiz"
+if [ -d "$QUIZ_DATA" ] && command -v python3 >/dev/null; then
+  while IFS= read -r line; do
+    [ -n "$line" ] && PHRASES+=("$line")
+  done < <(python3 - "$QUIZ_DATA" <<'PY'
+import glob, json, os, sys
+seen = set()
+for fn in sorted(glob.glob(os.path.join(sys.argv[1], "*.json"))):
+    try:
+        data = json.load(open(fn, encoding="utf-8"))
+    except Exception:
+        continue
+    for q in data.get("questions", []):
+        for c in q.get("choices", []):
+            s = str(c).strip()
+            if s and s.lower() not in seen:
+                seen.add(s.lower())
+                print(s)
+PY
+  )
 fi
 
 echo "rendering ${#PHRASES[@]} phrases with $ENGINE -> $OUT"
