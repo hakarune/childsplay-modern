@@ -51,8 +51,6 @@ case "$TTS" in
           ENGINE="espeak-ng (robotic — try TTS=google or TTS=piper)" ;;
   *) echo "TTS must be one of: auto piper google espeak"; exit 1 ;;
 esac
-# a deliberate quality engine re-bakes synthetic clips; espeak only fills gaps
-REBAKE_SYNTH=0; [ "$TTS" != espeak ] && REBAKE_SYNTH=1
 
 # slug: lowercase, drop everything but a-z 0-9, collapse to single dashes,
 # trim, cap length. MUST match tts.js `slug()` and GameContext.gd `_slug()`.
@@ -108,17 +106,13 @@ say_line() {
   human="${HUMAN_SRC[$sl]:-}"
   [ -f "$OUT/v_$sl.ogg" ] && exists=1 || exists=0
 
-  # Keep an existing clip unless FORCE=1, EXCEPT: a deliberate quality
-  # engine (TTS=piper|google) replaces the synthetic clips — that's why
-  # you ran it. Human-sourced clips are never overwritten by a
-  # synthesiser; to swap a NEW human recording in, add its HUMAN_SRC entry
-  # and run with FORCE=1. (libvorbis is not reproducible, so re-encoding
-  # an unchanged source only churns bytes — hence the keep.)
+  # An existing clip is kept unless FORCE=1 — so a plain re-run just fills
+  # in new / missing phrases, no churn. FORCE=1 re-bakes the whole pack
+  # with the chosen TTS= engine (and re-pulls HUMAN_SRC). Neither TTS
+  # output nor libvorbis is byte-reproducible, so keeping is the default.
   if [ "$exists" = 1 ] && [ "${FORCE:-0}" != "1" ]; then
-    if [ -n "$human" ] || [ "$REBAKE_SYNTH" = 0 ]; then
-      printf '  %-40s v_%s.ogg   (kept)\n' "$text" "$sl"
-      return 0
-    fi
+    printf '  %-40s v_%s.ogg   (kept)\n' "$text" "$sl"
+    return 0
   fi
 
   if [ -n "$human" ] && [ -f "$human" ]; then
@@ -172,11 +166,14 @@ PHRASES=(
   "here is a word you could make"
   "that is a word"
   "not a word, try again"
-  # --- animals (Aquarium fish + Flashcards deck) ---
+  # --- Aquarium fish names (Aquarium.gd / aquarium.js SPECIES) ---
   "shark" "manta ray" "eel" "discus" "angelfish" "butterfly fish" "blue tang"
   "tang" "wrasse" "cichlid" "goldfish" "fish"
+  "emperor angelfish" "Moorish idol" "bass" "pomfret" "snapper"
+  # --- animal-pool names (Flashcards deck + Memory/Image Changer nameFromId) ---
   "bear" "cow" "dog" "elephant" "fox" "frog" "hippopotamus" "horse" "lion"
   "pig" "penguin" "rooster" "cat" "sheep" "panda" "wolf" "monkey"
+  "turtle" "chicken" "redbird" "bluebirds" "gnu" "bluebaby" "greenbaby"
   # --- letters & digits: served from the human en_GB pack (HUMAN_SRC) ---
   a b c d e f g h i j k l m n o p q r s t u v w x y z
   0 1 2 3 4 5 6 7 8 9

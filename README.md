@@ -302,11 +302,11 @@ otherwise a synthesiser chosen by `TTS=`:
 - `TTS=espeak` — offline, robotic, always there.
 - default `auto` = piper if a model is present, else espeak.
 
-A `google` or `piper` run **re-bakes the synthetic clips** (that's why
-you ran it); it never overwrites a human-sourced one. `espeak` only fills
-gaps. `FORCE=1` re-renders everything (needed to swap a *new* human
-recording into a slug that already has a clip). `NO_HUMAN=1` ignores
-`HUMAN_SRC` for a fully uniform pass.
+A plain run **keeps every existing clip** and only renders new / missing
+phrases — so adding a line to `PHRASES` is a one-command no-churn update.
+`FORCE=1` re-bakes the whole pack with the chosen `TTS=` engine (and
+re-pulls `HUMAN_SRC`). `NO_HUMAN=1` ignores `HUMAN_SRC` for a fully
+uniform pass.
 
 Commit the regenerated `.ogg`s and re-run both
 `sync-assets.sh`.

@@ -323,3 +323,19 @@ Still not visually QA'd on a real device / browser._
 Verified: all 106 clips valid audio; exactly the 70 synthetic clips
 changed (0 human); `godot --headless` import + boot clean (211 audio
 indexed); both `sync-assets.sh` clean; web + Godot voice dirs both 106._
+
+2026-08-31 (voice pack — cover the names that had no clip):
+- **12 spoken names had no baked clip** and were falling through to live
+  (robot) TTS: the 5 fish added late to Aquarium's `SPECIES` (emperor
+  angelfish, Moorish idol, bass, pomfret, snapper) and 7 animal-pool
+  names Memory / Image Changer speak via `nameFromId` (turtle, chicken,
+  redbird, bluebirds, gnu, bluebaby, greenbaby). Added to `gen-voice.sh`
+  `PHRASES` and baked with Google TTS. Pack 106 → 118.
+- **`gen-voice.sh` keep-semantics simplified** — a plain run now keeps
+  every existing clip and only renders new/missing phrases (no engine
+  special-case). `FORCE=1` re-bakes the whole pack; `NO_HUMAN=1`
+  unchanged.
+
+Verified: 12 new clips valid audio, 0 existing clips re-churned; both
+`sync-assets.sh` clean; `godot --headless` import + boot clean (223 audio
+indexed); web + Godot voice dirs both 118._
