@@ -18,7 +18,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | card back | ui/card_back | png | 161x161 | ≤ 3:4 tile, contain | ~1:1 | — | GPL-3, legacy `CP_cardback` |
 | card front | ui/card_front | png | 161x161 | ≤ 3:4 tile, contain | ~1:1 | — | GPL-3, legacy `CP_cardfront` |
-| picture deck | animals/* (all) | png | 90x150 | fits card minus inset, contain | varies | — (grid size = level) | GPL, legacy `Memory_spData/tileset_2` |
+| picture deck | animals/* (all, plain-named) | png | 90x150 | fits card minus inset, contain | varies | — (grid size = level) | GPL, legacy `Memory_spData/tileset_2` |
 
 ## Notes
 

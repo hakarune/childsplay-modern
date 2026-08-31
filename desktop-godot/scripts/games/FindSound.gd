@@ -7,19 +7,14 @@ extends Control
 
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 
-# Levels + spoken-label overrides load from assets/data/findsound.json (§J);
-# this is only the offline fallback.
-const FALLBACK_LEVELS := [
-	{ "name": "Animals",     "ids": ["cow", "elephant", "frog", "lion", "rooster", "sheep"] },
-	{ "name": "Vehicles",    "ids": ["boat", "car", "plane", "police", "rocket"] },
-	{ "name": "Instruments", "ids": ["drum", "flute", "guitar", "harp", "piano", "violin"] },
-	{ "name": "More music",  "ids": ["banjo", "cello", "chimes", "clarinette", "didjeridu", "shenai"] },
-	{ "name": "Noises",      "ids": ["alarm", "bird", "bubbles", "carhorn", "chiken", "clang", "cow", "dog"] },
-	{ "name": "More noises", "ids": ["duck2", "foghorn", "frogs", "hey", "horse", "plane", "sheep", "zap"] },
-]
+# A level = a graphics pool folder; its cards = every picture in that pool
+# that has a matching soundmemory/<stem>.ogg (picture & clip pair by stem).
+# No data file — drop a picture + its clip in and it appears.
+const LEVEL_POOLS := ["animals", "vehicles", "instruments", "sounds"]
+const LEVEL_NAME := { "animals": "Animals", "vehicles": "Vehicles", "instruments": "Instruments", "sounds": "Noises" }
+const MAX_CARDS := 9
 
-var _levels: Array = FALLBACK_LEVELS
-var _labels: Dictionary = {}
+var _levels: Array = []
 
 const SND_GOOD := "good.ogg"
 const SND_BAD := "wrong.ogg"
@@ -67,11 +62,16 @@ func _ready() -> void:
 	_popup_next.pressed.connect(func() -> void: _start_level(_level_index + 1))
 	_popup.visible = false
 
-	var data := GameContext.load_json("findsound")
-	if data.get("levels", []) is Array and not data.get("levels", []).is_empty():
-		_levels = data["levels"]
-	if data.get("labels", {}) is Dictionary:
-		_labels = data["labels"]
+	for pool in LEVEL_POOLS:
+		var ids: Array = []
+		for id in AssetLoader.list_pool(pool):
+			if AssetLoader.has_stream(str(id) + ".ogg"):
+				ids.append(id)
+		ids.shuffle()
+		if ids.size() > MAX_CARDS:
+			ids = ids.slice(0, MAX_CARDS)
+		if ids.size() >= 3:
+			_levels.append({ "name": LEVEL_NAME.get(pool, pool), "pool": pool, "ids": ids })
 
 	if GameContext.has_voice():
 		_say_names = GameContext.name_toggle_get("findsound")
@@ -101,6 +101,8 @@ func _sync_names_btn() -> void:
 
 
 func _start_level(index: int) -> void:
+	if _levels.is_empty():
+		return
 	_level_index = clampi(index, 0, _levels.size() - 1)
 	var lvl: Dictionary = _levels[_level_index]
 	_tries = 0
@@ -166,7 +168,7 @@ func _on_card_pressed(card: Dictionary) -> void:
 		card["button"].modulate = Color(1, 1, 1, 0.55)
 		_play(_sfx_good)
 		if _say_names:
-			GameContext.speak(str(_labels.get(card["id"], GameContext.name_from_id(card["id"]))))
+			GameContext.speak(GameContext.name_from_id(str(card["id"])))
 		_update_info()
 		_next_round()
 	else:

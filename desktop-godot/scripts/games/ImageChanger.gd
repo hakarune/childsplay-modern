@@ -16,9 +16,9 @@ const LEVELS := [
 ]
 
 const DECK := [
-	"01_cat", "02_pig", "03_bear", "04_hippopotamus", "05_penguin", "06_cow",
-	"07_sheep", "08_turtle", "09_panda", "10_chicken", "11_redbird", "12_wolf",
-	"13_monkey", "14_fox", "16_elephant", "17_lion", "21_frog",
+	"cat", "pig", "bear", "hippopotamus", "penguin", "cow",
+	"sheep", "turtle", "panda", "chicken", "redbird", "wolf",
+	"monkey", "fox", "elephant", "lion", "frog",
 ]
 
 const SND_START := "pick.wav"

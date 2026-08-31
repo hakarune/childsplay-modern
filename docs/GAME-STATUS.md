@@ -74,7 +74,7 @@ is committed to porting first.
 | **Find Characters** / Find It | `findit_sp.py` | ✅ | ✅ | Spot the difference — the painting is shown twice, the right copy has a few coloured spots added; tap them all. Procedural (no authored diff-pairs needed) over the `WipeData` paintings; 3 levels (3/5/6 spots). `FindIt.tscn` / `findit.js`. |
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type the letter on each balloon before it hits the danger line. **6-tier `LEVELS` table** (gentle "Warm up" first level, monotonic ramp, 12 pops/level); out of lives just replays the level — no game-over ejection (§H.1.3). **Dual keyboard** (§I.3), both targets: the device OS keyboard (hidden `<input>` web / `virtual_keyboard_show` Godot) is primary on touch, the in-canvas QWERTY stays as the accessibility path, a `⌨` toggle switches between them (persisted). |
 | **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **10 levels**: 3 regular grids (`easy`), 4 free-cut irregular-rectangle levels (`med`), 3 fine-cut levels (`hard`). Each level's picture is drawn from the shared `backgrounds` pool **filtered by the level's difficulty tier** (a `_easy/_med/_hard` filename tag), with session no-repeat shared with Wipe (§B). `Puzzle.tscn` / `puzzle.js`. |
-| **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. Levels + spoken-label overrides load from the hand-editable `assets/data/findsound.json` (§J). A **say-the-names** toggle (§E.3) speaks the picture on a correct tap. `FindSound.tscn` / `findsound.js`. |
+| **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; themed levels — one per graphics pool folder (`animals` / `vehicles` / `instruments` / `sounds`), cards = the pool's pictures that have a matching `soundmemory/<stem>.ogg`. "Play again" button, wrong taps just wobble. No data file. A **say-the-names** toggle (§E.3) speaks the picture on a correct tap. `FindSound.tscn` / `findsound.js`. |
 | **Flashcards** | `flashcards.py` | ✅ | ✅ | Picture + word cards for 12 animals (reusing Memory / Find Sound art). **English is spoken by OS / browser text-to-speech** (`DisplayServer.tts_*` / `speechSynthesis`); **Deutsch / Nederlands / Français / Español** play the recorded Childsplay clips we ship, with a TTS fallback in that language. No audio at all → the card still shows the picture + word. `Flashcards.tscn` / `flashcards.js`. |
 | **Pong** | `pong.py` | ✅ | ✅ | Bat and ball versus a gentle AI paddle; first to 5; 3 levels of AI speed. Pointer / arrow-key paddle, ball speeds up per hit with spin from the contact point. A **court-style picker** (§D.5): Modern / Retro (Atari B&W) / 90s Neon / Y2K — each ships its own light + dark, the global light/dark toggle applies on top. `Pong.tscn` / `pong.js`. |
 | **PackId** | `packid.py` | ✅ | ✅ | Open pillar maze, grid-snapped player, fruit "ghosts" with non-reversing AI, arrow **and** swipe steering, cherry pickup, friendly bump→reset (no game over), 3 sizes. |
@@ -371,4 +371,22 @@ indexed); web + Godot voice dirs both 118._
   `TUNING` size/rarity table on both targets. **The Godot Aquarium now
   speaks fish names** (it never did) — `GameContext.speak` on poke + a
   §E.3 "say the names" toggle, matching web. Adding a fish = drop
-  `<name>_0.png` / `<name>_1.png`, re-run migrate + gen-voice + sync._
+  `<name>_0.png` / `<name>_1.png`, re-run migrate + gen-voice + sync.
+- **Stages 4 + 5 (combined) — animal pool cleanup + FindSound from folders.**
+  `animals/` filenames lost their `NN_` prefixes (`01_cat.png` →
+  `cat.png`); the ~9 animals that also appear in Find Sound now use that
+  (much better) art — the two picture sets are deduped into one. Updated
+  9 deck arrays + `electro.json` across both targets. The flat
+  `soundpics/` pool is retired and split into `vehicles/`,
+  `instruments/`, `sounds/`; **a Find Sound level is now a pool folder**
+  and its cards are that pool's pictures with a matching
+  `soundmemory/<stem>.ogg` — `findsound.json` deleted, label map gone
+  (odd legacy stems renamed at source: `chiken`→`chicken`,
+  `carhorn`→`car-horn`, `duck2`→`duck`, `police`→`police-car`,
+  `clarinette`→`clarinet`, `didjeridu`→`didgeridoo`, `shenai`→`shehnai`).
+  Sound Memory draws its (picture, clip) pairs from the union of those
+  pools. The web manifest now also lists `soundmemory/snd/*` so a game
+  can ask "does this stem have a clip?". With flat `soundpics/` gone the
+  Godot `AssetLoader` duplicate-filename warning is **0** (was 3, was
+  1668 at the start). Adding a Find Sound card = drop `<pool>/<stem>.png`
+  + `soundmemory/<stem>.ogg`; nothing else._

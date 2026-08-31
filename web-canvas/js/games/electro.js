@@ -14,9 +14,9 @@ const PAIRS = [3, 4, 5, 6, 7, 8];
 // Fallback pairs if data/electro.json can't be loaded. The live list is
 // hand-editable — see assets/data/electro.json.
 const FALLBACK_PAIRS = [
-  '01_cat', '02_pig', '03_bear', '06_cow', '07_sheep', '09_panda',
-  '14_fox', '17_lion', '21_frog', '12_wolf', '13_monkey', '16_elephant',
-  '05_penguin', '08_turtle',
+  'cat', 'pig', 'bear', 'cow', 'sheep', 'panda',
+  'fox', 'lion', 'frog', 'wolf', 'monkey', 'elephant',
+  'penguin', 'turtle',
 ].map((img) => ({ img, say: img.replace(/^\d+_/, '') }));
 
 const cap = (s) => s.replace(/^\w/, (c) => c.toUpperCase());

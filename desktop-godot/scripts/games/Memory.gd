@@ -26,12 +26,12 @@ const LEVELS := [
 # Picture pool: tileset_2 has unique filenames, so AssetLoader resolves
 # each unambiguously. 21 pictures cover the largest deck (10 pairs).
 const CARD_IMAGES := [
-	"01_cat", "02_pig", "03_bear", "04_hippopotamus",
-	"05_penguin", "06_cow", "07_sheep", "08_turtle",
-	"09_panda", "10_chicken", "11_redbird", "12_wolf",
-	"13_monkey", "14_fox", "15_bluebirds", "16_elephant",
-	"17_lion", "18_gnu", "19_bluebaby", "20_greenbaby",
-	"21_frog",
+	"cat", "pig", "bear", "hippopotamus",
+	"penguin", "cow", "sheep", "turtle",
+	"panda", "chicken", "redbird", "wolf",
+	"monkey", "fox", "bluebirds", "elephant",
+	"lion", "gnu", "bluebaby", "greenbaby",
+	"frog",
 ]
 const BACK_IMAGE := "card_back"
 const FRONT_IMAGE := "card_front"

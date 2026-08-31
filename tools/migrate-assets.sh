@@ -21,8 +21,19 @@ POOL="$HERE/../assets/graphics/pools"
 
 [ -d "$LIB" ] || { echo "error: $LIB not found" >&2; exit 1; }
 rm -rf "$POOL"
-mkdir -p "$POOL"/{backgrounds,animals,ui,soundpics,icons}
+mkdir -p "$POOL"/{backgrounds,animals,ui,icons,vehicles,instruments,sounds}
 mkdir -p "$POOL"/sprites/{packid,billiards,aquarium}
+
+# Find Sound / Sound Memory: the legacy stem -> a clean spoken stem, applied
+# to BOTH the picture (here) and the clip (tools/migrate-audio.sh). Anything
+# not listed keeps its name.
+declare -A SOUND_RENAME=(
+  [chiken]=chicken [carhorn]=car-horn [duck2]=duck [clarinette]=clarinet
+  [didjeridu]=didgeridoo [shenai]=shehnai [police]=police-car
+)
+snd_stem() { printf '%s' "${SOUND_RENAME[$1]:-$1}"; }
+SND_SRC="$HERE/../assets/audio/lib/CPData/SoundmemoryData/Sounds"   # a picture
+have_clip() { [ -f "$SND_SRC/$1.ogg" ]; }                          # earns a card only if its clip exists
 
 # --- backgrounds: GPL paintings, difficulty baked into the filename ------
 # `<stem>_<tier>.jpg` (Design Policy §A.3); untagged art = eligible at any
@@ -44,16 +55,19 @@ for n in 1 2 3 4 5 6; do
   [ -f "$TANK_SRC/$n.jpg" ] && cp "$TANK_SRC/$n.jpg" "$POOL/backgrounds/aquarium_$i.jpg" && i=$((i + 1))
 done
 
-# --- animals: the tileset_2 numbered deck (01_cat … 21_frog) ------------
+# --- animals: the tileset_2 deck, numeric prefixes stripped -------------
 AN_SRC="$LIB/Memory_spData/tileset_2/childsplay"
 for f in "$AN_SRC"/[0-9]*_*.png; do
-  [ -f "$f" ] && cp "$f" "$POOL/animals/$(basename "$f")"
+  [ -f "$f" ] || continue
+  cp "$f" "$POOL/animals/$(basename "$f" | sed 's/^[0-9]*_//')"
 done
 
-# ...plus a few named animals the numbered deck lacks (used by Flashcards),
-# from the Find Sound picture set (first match wins across level folders).
-for a in dog horse rooster; do
-  f="$(find "$LIB/FindsoundData/Images" -name "$a.png" -print -quit 2>/dev/null || true)"
+# ...then override every animal that also appears in the Find Sound set with
+# that (much better) art — dedupes the two picture sets into one.
+FS_IMG="$LIB/FindsoundData/Images"
+for a in cat cow dog elephant frog horse lion rooster sheep chicken; do
+  src="chiken"; [ "$a" != chicken ] && src="$a"
+  f="$(find "$FS_IMG" -name "$src.png" -print -quit 2>/dev/null || true)"
   [ -n "$f" ] && cp "$f" "$POOL/animals/$a.png"
 done
 
@@ -64,9 +78,22 @@ cp "$LIB/WipeData/sponge.png"                 "$POOL/ui/sponge.png"
 cp "$LIB/FishtankData/backgrounds/childsplay/blub0.png" "$POOL/ui/bubble.png"
 cp "$LIB/soundbut.png"                        "$POOL/ui/soundbut.png"
 
-# --- soundpics: the Find Sound / Sound Memory picture set (deduped) ----
-for f in "$LIB/FindsoundData/Images/"level*/*.png; do
-  [ -f "$f" ] && cp -n "$f" "$POOL/soundpics/$(basename "$f")"
+# --- Find Sound picture pools: one folder per level (§J). A folder + its
+#     matching soundmemory/<stem>.ogg IS the level — no data file. Animals
+#     come from the shared animals/ pool above; the rest split here. Only
+#     pictures whose legacy clip exists are copied.
+declare -A FS_POOL=(
+  [boat]=vehicles [car]=vehicles [plane]=vehicles [police]=vehicles [rocket]=vehicles [carhorn]=vehicles
+  [drum]=instruments [flute]=instruments [guitar]=instruments [harp]=instruments [piano]=instruments [violin]=instruments
+  [banjo]=instruments [cello]=instruments [chimes]=instruments [clarinette]=instruments [didjeridu]=instruments [shenai]=instruments
+  [alarm]=sounds [bird]=sounds [bubbles]=sounds [clang]=sounds [foghorn]=sounds [hey]=sounds [zap]=sounds [frogs]=sounds [duck2]=sounds
+)
+for f in "$FS_IMG/"level*/*.png; do
+  [ -f "$f" ] || continue
+  legacy="$(basename "$f" .png)"
+  pool="${FS_POOL[$legacy]:-}"
+  [ -n "$pool" ] || continue
+  have_clip "$legacy" && cp "$f" "$POOL/$pool/$(snd_stem "$legacy").png"
 done
 
 # --- sprites/packid: player frames, wall + fruit tiles, ghosts --------
@@ -126,6 +153,6 @@ for id in "${!ICONMAP[@]}"; do
 done
 
 echo "pools built:"
-for d in backgrounds animals ui soundpics icons sprites/packid sprites/billiards sprites/aquarium; do
+for d in backgrounds animals vehicles instruments sounds ui icons sprites/packid sprites/billiards sprites/aquarium; do
   printf '  %-20s %s files\n' "$d" "$(find "$POOL/$d" -type f 2>/dev/null | wc -l)"
 done

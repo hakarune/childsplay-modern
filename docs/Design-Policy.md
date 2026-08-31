@@ -47,7 +47,7 @@ The **only** graphics locations games may reference:
 ```
 assets/graphics/
   backgrounds/     full-scene pictures: paintings, photos, tank scenes, quiz-picture art
-  animals/         single-subject animal cutouts (numbered variants)
+  animals/         single-subject animal cutouts (plain-named)
   objects/         single-subject non-animals: vehicles, instruments, food, tools
   ui/              shared chrome: card_front, card_back, button, sponge, danger_line, bubble, particle
   icons/           one per game id (menu tiles) + menu chrome
@@ -738,8 +738,11 @@ game has a `docs/assets/<id>.assets.md` (§A.7).
 "say the names" pill, both targets; util.js `makeNameToggle` /
 GameContext `name_toggle_*` + `draw_name_pill`).
 
-~~findsound §J~~ (`assets/data/findsound.json` — levels + label overrides,
-loaded via `loadData` / `load_json` with an offline fallback).
+~~findsound §J~~ — superseded: a Find Sound level is now a **graphics pool
+folder** (`animals` / `vehicles` / `instruments` / `sounds`); its cards are
+the pictures in that pool that have a matching `soundmemory/<stem>.ogg`.
+No data file, no label map (stems are clean words). Adding a picture +
+its clip is the whole edit.
 ~~Godot HUD-bar contrast parity~~ (`GameContext.style_hud_bar` — a
 themed `hud` surface + `line` divider + theme-aware HUD labels, wired into
 16 games).

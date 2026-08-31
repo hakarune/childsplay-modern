@@ -67,8 +67,17 @@ for dst in "${!SFX[@]}"; do
 done
 
 # --- soundmemory: the shared named-clip set (Find Sound + Sound Memory + --
-#     Falling Letter's "zap"). One flat folder, keyed by id. ------------
-cp "$LIB/SoundmemoryData/Sounds/"*.ogg "$AUDIO/soundmemory/"
+#     Falling Letter's "zap"). One flat folder, keyed by the same clean
+#     stem the picture uses (see SOUND_RENAME in tools/migrate-assets.sh).
+declare -A SOUND_RENAME=(
+  [chiken]=chicken [carhorn]=car-horn [duck2]=duck [clarinette]=clarinet
+  [didjeridu]=didgeridoo [shenai]=shehnai [police]=police-car
+)
+for f in "$LIB/SoundmemoryData/Sounds/"*.ogg; do
+  [ -f "$f" ] || continue
+  legacy="$(basename "$f" .ogg)"
+  cp "$f" "$AUDIO/soundmemory/${SOUND_RENAME[$legacy]:-$legacy}.ogg"
+done
 
 # --- flashcards: recorded animal names, <word>_<lang>.ogg (flat) -----
 # Only the words in the Flashcards DECK (desktop-godot Flashcards.gd /

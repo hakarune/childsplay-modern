@@ -4,29 +4,22 @@
 // instruments...). A round plays one picture's clip; find them all to
 // clear the level. Wrong taps just wobble — no penalty.
 
-import { Scene, VIEW_W, VIEW_H, img, playSound, loadSound } from '../engine.js';
-import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton, makeNameToggle, nameFromId, loadData } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, img, playSound, loadSound, loadManifest } from '../engine.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, drawButton, makeNameToggle, nameFromId, poolKeys } from '../util.js';
 import { theme } from '../theme.js';
 
-// Levels + spoken-label overrides live in assets/data/findsound.json (§J);
-// this is only the offline fallback.
-const FALLBACK = {
-  levels: [
-    { name: 'Animals',      ids: ['cow', 'elephant', 'frog', 'lion', 'rooster', 'sheep'] },
-    { name: 'Vehicles',     ids: ['boat', 'car', 'plane', 'police', 'rocket'] },
-    { name: 'Instruments',  ids: ['drum', 'flute', 'guitar', 'harp', 'piano', 'violin'] },
-    { name: 'More music',   ids: ['banjo', 'cello', 'chimes', 'clarinette', 'didjeridu', 'shenai'] },
-    { name: 'Noises',       ids: ['alarm', 'bird', 'bubbles', 'carhorn', 'chiken', 'clang', 'cow', 'dog'] },
-    { name: 'More noises',  ids: ['duck2', 'foghorn', 'frogs', 'hey', 'horse', 'plane', 'sheep', 'zap'] },
-  ],
-  labels: {},
-};
+// A level = a graphics pool folder; its cards = every picture in that pool
+// that has a matching soundmemory/<stem>.ogg (picture & clip pair by stem).
+// No data file — add a picture + its clip, done.
+const LEVEL_POOLS = ['animals', 'vehicles', 'instruments', 'sounds'];
+const LEVEL_NAME = { animals: 'Animals', vehicles: 'Vehicles', instruments: 'Instruments', sounds: 'Noises' };
+const MAX_CARDS = 9;
 
 const SND_GOOD = 'sfx/good.ogg';
 const SND_BAD = 'sfx/wrong.ogg';
 const SND_WIN = 'sfx/winner.ogg';
 
-const IMG = (id) => `soundpics/${id}`;
+const IMG = (pool, id) => `${pool}/${id}`;
 const CLIP = (id) => `soundmemory/snd/${id}.ogg`;
 
 export default class FindSoundGame extends Scene {
@@ -35,27 +28,28 @@ export default class FindSoundGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._names = makeNameToggle('findsound', { x: VIEW_W - 172, y: 18, w: 150, h: 34 });
-    this._levels = FALLBACK.levels;
-    this._labels = FALLBACK.labels;
+    this._levels = [];
+    this._cards = [];
     this._level = 0;
-    this._startLevel(0);
-    // swap in the real data; restart the level if the player hasn't begun
-    loadData('findsound', FALLBACK).then((d) => {
-      if (d && Array.isArray(d.levels) && d.levels.length) {
-        this._levels = d.levels;
-        this._labels = d.labels || {};
-        if (this._level === 0 && this._cards && this._cards.every((c) => !c.found)) {
-          this._startLevel(0);
-        }
-      }
+    loadManifest().then((m) => {
+      const snd = new Set(poolKeys(m, 'soundmemory/snd'));
+      this._levels = LEVEL_POOLS
+        .map((pool) => ({
+          name: LEVEL_NAME[pool] || pool,
+          pool,
+          ids: shuffle(poolKeys(m, pool).filter((id) => snd.has(id))).slice(0, MAX_CARDS),
+        }))
+        .filter((lv) => lv.ids.length >= 3);
+      if (this._levels.length) this._startLevel(0);
     });
   }
 
-  _sayName(id) { this._names.say(this._labels[id] || nameFromId(id)); }
+  _sayName(id) { this._names.say(nameFromId(id)); }
 
   _startLevel(n) {
     this._level = Math.max(0, Math.min(n, this._levels.length - 1));
     const lv = this._levels[this._level];
+    this._pool = lv.pool;
     this._tries = 0;
     this._wobble = null;         // { card, t }
     this._overlay.hide();
@@ -147,6 +141,14 @@ export default class FindSoundGame extends Scene {
   render(ctx) {
     ctx.fillStyle = theme.surface;
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    if (!this._levels.length) {
+      ctx.fillStyle = theme.hud_muted;
+      ctx.font = '600 24px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('loading…', VIEW_W / 2, VIEW_H / 2);
+      return;
+    }
 
     // HUD
     ctx.fillStyle = theme.hud;
@@ -174,7 +176,7 @@ export default class FindSoundGame extends Scene {
       ctx.fill();
       ctx.save();
       ctx.globalAlpha = c.found ? 0.55 : 1;
-      drawImageFit(ctx, img(IMG(c.id)), c.x + dx + 12, c.y + 12, c.s - 24, c.s - 24);
+      drawImageFit(ctx, img(IMG(this._pool, c.id)), c.x + dx + 12, c.y + 12, c.s - 24, c.s - 24);
       ctx.restore();
       if (c.found) {
         ctx.fillStyle = theme.good;

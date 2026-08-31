@@ -40,9 +40,12 @@ assets/
     pools/            ← the ONLY graphics location games may reference
       backgrounds/      paintings + aquarium_1..6; difficulty is a
                         `_easy`/`_med`/`_hard` filename tag, untagged = any tier
-      animals/          01_cat.png … 21_frog.png, dog/horse/rooster
+      animals/          plain-named cutouts (cat, cow, dog, …); the ones
+                        also in Find Sound use that better art
       ui/               card_front, card_back, sponge, bubble, soundbut
-      soundpics/        Find Sound / Sound Memory pictures  (<id>.png)
+      vehicles/         Find Sound level pool: boat, car, plane, …
+      instruments/      Find Sound level pool: drum, flute, guitar, …
+      sounds/           Find Sound level pool: alarm, bird, clang, …
       icons/            one <game-id>.png per menu tile
       sprites/<game>/   dense single-game frame sets: packid, billiards, aquarium
     themes/<style>/     optional alternate-art overlay (Design Policy §C.4)

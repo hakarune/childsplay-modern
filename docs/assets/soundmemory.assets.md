@@ -7,7 +7,7 @@
 | --- | --- |
 | Game id | `soundmemory` (soundmemory.js / SoundMemory.tscn) |
 | Owns any art? | no |
-| Shared pools used | `ui` (card back), `soundmemory/snd/*.ogg` (audio), reveal art from `animals` / `soundpics`. |
+| Shared pools used | `ui` (card back), `soundmemory/snd/*.ogg` (audio), reveal art from `animals` / `vehicles` / `instruments` / `sounds`. |
 | Content file(s) | — (none) |
 | Theme variants | light+dark from palette only |
 | Style themes | none |
@@ -17,7 +17,7 @@
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | card back | ui/card_back | png | 161x161 | ≤ 3:4 tile, contain | ~1:1 | — | GPL-3 |
-| reveal picture | animals/* or soundpics/* | png | 90x150 / 112x112 | fits card, contain | varies | — (grid size = level) | GPL, legacy `SoundmemoryData` |
+| reveal picture | animals/* / vehicles/* / instruments/* / sounds/* (any stem with a clip) | png | 90x150 / 112x112 | fits card, contain | varies | — (grid size = level) | GPL, legacy `SoundmemoryData` |
 
 ## Notes
 

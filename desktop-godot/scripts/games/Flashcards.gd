@@ -11,17 +11,17 @@ extends Control
 const MAIN_MENU := "res://scenes/MainMenu.tscn"
 
 const DECK := [
-	{ "word": "bear", "img": "03_bear" },
-	{ "word": "cow", "img": "06_cow" },
+	{ "word": "bear", "img": "bear" },
+	{ "word": "cow", "img": "cow" },
 	{ "word": "dog", "img": "dog" },
-	{ "word": "elephant", "img": "16_elephant" },
-	{ "word": "fox", "img": "14_fox" },
-	{ "word": "frog", "img": "21_frog" },
-	{ "word": "hippopotamus", "img": "04_hippopotamus" },
+	{ "word": "elephant", "img": "elephant" },
+	{ "word": "fox", "img": "fox" },
+	{ "word": "frog", "img": "frog" },
+	{ "word": "hippopotamus", "img": "hippopotamus" },
 	{ "word": "horse", "img": "horse" },
-	{ "word": "lion", "img": "17_lion" },
-	{ "word": "pig", "img": "02_pig" },
-	{ "word": "penguin", "img": "05_penguin" },
+	{ "word": "lion", "img": "lion" },
+	{ "word": "pig", "img": "pig" },
+	{ "word": "penguin", "img": "penguin" },
 	{ "word": "rooster", "img": "rooster" },
 ]
 

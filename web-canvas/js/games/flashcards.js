@@ -12,17 +12,17 @@ import { theme } from '../theme.js';
 import { say } from '../tts.js';
 
 const DECK = [
-  { word: 'bear', img: 'animals/03_bear' },
-  { word: 'cow', img: 'animals/06_cow' },
+  { word: 'bear', img: 'animals/bear' },
+  { word: 'cow', img: 'animals/cow' },
   { word: 'dog', img: 'animals/dog' },
-  { word: 'elephant', img: 'animals/16_elephant' },
-  { word: 'fox', img: 'animals/14_fox' },
-  { word: 'frog', img: 'animals/21_frog' },
-  { word: 'hippopotamus', img: 'animals/04_hippopotamus' },
+  { word: 'elephant', img: 'animals/elephant' },
+  { word: 'fox', img: 'animals/fox' },
+  { word: 'frog', img: 'animals/frog' },
+  { word: 'hippopotamus', img: 'animals/hippopotamus' },
   { word: 'horse', img: 'animals/horse' },
-  { word: 'lion', img: 'animals/17_lion' },
-  { word: 'pig', img: 'animals/02_pig' },
-  { word: 'penguin', img: 'animals/05_penguin' },
+  { word: 'lion', img: 'animals/lion' },
+  { word: 'pig', img: 'animals/pig' },
+  { word: 'penguin', img: 'animals/penguin' },
   { word: 'rooster', img: 'animals/rooster' },
 ];
 

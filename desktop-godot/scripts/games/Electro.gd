@@ -20,9 +20,9 @@ const PAIRS_FILE := "res://assets/data/electro.json"
 # Fallback if the data file can't be read. The live list is hand-editable —
 # see assets/data/electro.json.
 const ANIMALS := [
-	"01_cat", "02_pig", "03_bear", "06_cow", "07_sheep", "09_panda",
-	"14_fox", "17_lion", "21_frog", "12_wolf", "13_monkey", "16_elephant",
-	"05_penguin", "08_turtle",
+	"cat", "pig", "bear", "cow", "sheep", "panda",
+	"fox", "lion", "frog", "wolf", "monkey", "elephant",
+	"penguin", "turtle",
 ]
 
 const SND_PICK := "dealcard1.wav"

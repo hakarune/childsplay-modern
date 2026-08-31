@@ -15,7 +15,7 @@ The ones that reference a bundled data file:
 | --- | --- |
 | Puzzle, Wipe | — difficulty is a `_easy/_med/_hard` tag on the `backgrounds/` filename |
 | Electro | `assets/data/electro.json` — picture↔name pairs |
-| Find Sound | `assets/data/findsound.json` — levels + spoken-label overrides |
+| Find Sound | — a level is a graphics pool folder; picture & clip pair by stem |
 | Quiz | `assets/data/quiz/*.json` — one file per deck |
 | Word Maker | `assets/data/wordlist.json` — kid dictionary |
 

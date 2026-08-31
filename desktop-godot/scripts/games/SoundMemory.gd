@@ -13,13 +13,9 @@ const LEVELS := [
 	{ "name": "Medium",  "cols": 4, "rows": 3 },
 ]
 
-# Sound ids that exist in SoundmemoryData/Sounds AND have a matching
-# picture resolvable through AssetLoader (FindsoundData images).
-const SOUND_POOL := [
-	"cow", "dog", "frog", "lion", "rooster", "sheep", "elephant", "horse",
-	"drum", "flute", "guitar", "harp", "piano", "violin", "banjo", "cello",
-	"boat", "car", "plane", "police", "rocket",
-]
+# Every (picture, clip) pair across the Find Sound pools: a picture in one
+# of these pools that also has a soundmemory/<stem>.ogg.
+const PICTURE_POOLS := ["animals", "vehicles", "instruments", "sounds"]
 const IDLE_ICON := "soundbut.png"
 
 const SND_MATCH := "good.ogg"
@@ -92,11 +88,21 @@ func _start_level(index: int) -> void:
 	_build_deck()
 
 
+## Picture stems (across the Find Sound pools) that also have a clip.
+func _sound_set() -> Array:
+	var out: Array = []
+	for pool in PICTURE_POOLS:
+		for id in AssetLoader.list_pool(pool):
+			if AssetLoader.has_stream(str(id) + ".ogg"):
+				out.append(id)
+	return out
+
+
 func _build_deck() -> void:
 	for c in _grid.get_children():
 		c.queue_free()
 
-	var pool: Array = SOUND_POOL.duplicate()
+	var pool: Array = _sound_set()
 	pool.shuffle()
 	var chosen: Array = pool.slice(0, _total_pairs)
 

@@ -7,8 +7,8 @@
 | --- | --- |
 | Game id | `findsound` (findsound.js / FindSound.tscn) |
 | Owns any art? | no |
-| Shared pools used | `soundpics` (the picture choices) + themed sound clips (audio, not covered here). |
-| Content file(s) | `assets/data/findsound.json` — levels + spoken-label overrides |
+| Shared pools used | one graphics pool per level (`animals`, `vehicles`, `instruments`, `sounds`) + `soundmemory/snd/*.ogg`. |
+| Content file(s) | none — a level IS a pool folder; picture & clip pair by stem |
 | Theme variants | light+dark from palette only |
 | Style themes | none |
 
@@ -16,7 +16,7 @@
 
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| choice pictures | soundpics/* (filtered by level theme) | png | ~112x112 (some to 150x203) | ≤ 190 sq tile, contain | varies | level theme picks the set | GPL, legacy `FindsoundData` |
+| choice pictures | <pool>/* where the stem has a `soundmemory/<stem>.ogg` | png | ~112x112 (some to 150x203) | ≤ 190 sq tile, contain | varies | the pool folder IS the level | GPL, legacy `FindsoundData` |
 
 ## Notes
 

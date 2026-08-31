@@ -15,10 +15,10 @@ const LEVELS = [
   { name: 'Hard',    cols: 5, rows: 4 },
 ];
 
-const PIC_NAMES = ['01_cat', '02_pig', '03_bear', '04_hippopotamus', '05_penguin',
-  '06_cow', '07_sheep', '08_turtle', '09_panda', '10_chicken', '11_redbird',
-  '12_wolf', '13_monkey', '14_fox', '15_bluebirds', '16_elephant', '17_lion',
-  '18_gnu', '19_bluebaby', '20_greenbaby', '21_frog'];
+const PIC_NAMES = ['cat', 'pig', 'bear', 'hippopotamus', 'penguin',
+  'cow', 'sheep', 'turtle', 'panda', 'chicken', 'redbird',
+  'wolf', 'monkey', 'fox', 'bluebirds', 'elephant', 'lion',
+  'gnu', 'bluebaby', 'greenbaby', 'frog'];
 
 const BACK = 'ui/card_back';
 const FRONT = 'ui/card_front';

@@ -26,7 +26,7 @@ APOOL="$SRC/audio"
 [ -d "$APOOL/sfx" ]    || { echo "error: $APOOL/sfx not found — run tools/migrate-audio.sh" >&2; exit 1; }
 
 rm -rf "$DST"
-mkdir -p "$DST"/{icons,fonts,backgrounds,animals,ui,soundpics,sfx,voice,data}
+mkdir -p "$DST"/{icons,fonts,backgrounds,animals,vehicles,instruments,sounds,ui,sfx,voice,data}
 mkdir -p "$DST"/sprites/{packid,billiards,aquarium}
 mkdir -p "$DST"/soundmemory/snd
 mkdir -p "$DST"/flashcards
@@ -34,8 +34,10 @@ mkdir -p "$DST"/flashcards
 # --- graphics: straight from the pools (Design Policy §A) ------------
 cp "$POOLS/backgrounds/"*       "$DST/backgrounds/"
 cp "$POOLS/animals/"*           "$DST/animals/"
+cp "$POOLS/vehicles/"*          "$DST/vehicles/"
+cp "$POOLS/instruments/"*       "$DST/instruments/"
+cp "$POOLS/sounds/"*            "$DST/sounds/"
 cp "$POOLS/ui/"*                "$DST/ui/"
-cp "$POOLS/soundpics/"*         "$DST/soundpics/"
 cp "$POOLS/icons/"*             "$DST/icons/"
 cp "$SRC/data/"*.json           "$DST/data/" 2>/dev/null || true
 [ -d "$SRC/data/quiz" ] && { mkdir -p "$DST/data/quiz"; cp "$SRC/data/quiz/"*.json "$DST/data/quiz/" 2>/dev/null || true; }
@@ -79,12 +81,14 @@ for root, _dirs, files in os.walk(dst):
     for f in files:
         stem, ext = os.path.splitext(f)
         ext = ext.lower()
-        if ext not in PRIO:
-            continue
         rel = os.path.relpath(os.path.join(root, f), dst).replace(os.sep, "/")
         key = os.path.splitext(rel)[0]
-        cur = best.get(key)
-        if cur is None or PRIO[ext] < PRIO[os.path.splitext(cur)[1].lower()]:
+        if ext in PRIO:
+            cur = best.get(key)
+            if cur is None or PRIO[ext] < PRIO[os.path.splitext(cur)[1].lower()]:
+                best[key] = rel
+        elif ext == ".ogg" and rel.startswith("soundmemory/snd/"):
+            # let Find Sound / Sound Memory ask "does this stem have a clip?"
             best[key] = rel
 print(json.dumps(best, separators=(",", ":"), sort_keys=True))
 PY

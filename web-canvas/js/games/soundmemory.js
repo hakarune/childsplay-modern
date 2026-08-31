@@ -2,8 +2,8 @@
 // hear its clip; find the two that sound the same. A match reveals the
 // matching picture.
 
-import { Scene, VIEW_W, VIEW_H, img, playSound } from '../engine.js';
-import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, img, playSound, loadManifest } from '../engine.js';
+import { roundRect, drawImageFit, shuffle, inRect, Overlay, buttonRow, poolKeys } from '../util.js';
 import { theme } from '../theme.js';
 
 const LEVELS = [
@@ -12,11 +12,9 @@ const LEVELS = [
   { name: 'Medium',  cols: 4, rows: 3 },
 ];
 
-const POOL = ['alarm', 'banjo', 'bird', 'boat', 'bubbles', 'car', 'carhorn',
-  'cello', 'chiken', 'chimes', 'clang', 'clarinette', 'cow', 'didjeridu', 'dog',
-  'drum', 'duck2', 'elephant', 'flute', 'foghorn', 'frog', 'frogs', 'guitar',
-  'harp', 'hey', 'horse', 'lion', 'piano', 'plane', 'police', 'rocket',
-  'rooster', 'sheep', 'shenai', 'violin', 'zap'];
+// Every (picture, clip) pair across the Find Sound pools: a picture in one
+// of these pools that also has a soundmemory/<stem>.ogg.
+const PICTURE_POOLS = ['animals', 'vehicles', 'instruments', 'sounds'];
 
 const SND_MATCH = 'sfx/good.ogg';
 const SND_MISMATCH = 'sfx/wrong.ogg';
@@ -28,7 +26,17 @@ export default class SoundMemoryGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
-    this._startLevel(0);
+    this._set = [];                 // [{ id, pool }]
+    this._cards = [];
+    this._pairs = 0;
+    this._matched = 0;
+    this._tries = 0;
+    loadManifest().then((m) => {
+      const snd = new Set(poolKeys(m, 'soundmemory/snd'));
+      this._set = PICTURE_POOLS.flatMap((pool) =>
+        poolKeys(m, pool).filter((id) => snd.has(id)).map((id) => ({ id, pool })));
+      if (this._set.length) this._startLevel(0);
+    });
   }
 
   _startLevel(n) {
@@ -43,10 +51,10 @@ export default class SoundMemoryGame extends Scene {
     this._pulse = 0;
     this._overlay.hide();
 
-    const ids = shuffle(POOL.slice()).slice(0, this._pairs);
-    const cells = shuffle(ids.concat(ids));
+    const picks = shuffle(this._set.slice()).slice(0, this._pairs);
+    const cells = shuffle(picks.concat(picks));
 
-    this._cards = cells.map((id) => ({ id, x: 0, y: 0, s: 0, matched: false }));
+    this._cards = cells.map((p) => ({ id: p.id, pool: p.pool, x: 0, y: 0, s: 0, matched: false }));
     this._place();
   }
 
@@ -159,7 +167,7 @@ export default class SoundMemoryGame extends Scene {
       ctx.fill();
 
       if (c.matched) {
-        drawImageFit(ctx, img(`soundpics/${c.id}`), c.x + 12, c.y + 12, c.s - 24, c.s - 24);
+        drawImageFit(ctx, img(`${c.pool}/${c.id}`), c.x + 12, c.y + 12, c.s - 24, c.s - 24);
       } else {
         const wob = playing ? 1 + 0.12 * Math.sin(this._pulse * 22) : 1;
         ctx.save();
