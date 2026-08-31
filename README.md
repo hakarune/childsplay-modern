@@ -16,6 +16,10 @@ engine required), **per-channel sound** (music / effects / voice), and
 * **Install on Linux:** grab the `.deb` from
   [**Releases**](https://github.com/hakarune/childsplay-modern/releases)
 
+[![Godot scene smoke](https://github.com/hakarune/childsplay-modern/actions/workflows/godot-smoke.yml/badge.svg)](https://github.com/hakarune/childsplay-modern/actions/workflows/godot-smoke.yml)
+[![Desktop binaries](https://github.com/hakarune/childsplay-modern/actions/workflows/release.yml/badge.svg)](https://github.com/hakarune/childsplay-modern/actions/workflows/release.yml)
+[![Pages deploy](https://github.com/hakarune/childsplay-modern/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/hakarune/childsplay-modern/actions/workflows/deploy-pages.yml)
+
 ---
 
 ## Dual-target architecture
