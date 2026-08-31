@@ -7,14 +7,11 @@
 # the web target, so this script copies it in. desktop-godot/assets/ is
 # git-ignored; run this after cloning and whenever ../assets/ changes.
 #
-# Only the curated pools are mirrored (Design Policy §A.2.3):
+# ../assets/ is the hand-maintained source of truth; only the curated
+# pools are mirrored into res:// (Design Policy §A):
 #   graphics: ../assets/graphics/{pools,themes}
 #   audio:    ../assets/audio/{sfx,voice,soundmemory,flashcards}
 #   plus fonts/ and data/.
-# The legacy dumps (graphics/lib/, audio/lib/, audio/alphabet-sounds/) are
-# NOT copied — they stay in the repo for provenance only. Keeping them out
-# of res:// is what clears AssetLoader's old "duplicate filename" warnings.
-#
 # (A symlink would be simpler but the project's storage is a FUSE mount
 #  that does not support them.)
 #
@@ -25,8 +22,8 @@ SRC="$HERE/../assets"
 DST="$HERE/assets"
 
 [ -d "$SRC" ] || { echo "error: $SRC not found" >&2; exit 1; }
-[ -d "$SRC/graphics/pools" ] || { echo "error: $SRC/graphics/pools not found — run tools/migrate-assets.sh" >&2; exit 1; }
-[ -d "$SRC/audio/sfx" ]      || { echo "error: $SRC/audio/sfx not found — run tools/migrate-audio.sh" >&2; exit 1; }
+[ -d "$SRC/graphics/pools" ] || { echo "error: $SRC/graphics/pools not found" >&2; exit 1; }
+[ -d "$SRC/audio/sfx" ]      || { echo "error: $SRC/audio/sfx not found" >&2; exit 1; }
 
 # The subtrees to mirror, relative to $SRC. Anything under $DST that is not
 # on this list is deleted (see the prune step below).

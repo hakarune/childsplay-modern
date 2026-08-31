@@ -31,14 +31,14 @@ Contents:
 
 ## §A — Asset directory layout & naming
 
-### A.1 The problem
+### A.1 The problem (historical — resolved)
 
-The tree under `assets/graphics/lib/CPData/<Foo>Data/tileset_1/…` is the raw
-legacy dump, mirrored verbatim. It is **not** an intentional structure. It
-forces paths like
-`assets/graphics/lib/CPData/WipeData/tileset_1/renoir0.jpg` and makes the
-Godot `AssetLoader` report *1668 duplicate filenames* (same name under many
-themes/locales, "first match wins" — fragile).
+The project started from the upstream Childsplay `CPData` / `SPData` dump
+mirrored verbatim, which forced paths like
+`…/WipeData/tileset_1/renoir0.jpg` and made the Godot `AssetLoader` report
+*1668 duplicate filenames*. The pools below replaced it; the dump and its
+one-time extraction scripts have been deleted (the full upstream tree
+survives, git-ignored, under `legacy-sources/`).
 
 ### A.2 Canonical layout (new)
 
@@ -69,8 +69,9 @@ Rules:
   sub-folder, and only for a set that is (a) single-game and (b) more than
   ~6 files. A single-game background still goes in `backgrounds/` with a
   name-prefix (`backgrounds/aquarium_1.jpg`).
-- **A.2.3** `assets/graphics/lib/` (raw legacy import) stays for provenance
-  but is **no longer synced to either target** after migration.
+- **A.2.3** There is no legacy dump in the repo any more — the pools ARE
+  the source of truth and are hand-maintained. Add art by dropping a
+  correctly-named file into the pool folder and committing it.
 
 ### A.3 Naming grammar
 
@@ -111,19 +112,13 @@ Rules:
   out of `res://` the old ~1668-collision warning is down to 3 known
   pool-vs-pool image overlaps (`dog/horse/rooster.png`).
 
-### A.5 Migration plan — **DONE** (2026-08-31)
+### A.5 Migration — **DONE** (2026-08-31)
 
-1. ✅ `tools/migrate-assets.sh` builds `graphics/pools/**`; `tools/migrate-audio.sh`
-   builds `audio/{sfx,soundmemory,flashcards}/**`. Mapping tables kept inline.
-2. ✅ Both `sync-assets.sh` scripts curate the pools only. The Godot one no
-   longer rsyncs the whole tree.
-3. ✅ Game asset paths point at pools (the last explicit `.tscn` refs in
-   `Packid.tscn` / `Aquarium.tscn` were repointed; `Flashcards.gd` and the
-   `FourRow` / `Aquarium` sound constants renamed to the pool names).
-4. ✅ Per-game curated web dirs collapsed into the shared pools.
-5. ✅ `graphics/lib/`, `audio/lib/`, `audio/alphabet-sounds/` stay in the
-   repo for provenance, dropped from both syncs. See
-   [`ASSETS.md`](ASSETS.md) for the full flow.
+The pools were curated out of the legacy dump by one-time extraction
+scripts; every game's asset paths point at pools; both `sync-assets.sh`
+scripts only copy `/assets/` outward; and the dump + those scripts have
+been removed. `/assets/` is now the hand-maintained source of truth — see
+[`ASSETS.md`](ASSETS.md).
 
 ### A.6 First mapping decisions (do these first — they unblock §B/§H)
 

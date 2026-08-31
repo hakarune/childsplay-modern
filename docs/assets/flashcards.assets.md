@@ -8,7 +8,7 @@
 | Game id | `flashcards` (flashcards.js / Flashcards.tscn) |
 | Owns any art? | no |
 | Shared pools used | `animals` (12 cards, reuses Memory / Find Sound art) + recorded name clips for de/nl/fr/es. |
-| Content file(s) | recorded name clips `assets/audio/alphabet-sounds/*/FlashCardsSounds/` |
+| Content file(s) | recorded name clips `assets/audio/flashcards/<word>_<lang>.ogg` |
 | Theme variants | cards stay light on a `surface_alt` backdrop in both themes |
 | Style themes | none |
 

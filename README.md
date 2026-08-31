@@ -85,27 +85,22 @@ Launch it from your desktop menu ("Childsplay Modern") or run
 
 ```
 childsplay-modern/
-├── assets/                     Shared source of truth — see docs/ASSETS.md
-│   ├── graphics/
-│   │   ├── pools/                Flat, purpose-named art the games actually use
-│   │   │   ├── backgrounds/        paintings + aquarium_1..6
-│   │   │   ├── animals/            01_cat.png … 21_frog.png, dog/horse/rooster
-│   │   │   ├── ui/                 card faces, sponge, bubble, soundbut
-│   │   │   ├── soundpics/          Find Sound / Sound Memory pictures
-│   │   │   ├── icons/              one <game-id>.png per menu tile
-│   │   │   └── sprites/<game>/     packid / billiards / aquarium sprite sheets
-│   │   └── lib/                  Untouched legacy dump — provenance only, NOT synced
+├── assets/                     Source of truth (hand-maintained) — see docs/ASSETS.md
+│   ├── graphics/pools/           Flat, purpose-named art the games read from
+│   │   ├── backgrounds/            paintings + aquarium_1..6 (`_tier` filename tag)
+│   │   ├── animals/               plain-named cutouts (cat, cow, dog, bird, …)
+│   │   ├── ui/                    card faces, sponge, bubble, soundbut
+│   │   ├── vehicles/ instruments/ sounds/   Find Sound level pools
+│   │   ├── icons/                 one <game-id>.png per menu tile
+│   │   └── sprites/<game>/        packid / billiards / aquarium sprite sheets
 │   ├── audio/
 │   │   ├── sfx/                  Flat effect clips (referenced by bare filename)
 │   │   ├── voice/               Baked spoken lines: v_<slug>.ogg
 │   │   ├── soundmemory/         Shared Find Sound / Sound Memory clip set: <id>.ogg
 │   │   ├── flashcards/          Recorded animal names, <word>_<lang>.ogg (de/nl/fr/es)
-│   │   ├── lib/                  Legacy sound tree — provenance only, NOT synced
-│   │   └── alphabet-sounds/     Legacy locale packs — provenance only, NOT synced
+│   │   └── human/               Raw human recordings gen-voice.sh may use (en_GB a–z / 0–9)
 │   ├── data/                    Editable game content (see "Customising content")
 │   │   ├── electro.json           Electro picture↔name pairs
-│   │   ├── findsound.json         Find Sound levels + spoken-label overrides
-│   │   ├── backgrounds.json       Difficulty tier per painting (Puzzle + Wipe)
 │   │   ├── wordlist.json          Word Maker dictionary (~1200 words)
 │   │   └── quiz/*.json            One deck per Quiz (general/picture/math/words/sayings)
 │   └── fonts/                   DejaVu Sans Condensed (UI font)
@@ -127,11 +122,9 @@ childsplay-modern/
 │   ├── assets/                  Web-sized copy of the pools + data files (committed)
 │   └── js/                       engine.js, util.js, theme.js, artstyle.js, tts.js,
 │                                 textinput.js, menu.js, main.js, games/*
-├── tools/                      Content generators (see below)
-│   ├── migrate-assets.sh         Build assets/graphics/pools/ from the legacy dump
-│   ├── migrate-audio.sh          Build assets/audio/{sfx,soundmemory,flashcards}/ from the legacy dump
+├── tools/                      Content generators (read the pools, write assets/)
 │   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg (human → google/piper → espeak-ng)
-│   ├── gen-electro-data.sh       Rebuild assets/data/electro.json from the art
+│   ├── gen-electro-data.sh       Rebuild assets/data/electro.json from the animals pool
 │   └── gen-wordlist.py           Rebuild assets/data/wordlist.json
 ├── build-deb.sh                Thin wrapper → desktop-godot/build-deb.sh
 ├── docs/
@@ -173,7 +166,7 @@ childsplay-modern/
 * **No-repeat asset pools** — Puzzle / Memory / Wipe / Find It draw
   pictures from shared "bags" so the same image doesn't recur within a
   session; Puzzle and Wipe share a **per-difficulty-tier** painting bag
-  (`assets/data/backgrounds.json`).
+  (the tier is an `_easy/_med/_hard` tag on the filename).
 * **Drop-in SVG art** — every image is referenced without an extension, so
   a newer `.svg` next to a `.png` / `.jpg` wins automatically
   (`svg → png → jpg → jpeg → webp`). A dormant **artwork** menu toggle
@@ -238,12 +231,10 @@ per-level starting letters and word targets are in `LEVELS` in
 
 ### Find Sound — levels
 
-`assets/data/findsound.json`:
-
-```json
-{ "levels": [ { "name": "Animals", "ids": ["cow", "elephant", "frog"] } ],
-  "labels": { "carhorn": "car horn" } }
-```
+A level is a graphics pool folder (`animals` / `vehicles` / `instruments`
+/ `sounds`); its cards are the pictures in that pool that have a matching
+`assets/audio/soundmemory/<stem>.ogg`. To add a card, drop
+`assets/graphics/pools/<pool>/<stem>.png` + the `.ogg`. No data file.
 
 Each `id` must be both a picture stem in `assets/graphics/pools/soundpics/`
 **and** a clip stem (`<id>.ogg`). `labels` overrides the spoken word for
@@ -274,10 +265,11 @@ grouped by `level`. To add a whole new deck: drop the JSON in and add a
 
 ### Puzzle / Wipe — painting difficulty
 
-`assets/data/backgrounds.json` maps each painting stem to a tier
-(`easy` / `med` / `hard`); a stem not listed is eligible at every tier.
-The level → tier map is in the `LEVELS` tables of `puzzle.js` / `Puzzle.gd`
-and `wipe.js` / `Wipe.gd`.
+Difficulty is a trailing `_easy` / `_med` / `_hard` tag on the background
+filename (`bruegel0_hard.jpg`); an untagged file is eligible at every
+tier. The level → tier map is in the `LEVELS` tables of `puzzle.js` /
+`Puzzle.gd` and `wipe.js` / `Wipe.gd`. Drop a new `backgrounds/*.jpg` in
+and it's picked up automatically.
 
 ### Spoken lines (voice pack)
 
@@ -318,17 +310,13 @@ the games fall back to live TTS, then to silence.
 
 ### Asset pools
 
-`assets/graphics/pools/` and `assets/audio/{sfx,soundmemory,flashcards}/`
-are the curated pools the games actually reference. They are built from the
-legacy dumps by **`tools/migrate-assets.sh`** and **`tools/migrate-audio.sh`**
-(see [`docs/ASSETS.md`](docs/ASSETS.md) for the whole picture and
+`assets/graphics/pools/` and `assets/audio/{sfx,soundmemory,flashcards,voice}/`
+are the **hand-maintained source of truth** — the purpose-named pools every
+game reads from (see [`docs/ASSETS.md`](docs/ASSETS.md) for the recipes and
 `docs/Design-Policy.md` §A for the naming rules). To add or swap an asset,
-edit the relevant `migrate-*.sh` mapping table, **or** — since a re-run
-wipes and rebuilds the pools — drop a hand-made file into
-`assets/graphics/custom/<pool>/<file>` (mirrors `pools/` exactly). Those
-are copied over the top on every `migrate-assets.sh` run, so they survive.
-The legacy trees (`graphics/lib/`, `audio/lib/`, `audio/alphabet-sounds/`)
-stay in the repo for provenance but are **not** synced to either target.
+drop a correctly-named file straight into the pool folder and commit it.
+The `sync-assets.sh` scripts only copy `assets/` **outward** to the two
+build trees; they never touch `assets/` itself.
 
 ### After editing anything under `assets/`
 
@@ -452,7 +440,7 @@ on **both** targets.
 | **Memory** | Visual memory | Flip-and-match picture pairs. A sub-menu picks the deck: Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
 | **Sound Memory** | Listening, memory | `?`-tiles play a clip; match by ear, a pair reveals the picture. |
 | **Falling Letter** | Letter recognition, keyboard | Type the letter on each balloon (physical, device, or in-canvas keyboard) before it hits the danger line. 6 levels, gentle first; out of lives replays the level. |
-| **Find Sound** | Listening | Hear a clip, tap the picture it belongs to. Themed levels from `assets/data/findsound.json`. |
+| **Find Sound** | Listening | Hear a clip, tap the picture it belongs to. Themed levels — one per graphics pool folder. |
 | **Flashcards** | Vocabulary | Picture + word cards for 12 animals; tap to hear the word. English + Deutsch / Nederlands / Français / Español. |
 | **Puzzle** | Spatial reasoning | Drag the pieces of a painting into the frame. 10 levels, grids → irregular rectangles; the picture is picked from a shared pool by the level's difficulty tier. |
 | **Find It** | Attention | Spot-the-difference — the painting is shown twice, the right copy has coloured spots added; tap them all. |

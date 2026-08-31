@@ -389,4 +389,23 @@ indexed); web + Godot voice dirs both 118._
   can ask "does this stem have a clip?". With flat `soundpics/` gone the
   Godot `AssetLoader` duplicate-filename warning is **0** (was 3, was
   1668 at the start). Adding a Find Sound card = drop `<pool>/<stem>.png`
-  + `soundmemory/<stem>.ogg`; nothing else._
+  + `soundmemory/<stem>.ogg`; nothing else.
+
+2026-08-31 (pools are the source of truth):
+- New card back art (256×256, replaces the 161×161 legacy one).
+- **`tools/migrate-assets.sh` + `tools/migrate-audio.sh` deleted.** Their
+  one-time job — curating the pools out of the upstream `CPData`/`SPData`
+  dump — is done and baked into the committed pools. They `rm -rf`'d the
+  pool dirs on every run, which made "the source of truth" a lie.
+- **The legacy dumps are deleted**: `assets/graphics/lib/`,
+  `assets/audio/lib/`, `assets/audio/alphabet-sounds/` (~49 MB). The full
+  upstream tree still lives, git-ignored, under `legacy-sources/`. The 36
+  human en_GB letter/digit recordings `gen-voice.sh` uses were kept at
+  `assets/audio/human/`.
+- `assets/graphics/pools/**` and `assets/audio/{sfx,soundmemory,flashcards,
+  voice}/**` are now the **hand-maintained source of truth** — add art by
+  dropping a correctly-named file in and committing. The two
+  `sync-assets.sh` only copy `/assets/` outward. Docs (README, ASSETS.md,
+  Design-Policy §A) rewritten to match.
+- The `custom/` override lane added earlier the same day is removed
+  (redundant once you edit `pools/` directly)._

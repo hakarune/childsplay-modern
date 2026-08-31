@@ -2,11 +2,12 @@
 #
 # sync-assets.sh - (re)build web-canvas/assets/ from the shared ../assets/.
 #
-# Graphics come entirely from the flat, purpose-named pools built by
-# tools/migrate-assets.sh; audio from the pools built by
-# tools/migrate-audio.sh (Design Policy §A). This script no longer touches
-# the legacy `assets/graphics/lib/`, `assets/audio/lib/` or
-# `assets/audio/alphabet-sounds/` trees — they are provenance only.
+# ../assets/ is the source of truth: the flat, purpose-named pools under
+# assets/graphics/pools/ and assets/audio/{sfx,soundmemory,flashcards,voice}/
+# are hand-maintained (Design Policy §A) — add art by dropping a
+# correctly-named file straight into a pool and committing it. This script
+# only copies + web-sizes that tree into web-canvas/assets/ and writes the
+# image manifest. It never touches ../assets/.
 #
 # Run after cloning or whenever ../assets/ changes. The result is checked
 # in so `web-canvas/` deploys as-is.
@@ -22,8 +23,8 @@ DST="$HERE/assets"
 POOLS="$SRC/graphics/pools"
 APOOL="$SRC/audio"
 
-[ -d "$POOLS" ]        || { echo "error: $POOLS not found — run tools/migrate-assets.sh" >&2; exit 1; }
-[ -d "$APOOL/sfx" ]    || { echo "error: $APOOL/sfx not found — run tools/migrate-audio.sh" >&2; exit 1; }
+[ -d "$POOLS" ]        || { echo "error: $POOLS not found" >&2; exit 1; }
+[ -d "$APOOL/sfx" ]    || { echo "error: $APOOL/sfx not found" >&2; exit 1; }
 
 rm -rf "$DST"
 mkdir -p "$DST"/{icons,fonts,backgrounds,animals,vehicles,instruments,sounds,ui,sfx,voice,data}
@@ -61,7 +62,7 @@ cp "$SRC/audio/voice/"*.ogg "$DST/voice/" 2>/dev/null || echo "  (no voice pack 
 # --- UI font ---------------------------------------------------------
 cp "$SRC/fonts/DejaVuSansCondensed-Bold.ttf" "$DST/fonts/"
 
-# --- audio: straight from the pools (tools/migrate-audio.sh) ---------
+# --- audio: straight from the pools ---------
 # sfx/ and flashcards/ keep their pool names 1:1 (flashcards are flat,
 # <word>_<lang>.ogg); the shared named-clip set lands under
 # soundmemory/snd/ where findsound.js + soundmemory.js expect it.

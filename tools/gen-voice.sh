@@ -31,7 +31,9 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT="$HERE/../assets/audio/voice"
-EN_GB="$HERE/../assets/audio/alphabet-sounds/alphabet-sounds_en_GB/AlphabetSounds/en_GB"
+# raw human recordings kept in-repo (letters + digits, en_GB, named by
+# codepoint: U0061 = 'a'). Preferred over any synthesiser.
+HUMAN="$HERE/../assets/audio/human"
 mkdir -p "$OUT"
 
 command -v ffmpeg >/dev/null || { echo "need ffmpeg"; exit 1; }
@@ -60,18 +62,16 @@ slug() {
   printf '%s' "${s:0:48}"
 }
 
-# slug -> original human recording. Letters + digits come from the GPL
-# en_GB AlphabetSounds pack (files are named by codepoint: U0061 = 'a').
-# Set NO_HUMAN=1 to ignore these and synthesise everything for a uniform
-# first pass — then add HUMAN_SRC entries and re-run to swap real
-# recordings back in selectively.
+# slug -> original human recording in assets/audio/human/ (files named by
+# codepoint: U0061 = 'a'). Set NO_HUMAN=1 to ignore these and synthesise
+# everything for a uniform first pass.
 declare -A HUMAN_SRC=()
 if [ "${NO_HUMAN:-0}" != "1" ]; then
   for n in 0 1 2 3 4 5 6 7 8 9; do
-    HUMAN_SRC["$n"]="$(printf '%s/U%04x.ogg' "$EN_GB" $((48 + n)))"
+    HUMAN_SRC["$n"]="$(printf '%s/U%04x.ogg' "$HUMAN" $((48 + n)))"
   done
   for c in {a..z}; do
-    HUMAN_SRC["$c"]="$(printf '%s/U%04x.ogg' "$EN_GB" "'$c")"
+    HUMAN_SRC["$c"]="$(printf '%s/U%04x.ogg' "$HUMAN" "'$c")"
   done
 fi
 

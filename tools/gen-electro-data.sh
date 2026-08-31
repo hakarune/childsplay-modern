@@ -12,7 +12,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 POOL="$HERE/../assets/graphics/pools/animals"
 OUT="$HERE/../assets/data/electro.json"
 
-[ -d "$POOL" ] || { echo "error: $POOL not found — run tools/migrate-assets.sh" >&2; exit 1; }
+[ -d "$POOL" ] || { echo "error: $POOL not found" >&2; exit 1; }
 mkdir -p "$(dirname "$OUT")"
 
 {
