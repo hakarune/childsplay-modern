@@ -8,7 +8,7 @@
 | Game id | `puzzle` (puzzle.js / Puzzle.tscn) |
 | Owns any art? | no |
 | Shared pools used | `backgrounds` (the paintings), filtered by the level's tier. |
-| Content file(s) | `assets/data/backgrounds.json` (difficulty tiers) |
+| Content file(s) | — (difficulty is a `_easy/_med/_hard` filename tag, §A.3) |
 | Theme variants | light+dark from palette only (art is photographic) |
 | Style themes | none |
 
@@ -16,7 +16,7 @@
 
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| painting pool | backgrounds/* (bruegel*/gogh*/monet*/pieck*/rembrandt*/renoir*/vermeer*) | jpg | ~800x560 | frame, contain | ~4:3 | easy \| med \| hard — `assets/data/backgrounds.json` | GPL, legacy `WipeData` paintings |
+| background pool | backgrounds/* (paintings + aquarium tanks + future drops) | jpg | ~800x560 | frame, contain | ~4:3 | easy \| med \| hard — `_tier` filename tag (`bruegel0_hard.jpg`); untagged = any tier | GPL, legacy `WipeData` paintings |
 
 ## Notes
 

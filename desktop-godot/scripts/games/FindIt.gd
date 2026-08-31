@@ -10,7 +10,6 @@ const LEVELS := [
 	{ "diffs": 5, "r": 25.0 },
 	{ "diffs": 6, "r": 20.0 },
 ]
-const PAINTINGS := ["bruegel0", "bruegel1", "gogh0", "gogh1", "gogh3", "monet0", "monet1", "monet3", "pieck0", "pieck1", "pieck2", "rembrandt0", "rembrandt1", "renoir0", "vermeer1", "vermeer2", "vermeer3"]
 const BLOBS := [
 	Color("ff5a5a"), Color("ffd93d"), Color("6bcb77"),
 	Color("4d96ff"), Color("b980f0"), Color("ff9f45"), Color("31c2d6"),
@@ -58,7 +57,7 @@ func _ready() -> void:
 func _start_level(n: int) -> void:
 	_level = clampi(n, 0, LEVELS.size() - 1)
 	var lvl: Dictionary = LEVELS[_level]
-	_tex = AssetLoader.get_texture(str(GameContext.draw_from_pool("backgrounds", PAINTINGS, 1)[0]))
+	_tex = AssetLoader.get_texture(str(GameContext.draw_from_pool("backgrounds", AssetLoader.list_pool("backgrounds"), 1)[0]))
 	_found = 0
 	_tries = 0
 	_miss = null

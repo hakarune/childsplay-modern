@@ -24,12 +24,17 @@ rm -rf "$POOL"
 mkdir -p "$POOL"/{backgrounds,animals,ui,soundpics,icons}
 mkdir -p "$POOL"/sprites/{packid,billiards,aquarium}
 
-# --- backgrounds: GPL paintings (a curated, puzzle-friendly subset) -------
+# --- backgrounds: GPL paintings, difficulty baked into the filename ------
+# `<stem>_<tier>.jpg` (Design Policy §A.3); untagged art = eligible at any
+# tier. Puzzle / Wipe read the tag off the filename — no data file.
 PAINT_SRC="$LIB/WipeData/tileset_1"
-for p in bruegel0 bruegel1 gogh0 gogh1 gogh3 monet0 monet1 monet3 \
-         pieck0 pieck1 pieck2 rembrandt0 rembrandt1 renoir0 \
-         vermeer1 vermeer2 vermeer3; do
-  [ -f "$PAINT_SRC/$p.jpg" ] && cp "$PAINT_SRC/$p.jpg" "$POOL/backgrounds/$p.jpg"
+declare -A PAINT_TIER=(
+  [gogh0]=easy [monet0]=easy [pieck0]=easy [pieck1]=easy [renoir0]=easy
+  [gogh1]=med [gogh3]=med [monet1]=med [pieck2]=med [rembrandt0]=med [vermeer1]=med
+  [bruegel0]=hard [bruegel1]=hard [monet3]=hard [rembrandt1]=hard [vermeer2]=hard [vermeer3]=hard
+)
+for p in "${!PAINT_TIER[@]}"; do
+  [ -f "$PAINT_SRC/$p.jpg" ] && cp "$PAINT_SRC/$p.jpg" "$POOL/backgrounds/${p}_${PAINT_TIER[$p]}.jpg"
 done
 
 # --- backgrounds: aquarium tank scenes, renamed aquarium_1..N ------------

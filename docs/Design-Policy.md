@@ -165,7 +165,9 @@ lists the pools).
   reused until the eligible set is exhausted, then the set reshuffles.
 - **B.1.4** Difficulty tiers map to the level index. Default: split the level
   count into thirds → `easy` / `med` / `hard`. Games state their exact map in
-  `LEVELS`.
+  `LEVELS`. A picture's own tier is the trailing `_easy` / `_med` / `_hard`
+  tag on its **filename** (§A.3); no tag = eligible at every tier. There is
+  no tier data-file — the pool is a runtime directory/manifest listing.
 
 ### B.2 Where the state lives
 

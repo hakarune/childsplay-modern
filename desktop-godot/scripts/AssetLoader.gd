@@ -224,6 +224,33 @@ func has_texture(asset_name: String) -> bool:
 	return _texture_paths.has(asset_name.to_lower())
 
 
+const TIER_TAGS := ["easy", "med", "hard"]
+
+## Trailing difficulty tag of a pool stem (Design Policy §A.3):
+## "bruegel0_hard" -> "hard"; "aquarium_1" -> "" (any tier).
+func stem_tier(stem: String) -> String:
+	var i := stem.rfind("_")
+	if i >= 0 and stem.substr(i + 1) in TIER_TAGS:
+		return stem.substr(i + 1)
+	return ""
+
+## Bare stems (with any tier tag, no extension) of every texture directly
+## under res://assets/graphics/pools/<pool>/ — a runtime directory listing
+## so games never hard-code a pool's contents.
+func list_pool(pool: String) -> Array:
+	var marker := "/pools/%s/" % pool
+	var out := {}
+	for p in _texture_paths.values():
+		var at := String(p).find(marker)
+		if at < 0:
+			continue
+		var rel: String = String(p).substr(at + marker.length())
+		if rel.contains("/"):          # one level deep only
+			continue
+		out[rel.get_basename()] = true
+	return out.keys()
+
+
 func has_stream(sound_name: String) -> bool:
 	return _audio_paths.has(sound_name.to_lower())
 

@@ -13,7 +13,7 @@ The ones that reference a bundled data file:
 
 | Game | Data file |
 | --- | --- |
-| Puzzle, Wipe | `assets/data/backgrounds.json` — difficulty tier per painting |
+| Puzzle, Wipe | — difficulty is a `_easy/_med/_hard` tag on the `backgrounds/` filename |
 | Electro | `assets/data/electro.json` — picture↔name pairs |
 | Find Sound | `assets/data/findsound.json` — levels + spoken-label overrides |
 | Quiz | `assets/data/quiz/*.json` — one file per deck |

@@ -2,17 +2,17 @@
 // the cover away and reveal the picture. Clear enough of it to finish the
 // level. Six paintings; the target rises and the sponge shrinks.
 
-import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { clamp, Overlay, buttonRow, tierBag, loadData, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, img, loadImage, loadManifest, playSound } from '../engine.js';
+import { clamp, Overlay, buttonRow, tierBag, poolKeys, parseTier, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 import { theme } from '../theme.js';
 
 const HUD = 64;
 
-// Shared painting pool (Wipe + Puzzle draw from the same bags so one session
-// playing both won't see the same picture twice) — Design Policy §B.4. Tier
-// per painting: assets/data/backgrounds.json (hand-editable, §B.1.4).
-const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
-let TIERS = {};
+// The whole `backgrounds/` pool (paintings + aquarium tanks + future drops).
+// Wipe + Puzzle share the `backgrounds:<tier>` bags so one session playing
+// both won't see the same picture twice (§B.4). Difficulty is a filename
+// tag — `bruegel0_hard.jpg`, untagged = any tier (§A.3) — read off the
+// manifest, no data file.
 
 // 12 levels: target rises 0.65 → 0.99, sponge shrinks 54 → 26; tier steps
 // easy (1-4) → med (5-8) → hard (9-12) for the shared-pool picture draw.
@@ -33,12 +33,11 @@ export default class WipeGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
-    this._tiersReady = loadData('backgrounds', { tiers: {} })
-      .then((d) => { TIERS = (d && d.tiers) || {}; });
+    this._bgReady = loadManifest().then((m) => { this._bgStems = poolKeys(m, 'backgrounds'); });
     this._startLevel(0);
   }
 
-  _tierOf(stem) { return TIERS[stem]; }
+  _tierOf(stem) { return parseTier(stem).tier; }
 
   _startLevel(n) {
     this._level = clamp(n, 0, LEVELS.length - 1);
@@ -52,9 +51,9 @@ export default class WipeGame extends Scene {
     this._overlay.hide();
     const lv = LEVELS[this._level];
     const forLevel = this._level;
-    this._tiersReady.then(() => {
+    this._bgReady.then(() => {
       if (this._level !== forLevel) return;
-      const want = tierBag('backgrounds', PAINTINGS, this._tierOf, lv.tier).draw();
+      const want = tierBag('backgrounds', this._bgStems, this._tierOf, lv.tier).draw();
       this._imgName = want;
       loadImage(`backgrounds/${want}`).then((im) => {
         if (this._imgName !== want) return;

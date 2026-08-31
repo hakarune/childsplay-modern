@@ -4,15 +4,15 @@
 // rectangles of *different sizes* by recursive random splits, so there's
 // no grid to lean on.
 
-import { Scene, VIEW_W, VIEW_H, loadImage, playSound } from '../engine.js';
-import { roundRect, clamp, rand, shuffle, tierBag, loadData, Overlay, buttonRow } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, loadImage, loadManifest, playSound } from '../engine.js';
+import { roundRect, clamp, rand, shuffle, tierBag, poolKeys, parseTier, Overlay, buttonRow } from '../util.js';
 import { theme } from '../theme.js';
 
-// Shared painting pool (Wipe + Puzzle draw from the same bags so a session
-// playing both won't repeat a picture) — Design Policy §B.4. Difficulty tier
-// per painting comes from assets/data/backgrounds.json (hand-editable §B.1.4).
-const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
-let TIERS = {};   // stem -> 'easy'|'med'|'hard'  (filled from the data file)
+// The whole `backgrounds/` pool is fair game (paintings + aquarium tanks +
+// anything dropped in later). Wipe + Puzzle share the `backgrounds:<tier>`
+// bags so a session playing both won't repeat a picture (Design Policy §B.4).
+// Difficulty is a filename tag — `bruegel0_hard.jpg`, untagged = any tier
+// (§A.3) — parsed straight off the manifest, no data file.
 
 // 10 levels: 3 regular grids (easy), 4 irregular cuts (med), 3 fine cuts
 // (hard). `tier` picks which slice of the painting pool the level draws from.
@@ -78,12 +78,11 @@ export default class PuzzleGame extends Scene {
     this._exit = opts.onExit || (() => {});
     this._overlay = new Overlay();
     this._level = 0;
-    this._tiersReady = loadData('backgrounds', { tiers: {} })
-      .then((d) => { TIERS = (d && d.tiers) || {}; });
+    this._bgReady = loadManifest().then((m) => { this._bgStems = poolKeys(m, 'backgrounds'); });
     this._startLevel(0);
   }
 
-  _tierOf(stem) { return TIERS[stem]; }
+  _tierOf(stem) { return parseTier(stem).tier; }
 
   _startLevel(n) {
     this._level = Math.max(0, Math.min(n, LEVELS.length - 1));
@@ -97,9 +96,9 @@ export default class PuzzleGame extends Scene {
     const forLevel = this._level;
     // Draw the painting from this level's difficulty tier once the tier map
     // has loaded (instant after the first level).
-    this._tiersReady.then(() => {
+    this._bgReady.then(() => {
       if (this._level !== forLevel) return;               // level changed while waiting
-      const want = tierBag('backgrounds', PAINTINGS, this._tierOf, lv.tier).draw();
+      const want = tierBag('backgrounds', this._bgStems, this._tierOf, lv.tier).draw();
       this._imgName = want;
       loadImage(`backgrounds/${want}`).then((im) => {
         if (this._imgName !== want) return;               // stale

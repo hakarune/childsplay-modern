@@ -11,8 +11,8 @@ const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const SNAP := 44.0
 
 # 10 levels: 3 grids (easy), 4 irregular cuts (med), 3 fine cuts (hard).
-# `tier` picks which slice of the shared painting pool the level draws from
-# (tags in assets/data/backgrounds.json — Design Policy §B).
+# `tier` picks which slice of the shared `backgrounds/` pool the level draws
+# from; the tier is a filename tag — `bruegel0_hard.jpg` (§A.3 / §B).
 const LEVELS := [
 	{ "name": "2 x 2",       "kind": "grid", "cols": 2, "rows": 2, "tier": "easy" },
 	{ "name": "3 x 3",       "kind": "grid", "cols": 3, "rows": 3, "tier": "easy" },
@@ -25,9 +25,6 @@ const LEVELS := [
 	{ "name": "Tricky",      "kind": "free", "pieces": 16, "min": 0.09,  "tier": "hard" },
 	{ "name": "Master",      "kind": "free", "pieces": 20, "min": 0.075, "tier": "hard" },
 ]
-const PAINTINGS := ["bruegel0", "bruegel1", "gogh0", "gogh1", "gogh3", "monet0", "monet1", "monet3", "pieck0", "pieck1", "pieck2", "rembrandt0", "rembrandt1", "renoir0", "vermeer1", "vermeer2", "vermeer3"]
-
-var _tiers: Dictionary = {}
 
 const SND_SNAP := "pick.wav"
 const SND_WIN := "winner.ogg"
@@ -53,7 +50,6 @@ var _drag_offset := Vector2.ZERO
 
 
 func _ready() -> void:
-	_tiers = GameContext.load_json("backgrounds").get("tiers", {})
 	GameContext.theme_changed.connect(queue_redraw)
 	_sfx_snap.stream = AssetLoader.get_stream(SND_SNAP)
 	_sfx_win.stream = AssetLoader.get_stream(SND_WIN)
@@ -72,7 +68,7 @@ func _start_level(index: int) -> void:
 	_drag_piece = null
 	_popup.visible = false
 
-	var pick: String = str(GameContext.draw_tiered("backgrounds", PAINTINGS, _tiers, lvl.get("tier", "med"), 1)[0])
+	var pick: String = str(GameContext.draw_tiered("backgrounds", AssetLoader.list_pool("backgrounds"), lvl.get("tier", "med"), 1)[0])
 	_tex = AssetLoader.get_texture(pick)
 	var iw := 4.0
 	var ih := 3.0

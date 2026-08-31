@@ -38,7 +38,8 @@ Two mirrors, two reasons they differ from a plain copy:
 assets/
   graphics/
     pools/            ← the ONLY graphics location games may reference
-      backgrounds/      paintings, aquarium_1..6            (flat, unique names)
+      backgrounds/      paintings + aquarium_1..6; difficulty is a
+                        `_easy`/`_med`/`_hard` filename tag, untagged = any tier
       animals/          01_cat.png … 21_frog.png, dog/horse/rooster
       ui/               card_front, card_back, sponge, bubble, soundbut
       soundpics/        Find Sound / Sound Memory pictures  (<id>.png)

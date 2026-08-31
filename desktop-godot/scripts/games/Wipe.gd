@@ -7,14 +7,11 @@ const MAIN_MENU := "res://scenes/MainMenu.tscn"
 const HUD := 56.0
 const CELL := 20.0
 
-# Shared painting pool with Puzzle; tier per painting from
-# assets/data/backgrounds.json, no-repeat shared across a session (§B.4).
-const PAINTINGS := ["bruegel0", "bruegel1", "gogh0", "gogh1", "gogh3", "monet0", "monet1", "monet3", "pieck0", "pieck1", "pieck2", "rembrandt0", "rembrandt1", "renoir0", "vermeer1", "vermeer2", "vermeer3"]
+# Whole `backgrounds/` pool, shared with Puzzle; difficulty is a filename
+# tag (`bruegel0_hard.jpg`), no-repeat shared across a session (§B.4).
 const LEVEL_COUNT := 12
 const SND_WIPE := "pick.wav"
 const SND_WIN := "winner.ogg"
-
-var _tiers: Dictionary = {}
 
 func _level_target(i: int) -> float:
 	return 0.65 + (0.99 - 0.65) * (float(i) / float(LEVEL_COUNT - 1))
@@ -50,7 +47,6 @@ var _tex_cache: Dictionary = {}
 
 
 func _ready() -> void:
-	_tiers = GameContext.load_json("backgrounds").get("tiers", {})
 	GameContext.theme_changed.connect(_style_hud)
 	_style_hud()
 	var al := get_node_or_null("/root/AssetLoader")
@@ -81,7 +77,7 @@ func _start_level(n: int) -> void:
 	_cover = PackedByteArray()
 	_cols = 0
 	_rows = 0
-	_tex = _tex_for(str(GameContext.draw_tiered("backgrounds", PAINTINGS, _tiers, _level_tier(_level), 1)[0]))
+	_tex = _tex_for(str(GameContext.draw_tiered("backgrounds", AssetLoader.list_pool("backgrounds"), _level_tier(_level), 1)[0]))
 	_popup.visible = false
 	_geo()
 	_update_hud()

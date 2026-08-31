@@ -1,15 +1,15 @@
 // findit.js — spot the difference. The same picture is shown twice; the
 // right copy has a few coloured spots added. Tap them all.
 
-import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound } from '../engine.js';
-import { rand, clamp, bag, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, img, loadImage, loadManifest, playSound } from '../engine.js';
+import { rand, clamp, bag, poolKeys, Overlay, buttonRow, hudSpeakButton, hudSpeakHit, speakHud } from '../util.js';
 import { theme } from '../theme.js';
 
 const HUD = 64;
 const BLOBS = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#b980f0', '#ff9f45', '#31c2d6'];
 
-// picture drawn from the shared painting pool (Design Policy §B)
-const PAINTINGS = ['bruegel0', 'bruegel1', 'gogh0', 'gogh1', 'gogh3', 'monet0', 'monet1', 'monet3', 'pieck0', 'pieck1', 'pieck2', 'rembrandt0', 'rembrandt1', 'renoir0', 'vermeer1', 'vermeer2', 'vermeer3'];
+// Any picture in the shared `backgrounds/` pool — paintings and the aquarium
+// tank scenes alike (Design Policy §B). FindIt ignores the difficulty tag.
 
 const LEVELS = [
   { diffs: 3, r: 30 },
@@ -28,6 +28,8 @@ export default class FindItGame extends Scene {
     this._overlay = new Overlay();
     this._level = 0;
     this._miss = null;               // {x, y, t} wrong-tap flash
+    this._bgStems = [];
+    this._bgReady = loadManifest().then((m) => { this._bgStems = poolKeys(m, 'backgrounds'); });
     this._startLevel(0);
   }
 
@@ -41,12 +43,16 @@ export default class FindItGame extends Scene {
     this._miss = null;
     this._overlay.hide();
 
-    this._imgName = bag('backgrounds', PAINTINGS).draw();
-    const want = this._imgName;
-    loadImage(`backgrounds/${want}`).then((im) => {
-      if (this._imgName !== want) return;
-      this._img = im;
-      this._layout(im, lv);
+    const forLevel = this._level;
+    this._bgReady.then(() => {
+      if (this._level !== forLevel) return;
+      this._imgName = bag('backgrounds', this._bgStems).draw();
+      const want = this._imgName;
+      loadImage(`backgrounds/${want}`).then((im) => {
+        if (this._imgName !== want) return;
+        this._img = im;
+        this._layout(im, lv);
+      });
     });
   }
 

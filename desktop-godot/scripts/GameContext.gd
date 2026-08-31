@@ -138,15 +138,15 @@ func reset_pools(prefix := "") -> void:
 			_bags.erase(k)
 
 
-## Draw `n` distinct entries from the subset of `candidates` whose difficulty
-## tier (looked up in `tier_of`: item -> "easy"|"med"|"hard") equals `tier`.
-## Items missing from `tier_of` are eligible at every tier. Each tier keeps
-## its own no-repeat memory under `<pool_key>:<tier>` so Puzzle and Wipe
-## sharing the paintings pool never repeat a picture in a session (§B.4).
-func draw_tiered(pool_key: String, candidates: Array, tier_of: Dictionary, tier: String, n := 1) -> Array:
+## Draw `n` distinct entries from the subset of `candidates` whose filename
+## difficulty tag (`AssetLoader.stem_tier`) equals `tier`. Untagged stems are
+## eligible at every tier. Each tier keeps its own no-repeat memory under
+## `<pool_key>:<tier>` so Puzzle and Wipe sharing the backgrounds pool never
+## repeat a picture in a session (§B.4).
+func draw_tiered(pool_key: String, candidates: Array, tier: String, n := 1) -> Array:
 	var eligible: Array = []
 	for item in candidates:
-		var t: String = str(tier_of.get(item, ""))
+		var t := AssetLoader.stem_tier(str(item))
 		if t == "" or t == tier:
 			eligible.append(item)
 	if eligible.is_empty():

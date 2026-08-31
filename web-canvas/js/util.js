@@ -89,6 +89,27 @@ export function bag(key, items) {
   return b;
 }
 
+const _TIER_TAGS = new Set(['easy', 'med', 'hard']);
+
+/** Split a pool filename stem on a trailing difficulty tag (Design Policy
+ *  §A.3): "bruegel0_hard" -> {name:'bruegel0', tier:'hard'};
+ *  "aquarium_1" -> {name:'aquarium_1', tier:null}. */
+export function parseTier(stem) {
+  const i = String(stem).lastIndexOf('_');
+  const tag = i >= 0 ? stem.slice(i + 1) : '';
+  return _TIER_TAGS.has(tag) ? { name: stem.slice(0, i), tier: tag } : { name: String(stem), tier: null };
+}
+
+/** Every ext-less key in `manifest` that sits directly under `<pool>/`
+ *  (one level deep), returned as the raw tagged stem
+ *  ("backgrounds/bruegel0_hard" -> "bruegel0_hard"). */
+export function poolKeys(manifest, pool) {
+  const p = pool + '/';
+  return Object.keys(manifest || {})
+    .filter((k) => k.startsWith(p) && !k.slice(p.length).includes('/'))
+    .map((k) => k.slice(p.length));
+}
+
 /** Difficulty-tiered pool draw (Policy §B.1.4 / §B.4). `tierOf` maps an item
  *  to 'easy' | 'med' | 'hard' (or a falsy value = eligible at every tier).
  *  Each tier gets its own no-repeat bag under `<poolKey>:<tier>`, so Puzzle

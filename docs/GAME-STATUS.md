@@ -73,7 +73,7 @@ is committed to porting first.
 | **Fishtank** / Aquarium | `fishtank.py` | ✅ | ✅ | Reinterpreted as a calm **Aquarium** toy (no score): ~12 fish with a 2-frame swim cycle wander + bob + bounce; poke a fish for a bubble sound + its floating name + a dart/flip; tap the water for a ripple + food pellet the nearest fish steer toward. Godot uses `GPUParticles2D` bubbles + a looping ambient track. `Aquarium.tscn` + `AquariumFish.tscn` / `aquarium.js`. |
 | **Find Characters** / Find It | `findit_sp.py` | ✅ | ✅ | Spot the difference — the painting is shown twice, the right copy has a few coloured spots added; tap them all. Procedural (no authored diff-pairs needed) over the `WipeData` paintings; 3 levels (3/5/6 spots). `FindIt.tscn` / `findit.js`. |
 | **Falling Letters** | `fallingletters.py` / `dltr.py` | ✅ | ✅ | Type the letter on each balloon before it hits the danger line. **6-tier `LEVELS` table** (gentle "Warm up" first level, monotonic ramp, 12 pops/level); out of lives just replays the level — no game-over ejection (§H.1.3). **Dual keyboard** (§I.3), both targets: the device OS keyboard (hidden `<input>` web / `virtual_keyboard_show` Godot) is primary on touch, the in-canvas QWERTY stays as the accessibility path, a `⌨` toggle switches between them (persisted). |
-| **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **10 levels**: 3 regular grids (`easy`), 4 free-cut irregular-rectangle levels (`med`), 3 fine-cut levels (`hard`). Each level's picture is drawn from the shared `backgrounds` pool **filtered by the level's difficulty tier** (`assets/data/backgrounds.json`), with session no-repeat shared with Wipe (§B). `Puzzle.tscn` / `puzzle.js`. |
+| **Puzzle** | `puzzle.py` | ✅ | ✅ | Drag the pieces of a painting into the frame. **10 levels**: 3 regular grids (`easy`), 4 free-cut irregular-rectangle levels (`med`), 3 fine-cut levels (`hard`). Each level's picture is drawn from the shared `backgrounds` pool **filtered by the level's difficulty tier** (a `_easy/_med/_hard` filename tag), with session no-repeat shared with Wipe (§B). `Puzzle.tscn` / `puzzle.js`. |
 | **Find Sound** | `findsound.py` | ✅ | ✅ | Hear a clip, tap the picture it belongs to; themed levels (animals, vehicles, instruments, noises), "Play again" button, wrong taps just wobble. Levels + spoken-label overrides load from the hand-editable `assets/data/findsound.json` (§J). A **say-the-names** toggle (§E.3) speaks the picture on a correct tap. `FindSound.tscn` / `findsound.js`. |
 | **Flashcards** | `flashcards.py` | ✅ | ✅ | Picture + word cards for 12 animals (reusing Memory / Find Sound art). **English is spoken by OS / browser text-to-speech** (`DisplayServer.tts_*` / `speechSynthesis`); **Deutsch / Nederlands / Français / Español** play the recorded Childsplay clips we ship, with a TTS fallback in that language. No audio at all → the card still shows the picture + word. `Flashcards.tscn` / `flashcards.js`. |
 | **Pong** | `pong.py` | ✅ | ✅ | Bat and ball versus a gentle AI paddle; first to 5; 3 levels of AI speed. Pointer / arrow-key paddle, ball speeds up per hit with spin from the contact point. A **court-style picker** (§D.5): Modern / Retro (Atari B&W) / 90s Neon / Y2K — each ships its own light + dark, the global light/dark toggle applies on top. `Pong.tscn` / `pong.js`. |
@@ -109,7 +109,7 @@ parity.
 | Simon | `simon_sp.py` | ✅ | ✅ | Repeat the growing colour-and-tone sequence; **ten levels, target length 2→11**. Tones are synthesised (WebAudio oscillator / procedural `AudioStreamWAV`), so no audio assets. A wrong tap just replays the same sequence — no lives, no game-over. `Simon.tscn` / `simon.js`. |
 | Block Breaker | `BlockBreaker.py` | ✅ | ✅ | Gentle Breakout — slide the paddle, bounce the ball, clear six walls of bricks. Tough (grey) bricks take two hits; losing the ball costs one of three lives, then you just replay the wall. Pointer / drag / arrow-key paddle, paddle-relative bounce angle. `BlockBreaker.tscn` / `blockbreaker.js`. |
 | Image Changer | `ichanger.py` | ✅ | ✅ | Study the row of pictures, press Start; the cards flip down and back and one picture has changed — tap it. Four levels (3 cards, 3 + position shuffle, 4 cards, 4 + shuffle), three rounds each. Reuses the Memory animal art. A **say-the-names** toggle (§E.3) speaks a card while studying, and the changed card on a correct guess. `ImageChanger.tscn` / `ichanger.js`. |
-| Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. **12 levels**, target fraction 0.65→0.99, sponge 54→26 px. Each level's picture is drawn from the shared 17-painting `backgrounds` pool **by difficulty tier** (`assets/data/backgrounds.json`), no-repeat shared with Puzzle (§B). Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
+| Wipe | `wipe.py` | ✅ | ✅ | A painting hidden under a grey cover; drag the sponge to wipe the cover away. **12 levels**, target fraction 0.65→0.99, sponge 54→26 px. Each level's picture is drawn from the shared `backgrounds` pool **by difficulty tier** (a `_easy/_med/_hard` filename tag), no-repeat shared with Puzzle (§B). Cover is a fine cell grid (portable + progress survives a resize). `Wipe.tscn` / `wipe.js`. |
 | Word Maker | `synonyms.py` | ✅ | ✅ | Adapted from the senior `synonyms` drill for young English readers: given a starting letter, build words with the on-screen keyboard (or type). Scored against the bundled ~1235-word kid dictionary `assets/data/wordlist.json` (edit `tools/gen-wordlist.py` to extend). Spoken prompt on open; a **Hint** button reveals an unused word (2 per level); a `⌨` toggle switches between the device keyboard and the on-screen one (§I.3), both targets. Five letters (S/B/C/T/P), 3→5 words. `WordMaker.tscn` / `synonyms.js`. |
 
 ---
@@ -205,7 +205,7 @@ Maker). Summary table reworked to the three groups.
 SVG-first asset resolution on both targets (Godot `IMAGE_EXTS` reorder +
 priority-aware collision + `/pools/` tiebreak), a `themes/<style>/`
 alternate-art overlay with a launcher **artwork toggle** (classic/modern),
-`assets/data/backgrounds.json` difficulty tiers with `tierBag` /
+`backgrounds.json` difficulty tiers with `tierBag` /
 `draw_tiered`. **Godot menu rebuilt to §F** — square tiles, responsive +
 paginated grid, flat `icons/<id>` pool art, light/dark + artwork + sound
 chrome. Web menu tiles enlarged. **Falling Letter**: 6-tier LEVELS table +
@@ -347,3 +347,19 @@ indexed); web + Godot voice dirs both 118._
   bird" (the `19_/20_` baby-bird sprites in the Memory / Image Changer
   deck). `gen-voice.sh` bakes the friendly phrases; the `v_bluebaby.ogg`
   / `v_greenbaby.ogg` clips are removed. Pack stays 118._
+
+2026-08-31 (playtest fixes — staged):
+- **Stage 1 — Memory HUD** now follows the §G one-row/three-cluster
+  contract on web (`match the pictures/letters/numbers` instruction +
+  🔊, short `Level n/N`, no title in the band) — fixes the left/centre
+  text overlap on a 4:3 viewport. Godot strings trimmed to match.
+- **Stage 2 — background difficulty is a filename tag.** Deleted
+  `assets/data/backgrounds.json`; the tier is the trailing
+  `_easy`/`_med`/`_hard` on the filename (`bruegel0_hard.jpg`), untagged
+  = any tier (§A.3). Puzzle / Wipe / FindIt (both targets) drop their
+  hard-coded `PAINTINGS` arrays and scan the whole `backgrounds/` pool at
+  runtime — `poolKeys(manifest)` + `parseTier` (web),
+  `AssetLoader.list_pool` + `stem_tier` (Godot); `GameContext.draw_tiered`
+  lost its `tier_of` Dict param. The aquarium tank photos are now in play
+  for all three games (untagged → every tier). Adding a background = drop
+  a correctly-named file, re-run migrate + sync; no code/JSON edit._
