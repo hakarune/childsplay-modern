@@ -1,7 +1,9 @@
 extends Control
 ## Flashcards — picture + word cards. Press the speaker to hear the word.
 ##
-## English is spoken with the OS text-to-speech (DisplayServer.tts_*).
+## English: baked voice/v_<word>.ogg first (via GameContext.speak), then
+## OS TTS, then silence. de/nl/fr/es: the recorded flashcards/<word>_<lang>.ogg
+## clip, else live TTS in that language.
 ## German / Dutch / French / Spanish play the recorded Childsplay clips we
 ## ship, falling back to TTS in that language if a clip is missing. If no
 ## TTS voice is installed the card still shows the picture + word.
@@ -102,8 +104,15 @@ func _say() -> void:
 			_clip.stream = AssetLoader.get_stream(key)
 			_clip.play()
 			return
+		# No recorded clip in this language — live TTS in that language, or
+		# silence. (An English baked clip here would be the wrong word.)
+		_speak(word, lang["bcp"])
+		return
 
-	_speak(word, lang["bcp"])
+	# English: GameContext.speak() plays the baked voice/v_<word>.ogg first
+	# (tools/gen-voice.sh bakes every Flashcards animal), then live TTS,
+	# then silence — the §E "never depend on a speech engine" chain.
+	GameContext.speak(word, "en")
 
 
 func _speak(text: String, bcp: String) -> void:
