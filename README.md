@@ -374,6 +374,7 @@ immediately rather than lazily refreshed. Icons live in `web-canvas/icons/`
 ```sh
 desktop-godot/sync-assets.sh       # first run / after assets change
 godot4 --path desktop-godot        # boots res://scenes/MainMenu.tscn
+desktop-godot/tests/smoke.sh       # headless: load every scene, exit != 0 on failure
 ```
 
 `AssetLoader` (autoload) indexes `res://assets/` and exposes
