@@ -51,13 +51,18 @@ slug() {
 
 # slug -> original human recording. Letters + digits come from the GPL
 # en_GB AlphabetSounds pack (files are named by codepoint: U0061 = 'a').
+# Set NO_HUMAN=1 to ignore these and synthesise everything for a uniform
+# first pass — then add HUMAN_SRC entries and re-run to swap real
+# recordings back in selectively.
 declare -A HUMAN_SRC=()
-for n in 0 1 2 3 4 5 6 7 8 9; do
-  HUMAN_SRC["$n"]="$(printf '%s/U%04x.ogg' "$EN_GB" $((48 + n)))"
-done
-for c in {a..z}; do
-  HUMAN_SRC["$c"]="$(printf '%s/U%04x.ogg' "$EN_GB" "'$c")"
-done
+if [ "${NO_HUMAN:-0}" != "1" ]; then
+  for n in 0 1 2 3 4 5 6 7 8 9; do
+    HUMAN_SRC["$n"]="$(printf '%s/U%04x.ogg' "$EN_GB" $((48 + n)))"
+  done
+  for c in {a..z}; do
+    HUMAN_SRC["$c"]="$(printf '%s/U%04x.ogg' "$EN_GB" "'$c")"
+  done
+fi
 
 encode() {  # $1 = input audio  ->  $2 = v_<slug>.ogg
   ffmpeg -y -loglevel error -i "$1" -ac 1 -ar 22050 -c:a libvorbis -q:a 4 "$2"
@@ -73,22 +78,28 @@ synth() {   # $1 = text  ->  $2 = wav
 }
 
 say_line() {
-  local text="$1" sl human tmp
+  local text="$1" sl human tmp exists
   sl="$(slug "$text")"
   [ -n "$sl" ] || return 0
-
   human="${HUMAN_SRC[$sl]:-}"
+  [ -f "$OUT/v_$sl.ogg" ] && exists=1 || exists=0
+
+  # Keep an existing clip unless FORCE=1, EXCEPT: a piper run replaces the
+  # synthetic (espeak/older-piper) clips — that's the point of installing
+  # piper. Human-sourced clips are never overwritten by synthesis; to swap
+  # a NEW human recording in, add its HUMAN_SRC entry and run with FORCE=1.
+  # libvorbis is not reproducible, so re-encoding an unchanged source only
+  # churns bytes — hence the keep.
+  if [ "$exists" = 1 ] && [ "${FORCE:-0}" != "1" ]; then
+    if [ -n "$human" ] || ! have_piper; then
+      printf '  %-40s v_%s.ogg   (kept)\n' "$text" "$sl"
+      return 0
+    fi
+  fi
+
   if [ -n "$human" ] && [ -f "$human" ]; then
     encode "$human" "$OUT/v_$sl.ogg"
     printf '  %-40s v_%s.ogg   (human)\n' "$text" "$sl"
-    return 0
-  fi
-
-  # On the espeak-ng fallback, don't re-churn clips that already exist — the
-  # output is not worth a new binary diff. A piper run (or FORCE=1) rebakes
-  # everything; a plain run just fills in what's missing / new.
-  if ! have_piper && [ "${FORCE:-0}" != "1" ] && [ -f "$OUT/v_$sl.ogg" ]; then
-    printf '  %-40s v_%s.ogg   (kept)\n' "$text" "$sl"
     return 0
   fi
 

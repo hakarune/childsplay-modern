@@ -284,16 +284,25 @@ and `wipe.js` / `Wipe.gd`.
 (needs `ffmpeg`). Add strings to the `PHRASES` array and run:
 
 ```sh
-# best voice — install piper once, then:
+# best voice — install piper once (pipx install piper-tts + a voice
+# model from huggingface.co/rhasspy/piper-voices), then:
 PIPER_MODEL=~/.local/share/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
-# or just `tools/gen-voice.sh` — falls back to espeak-ng (robotic)
+# no piper installed → falls back to espeak-ng (robotic)
 ```
 
 Each clip is sourced **best-first**: an original human recording if
 `HUMAN_SRC` has one (the GPL en_GB letters `a`–`z` and digits `0`–`9`),
-then **piper** neural TTS, then `espeak-ng`. On the espeak fallback an
-existing clip is kept as-is (no pointless re-encode) unless `FORCE=1`;
-piper always re-bakes. Commit the regenerated `.ogg`s and re-run both
+then **piper** neural TTS, then `espeak-ng`. Behaviour flags:
+
+- a **piper** run replaces the synthetic clips (that's the point); it
+  never overwrites a human-sourced one.
+- **no piper** → existing clips are kept, only missing/new ones render.
+- `FORCE=1` → re-render everything regardless (needed to swap a *new*
+  human recording into a slug that already has a clip).
+- `NO_HUMAN=1` → ignore `HUMAN_SRC`, synthesise everything for a uniform
+  first pass; add the human clips back selectively later.
+
+Commit the regenerated `.ogg`s and re-run both
 `sync-assets.sh`.
 
 The slug is `lowercase, non-alphanumerics → "-", trimmed, 48 chars` — the
