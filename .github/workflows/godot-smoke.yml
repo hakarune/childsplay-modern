@@ -1,0 +1,54 @@
+name: Godot scene-load smoke
+
+# Headless sanity check for the desktop target: import the project and
+# load + instantiate every scene under res://scenes (desktop-godot/tests/).
+# Runs on anything that can break a scene — Godot scripts/scenes or the
+# shared asset pools they pull from.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'desktop-godot/**'
+      - 'assets/**'
+      - '.github/workflows/godot-smoke.yml'
+  pull_request:
+    paths:
+      - 'desktop-godot/**'
+      - 'assets/**'
+      - '.github/workflows/godot-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: '4.7.2'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot ${{ env.GODOT_VERSION }} (headless editor)
+        run: |
+          set -eux
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          install -Dm755 "Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/.local/bin/godot"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Sanity — Godot version
+        run: godot --version
+
+      - name: Mirror curated assets into res://
+        run: bash desktop-godot/sync-assets.sh
+
+      - name: Scene-load smoke
+        run: bash desktop-godot/tests/smoke.sh

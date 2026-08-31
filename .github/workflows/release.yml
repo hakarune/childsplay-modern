@@ -61,6 +61,11 @@ jobs:
       - name: Sanity — Godot version
         run: godot --version
 
+      - name: Scene-load smoke (don't ship a broken scene)
+        run: |
+          bash desktop-godot/sync-assets.sh
+          bash desktop-godot/tests/smoke.sh
+
       - name: Build .deb (Linux x86_64)
         run: bash desktop-godot/build-deb.sh "${{ steps.ver.outputs.version }}"
 
