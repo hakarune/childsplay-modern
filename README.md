@@ -130,7 +130,7 @@ childsplay-modern/
 ├── tools/                      Content generators (see below)
 │   ├── migrate-assets.sh         Build assets/graphics/pools/ from the legacy dump
 │   ├── migrate-audio.sh          Build assets/audio/{sfx,soundmemory,flashcards}/ from the legacy dump
-│   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg (human → piper → espeak-ng)
+│   ├── gen-voice.sh              Bake spoken lines → assets/audio/voice/*.ogg (human → google/piper → espeak-ng)
 │   ├── gen-electro-data.sh       Rebuild assets/data/electro.json from the art
 │   └── gen-wordlist.py           Rebuild assets/data/wordlist.json
 ├── build-deb.sh                Thin wrapper → desktop-godot/build-deb.sh
@@ -159,7 +159,8 @@ childsplay-modern/
   `assets/audio/voice/v_<slug>.ogg` and ship with both targets, so
   pre-readers get audio help even with **no TTS engine installed**. Clips
   are sourced best-first: an original human recording (the GPL en_GB
-  letters + digits), else **piper** neural TTS, else `espeak-ng`. Each
+  letters + digits), else a synthesiser (`TTS=google` natural / `piper`
+  offline-neural / `espeak-ng` fallback). Each
   game's HUD has a 🔊 button that re-speaks the current prompt; live
   OS/browser TTS is used only as a fallback. Games with named
   pictures (Memory, Find Sound, Electro, Image Changer, Aquarium) have a
@@ -284,23 +285,28 @@ and `wipe.js` / `Wipe.gd`.
 (needs `ffmpeg`). Add strings to the `PHRASES` array and run:
 
 ```sh
-# best voice — install piper once (pipx install piper-tts + a voice
-# model from huggingface.co/rhasspy/piper-voices), then:
+TTS=google tools/gen-voice.sh          # natural voice, no install (needs network)
+# or, best quality, offline:
 PIPER_MODEL=~/.local/share/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
-# no piper installed → falls back to espeak-ng (robotic)
+# no engine chosen and no piper model → espeak-ng (robotic) fallback
 ```
 
 Each clip is sourced **best-first**: an original human recording if
 `HUMAN_SRC` has one (the GPL en_GB letters `a`–`z` and digits `0`–`9`),
-then **piper** neural TTS, then `espeak-ng`. Behaviour flags:
+otherwise a synthesiser chosen by `TTS=`:
 
-- a **piper** run replaces the synthetic clips (that's the point); it
-  never overwrites a human-sourced one.
-- **no piper** → existing clips are kept, only missing/new ones render.
-- `FORCE=1` → re-render everything regardless (needed to swap a *new*
-  human recording into a slug that already has a clip).
-- `NO_HUMAN=1` → ignore `HUMAN_SRC`, synthesise everything for a uniform
-  first pass; add the human clips back selectively later.
+- `TTS=google` — Google Translate TTS. Natural, no install, needs
+  network + `curl`; unofficial endpoint but fine for a one-time bake.
+  `GTTS_LANG` (default `en`) picks `en` / `en-GB` / `en-AU` / …
+- `TTS=piper` — offline neural, best quality (`PIPER_MODEL` / on `PATH`).
+- `TTS=espeak` — offline, robotic, always there.
+- default `auto` = piper if a model is present, else espeak.
+
+A `google` or `piper` run **re-bakes the synthetic clips** (that's why
+you ran it); it never overwrites a human-sourced one. `espeak` only fills
+gaps. `FORCE=1` re-renders everything (needed to swap a *new* human
+recording into a slug that already has a clip). `NO_HUMAN=1` ignores
+`HUMAN_SRC` for a fully uniform pass.
 
 Commit the regenerated `.ogg`s and re-run both
 `sync-assets.sh`.
@@ -496,7 +502,9 @@ activity is playable with a pointer or a touchscreen.
 All art and audio under `assets/` is derived from the original Childsplay
 project and is licensed under the **GPL-3.0**, same as the original code
 (`legacy-sources/childsplay-legacy/COPYING`). The baked voice clips in
-`assets/audio/voice/` are generated locally with `espeak-ng`. Upstream:
+`assets/audio/voice/` are the GPL en_GB letter/digit recordings plus
+short lines synthesised by `tools/gen-voice.sh` (currently Google
+Translate TTS; swappable for piper). Upstream:
 <https://codeberg.org/childsplay/childsplay>.
 
 To refresh the upstream checkout used for extraction:

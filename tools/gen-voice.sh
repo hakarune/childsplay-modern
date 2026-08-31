@@ -9,18 +9,24 @@
 # At runtime the baked clip plays first; live TTS and then silence are the
 # fallbacks.
 #
-# Source for each clip, best first:
-#   1. an original human recording, if we have one  (HUMAN_SRC map below)
-#   2. piper  — offline neural TTS, natural voice   (set PIPER_MODEL / PATH)
-#   3. espeak-ng  — robotic last resort so the script always runs
+# Per clip, best first:
+#   1. an original human recording, if we have one   (HUMAN_SRC map below)
+#   2. a synthesiser, chosen with  TTS=<engine>  (default: auto):
+#        piper   — offline neural, best quality      (set PIPER_MODEL / PATH)
+#        google  — Google Translate TTS, natural, needs network + curl.
+#                  Unofficial endpoint; fine for a one-time bake of short
+#                  lines. GTTS_LANG (default en) picks en / en-GB / en-AU / …
+#        espeak  — offline, robotic, always available last resort
+#      auto = piper if a model is present, else espeak.
 #
-# Re-run whenever a spoken string changes; commit the .ogg files. To get
-# the good synthetic voice, install piper + a voice model and re-run:
-#   pipx install piper-tts       # or: pip install piper-tts
-#   mkdir -p ~/.local/share/piper && cd ~/.local/share/piper
-#   # download <voice>.onnx + <voice>.onnx.json from
-#   #   https://huggingface.co/rhasspy/piper-voices  (e.g. en_US-lessac-medium)
-#   PIPER_MODEL=~/.local/share/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
+# A piper or google run re-bakes the synthetic clips (that is the point);
+# espeak keeps whatever already exists unless FORCE=1. Human-sourced clips
+# are never overwritten by a synthesiser — use FORCE=1 to swap a new one
+# in. Re-run whenever a spoken string changes; commit the .ogg files, then
+# re-run both sync-assets.sh.
+#
+#   TTS=google tools/gen-voice.sh            # natural voice, no install
+#   PIPER_MODEL=~/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,15 +37,22 @@ mkdir -p "$OUT"
 command -v ffmpeg >/dev/null || { echo "need ffmpeg"; exit 1; }
 
 PIPER_MODEL="${PIPER_MODEL:-$HOME/.local/share/piper/en_US-lessac-medium.onnx}"
+GTTS_LANG="${GTTS_LANG:-en}"
 have_piper() { command -v piper >/dev/null 2>&1 && [ -f "$PIPER_MODEL" ]; }
 
-if have_piper; then
-  ENGINE="piper ($(basename "$PIPER_MODEL" .onnx))"
-elif command -v espeak-ng >/dev/null 2>&1; then
-  ENGINE="espeak-ng (robotic — install piper for a natural voice)"
-else
-  echo "need piper (+ PIPER_MODEL) or espeak-ng"; exit 1
-fi
+TTS="${TTS:-auto}"
+[ "$TTS" = auto ] && { have_piper && TTS=piper || TTS=espeak; }
+case "$TTS" in
+  piper)  have_piper || { echo "TTS=piper but no piper binary / PIPER_MODEL"; exit 1; }
+          ENGINE="piper ($(basename "$PIPER_MODEL" .onnx))" ;;
+  google) command -v curl >/dev/null || { echo "TTS=google needs curl"; exit 1; }
+          ENGINE="Google Translate TTS (tl=$GTTS_LANG)" ;;
+  espeak) command -v espeak-ng >/dev/null || { echo "TTS=espeak needs espeak-ng"; exit 1; }
+          ENGINE="espeak-ng (robotic — try TTS=google or TTS=piper)" ;;
+  *) echo "TTS must be one of: auto piper google espeak"; exit 1 ;;
+esac
+# a deliberate quality engine re-bakes synthetic clips; espeak only fills gaps
+REBAKE_SYNTH=0; [ "$TTS" != espeak ] && REBAKE_SYNTH=1
 
 # slug: lowercase, drop everything but a-z 0-9, collapse to single dashes,
 # trim, cap length. MUST match tts.js `slug()` and GameContext.gd `_slug()`.
@@ -68,13 +81,24 @@ encode() {  # $1 = input audio  ->  $2 = v_<slug>.ogg
   ffmpeg -y -loglevel error -i "$1" -ac 1 -ar 22050 -c:a libvorbis -q:a 4 "$2"
 }
 
-synth() {   # $1 = text  ->  $2 = wav
-  if have_piper; then
-    printf '%s\n' "$1" | piper --model "$PIPER_MODEL" --output_file "$2" >/dev/null 2>&1
-  else
-    # slower, a touch higher, small word gap — friendlier for young ears
-    espeak-ng -v en-us -s 150 -p 55 -g 4 -w "$2" "$1"
-  fi
+synth() {   # $1 = text  ->  $2 = audio file (encode() re-encodes to ogg)
+  case "$TTS" in
+    piper)
+      printf '%s\n' "$1" | piper --model "$PIPER_MODEL" --output_file "$2" >/dev/null 2>&1 ;;
+    google)
+      local i
+      for i in 1 2 3; do
+        curl -sS -f -A 'Mozilla/5.0' -G 'https://translate.google.com/translate_tts' \
+          --data-urlencode 'ie=UTF-8' --data-urlencode 'client=tw-ob' \
+          --data-urlencode "tl=$GTTS_LANG" --data-urlencode "q=$1" \
+          -o "$2" && return 0
+        sleep 3
+      done
+      echo "  !! google TTS failed: $1" >&2; return 1 ;;
+    espeak)
+      # slower, a touch higher, small word gap — friendlier for young ears
+      espeak-ng -v en-us -s 150 -p 55 -g 4 -w "$2" "$1" ;;
+  esac
 }
 
 say_line() {
@@ -84,14 +108,14 @@ say_line() {
   human="${HUMAN_SRC[$sl]:-}"
   [ -f "$OUT/v_$sl.ogg" ] && exists=1 || exists=0
 
-  # Keep an existing clip unless FORCE=1, EXCEPT: a piper run replaces the
-  # synthetic (espeak/older-piper) clips — that's the point of installing
-  # piper. Human-sourced clips are never overwritten by synthesis; to swap
-  # a NEW human recording in, add its HUMAN_SRC entry and run with FORCE=1.
-  # libvorbis is not reproducible, so re-encoding an unchanged source only
-  # churns bytes — hence the keep.
+  # Keep an existing clip unless FORCE=1, EXCEPT: a deliberate quality
+  # engine (TTS=piper|google) replaces the synthetic clips — that's why
+  # you ran it. Human-sourced clips are never overwritten by a
+  # synthesiser; to swap a NEW human recording in, add its HUMAN_SRC entry
+  # and run with FORCE=1. (libvorbis is not reproducible, so re-encoding
+  # an unchanged source only churns bytes — hence the keep.)
   if [ "$exists" = 1 ] && [ "${FORCE:-0}" != "1" ]; then
-    if [ -n "$human" ] || ! have_piper; then
+    if [ -n "$human" ] || [ "$REBAKE_SYNTH" = 0 ]; then
       printf '  %-40s v_%s.ogg   (kept)\n' "$text" "$sl"
       return 0
     fi
@@ -159,5 +183,9 @@ PHRASES=(
 )
 
 echo "rendering ${#PHRASES[@]} phrases with $ENGINE -> $OUT"
-for p in "${PHRASES[@]}"; do say_line "$p"; done
+for p in "${PHRASES[@]}"; do
+  say_line "$p"
+  # be gentle on the unofficial Google endpoint
+  [ "$TTS" = google ] && sleep 0.6
+done
 echo "voice pack: $(find "$OUT" -name '*.ogg' | wc -l) files, $(du -sh "$OUT" | cut -f1)"

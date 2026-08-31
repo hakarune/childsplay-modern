@@ -54,7 +54,7 @@ assets/graphics/
   sprites/<game>/  DENSE single-game sprite/frame sets only (packid tiles, billiards balls, fish swim frames)
 assets/audio/
   sfx/          flat effect clips, referenced by bare filename
-  voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh: human → piper → espeak-ng)
+  voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh: human → google/piper → espeak-ng)
   soundmemory/  shared Find Sound / Sound Memory clip set, <id>.ogg
   flashcards/   recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
   (no music/ — win stingers live in sfx/ and play on the Music bus)
@@ -439,7 +439,7 @@ Result: animal sounds / BGM keep playing on the menu after you quit.
 >   `GameContext.speak()` / `tts.js say()`.
 > - Adding a language **is** adding its recordings (+ a `LANGS` entry).
 >   Missing clips fall back to TTS in that language, then silence.
-> - The baked English pack is sourced human → piper → espeak-ng.
+> - The baked English pack is sourced human → google/piper → espeak-ng.
 
 ### E.5 Audio buses / mute
 

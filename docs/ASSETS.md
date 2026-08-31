@@ -73,7 +73,7 @@ purpose-named subset the games actually load, produced by:
 | --- | --- | --- |
 | `tools/migrate-assets.sh` | `graphics/pools/**` | `graphics/lib/CPData/**` + `graphics/lib/SPData/themes/**` |
 | `tools/migrate-audio.sh` | `audio/sfx/`, `audio/soundmemory/`, `audio/flashcards/**` | `audio/lib/CPData/**` + `audio/alphabet-sounds/**` |
-| `tools/gen-voice.sh` | `audio/voice/**` | per phrase, best-first: a human recording (`HUMAN_SRC` — the GPL en_GB `a`–`z` / `0`–`9`), then **piper** neural TTS, then `espeak-ng` |
+| `tools/gen-voice.sh` | `audio/voice/**` | per phrase, best-first: a human recording (`HUMAN_SRC` — the GPL en_GB `a`–`z` / `0`–`9`), else a synthesiser picked by `TTS=` (`google` \| `piper` \| `espeak`) |
 
 Each `migrate-*` script keeps its mapping table inline so it is
 reviewable. **To add or change an asset**: either drop a correctly-named
@@ -194,11 +194,10 @@ works.
 
 ## Known debt
 
-- **The synthetic `voice/` phrase clips are still `espeak-ng`.** The
-  build host (termux/Python 3.14) can't install piper, so `gen-voice.sh`
-  fell back. Re-run it on any machine with piper + a voice model to
-  upgrade every non-human clip in one pass — the letters/digits are
-  already the human en_GB recordings and won't change.
+- **The synthetic `voice/` phrase clips are Google Translate TTS.**
+  Natural enough, but an unofficial endpoint. For a fully offline,
+  reproducible pack run `TTS=piper tools/gen-voice.sh` on a machine with
+  piper + a voice model — the human letters/digits won't change.
 - **`assets/audio/alphabet-sounds/` is ~24 MB** but only the 48 clips in
   `flashcards/` + the 36 en_GB letters/digits (now folded into `voice/`)
   are used. The rest is kept purely as provenance. It could be dropped

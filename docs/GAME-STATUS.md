@@ -297,28 +297,29 @@ Verified: `godot --headless` import pass clean; headless scene-load of all
 `migrate-*.sh` run clean; every `sfx/*` path referenced in web JS resolves.
 Still not visually QA'd on a real device / browser._
 
-2026-08-31 (voice pack — better source chain):
-- **`gen-voice.sh` rewritten** — each `v_<slug>.ogg` is now sourced
-  best-first: an original **human recording** (`HUMAN_SRC` map), then
-  **piper** neural TTS (`PIPER_MODEL` / on `PATH`), then `espeak-ng` as a
-  last resort. On the espeak path an existing clip is kept (no churn)
-  unless `FORCE=1`; piper always re-bakes.
-- **en_GB letters + digits folded in** — the GPL human recordings under
-  `alphabet-sounds/alphabet-sounds_en_GB/AlphabetSounds/` (`a`–`z`,
-  `0`–`9`, 36 clips) are now `voice/v_a.ogg` … `v_z.ogg` / `v_0.ogg` …
-  `v_9.ogg`, re-encoded to the pack's 22 kHz mono. So `say("a")` /
-  `say("3")` get a real voice, and the original clips aren't lost.
-- **Flashcards English routing** (from the earlier fix) means those baked
-  clips are now actually reached: baked `v_<word>.ogg` → live TTS →
-  silence.
-- Design-Policy **§E.4 marked SUPERSEDED** — "TTS baseline, packs
-  optional" is reversed; every phrase needs a baked `.ogg` and it plays
-  first.
-- Voice pack 70 → 106 files (~1.2 MB). Both `sync-assets.sh` re-run.
-- **Open:** the ~70 synthetic phrase clips are still `espeak-ng` — the
-  build host can't install piper. Re-run `gen-voice.sh` with piper on a
-  capable machine to upgrade them in one pass.
+2026-08-31 (voice pack — natural voices):
+- **`gen-voice.sh` rewritten** — each `v_<slug>.ogg` is sourced
+  best-first: an original **human recording** (`HUMAN_SRC` map), else a
+  synthesiser picked by `TTS=`: **google** (Google Translate TTS —
+  natural, no install, needs network), **piper** (offline neural), or
+  **espeak** (robotic fallback). A google/piper run re-bakes the
+  synthetic clips; espeak only fills gaps. `FORCE=1` / `NO_HUMAN=1`
+  modifiers. Re-runs are idempotent (was churning bytes via non-repro
+  libvorbis).
+- **All ~70 synthetic phrase clips re-baked with Google TTS** — the
+  espeak "robot voice" is gone. The 36 human en_GB letter/digit clips
+  (`v_a`…`v_z`, `v_0`…`v_9`) are kept untouched.
+- **en_GB letters + digits folded in** earlier this day — GPL human
+  recordings, re-encoded to the pack's 22 kHz mono, so `say("a")` /
+  `say("3")` get a real voice.
+- **Flashcards English routing** fix means the baked `v_<word>.ogg` is
+  actually reached now: baked clip → live TTS → silence.
+- Design-Policy **§E.4 marked SUPERSEDED** — every phrase needs a baked
+  `.ogg` and it plays first.
+- Voice pack 106 files (~1.2 MB). Both `sync-assets.sh` re-run.
+- For a fully offline / reproducible pack: `TTS=piper tools/gen-voice.sh`
+  on a machine with piper + a voice model.
 
-Verified: `gen-voice.sh` runs clean (36 human clips added, 0 phrase clips
-re-churned); both `sync-assets.sh` re-run clean; web + Godot voice dirs
-both 106 files._
+Verified: all 106 clips valid audio; exactly the 70 synthetic clips
+changed (0 human); `godot --headless` import + boot clean (211 audio
+indexed); both `sync-assets.sh` clean; web + Godot voice dirs both 106._
