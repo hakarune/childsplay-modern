@@ -35,7 +35,7 @@ var _cell := 90.0
 var _bx := 0.0
 var _by := 0.0
 var _r := 36.0
-var _mode_btn: Button
+var _mode_overlay: Control
 
 @onready var _info_label: Label = %InfoLabel
 @onready var _back_button: Button = %BackButton
@@ -62,18 +62,10 @@ func _ready() -> void:
 	_popup.visible = false
 
 	_two_p = _load_two_p()
-	_mode_btn = Button.new()
-	_mode_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_mode_btn.offset_left = -196.0
-	_mode_btn.offset_top = 12.0
-	_mode_btn.offset_right = -16.0
-	_mode_btn.custom_minimum_size = Vector2(180, 40)
-	_mode_btn.focus_mode = Control.FOCUS_ALL
-	_mode_btn.pressed.connect(_toggle_two_p)
-	add_child(_mode_btn)
-	_sync_mode_btn()
+	_build_mode_overlay()
 
 	_start_level(0)
+	_mode_overlay.visible = true   # ask 1P / 2P up front, before the first move (§K)
 
 
 func _load_two_p() -> bool:
@@ -83,22 +75,47 @@ func _load_two_p() -> bool:
 	return false
 
 
-func _toggle_two_p() -> void:
-	if _moves > 0:
-		return
-	_two_p = not _two_p
+func _build_mode_overlay() -> void:
+	_mode_overlay = ColorRect.new()
+	_mode_overlay.color = Color(0, 0, 0, 0.55)
+	_mode_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_mode_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_mode_overlay.add_child(center)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 24)
+	center.add_child(box)
+	var lbl := Label.new()
+	lbl.text = "Who is playing?"
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 32)
+	box.add_child(lbl)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 20)
+	box.add_child(row)
+	for spec in [["1 Player", false], ["2 Players", true]]:
+		var b := Button.new()
+		b.text = spec[0]
+		b.custom_minimum_size = Vector2(200, 64)
+		b.focus_mode = Control.FOCUS_ALL
+		var duo: bool = spec[1]
+		b.pressed.connect(func() -> void: _choose_mode(duo))
+		row.add_child(b)
+	add_child(_mode_overlay)
+	_mode_overlay.visible = false
+
+
+func _choose_mode(two_p: bool) -> void:
+	_two_p = two_p
 	var cfg := ConfigFile.new()
 	cfg.load(SETTINGS_PATH)
 	cfg.set_value("fourrow", "two_p", _two_p)
 	cfg.save(SETTINGS_PATH)
+	_mode_overlay.visible = false
 	_start_level(_level)
-
-
-func _sync_mode_btn() -> void:
-	if _mode_btn == null:
-		return
-	_mode_btn.text = "2 Players" if _two_p else "1 Player"
-	_mode_btn.visible = _moves == 0 and not _over   # only choosable before move 1
 
 
 func _start_level(n: int) -> void:
@@ -116,7 +133,6 @@ func _start_level(n: int) -> void:
 	_hover_col = -1
 	_moves = 0
 	_popup.visible = false
-	_sync_mode_btn()
 	_geo()
 	_update_hud()
 
@@ -160,7 +176,6 @@ func _process(delta: float) -> void:
 			_grid[_drop["row"]][_drop["col"]] = who
 			_drop = null
 			_moves += 1
-			_sync_mode_btn()
 			_play(_sfx_drop)
 			var line = _four(who)
 			if line != null:
@@ -264,7 +279,7 @@ func _end(who: int, line) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if _popup.visible:
+	if _popup.visible or _mode_overlay.visible:
 		return
 	if event is InputEventMouseMotion:
 		_hover_col = int(floor((event.position.x - _bx) / _cell))
