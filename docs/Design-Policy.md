@@ -55,7 +55,7 @@ assets/graphics/
 assets/audio/
   sfx/          flat effect clips, referenced by bare filename
   voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh: human → google/piper → espeak-ng)
-  soundmemory/  shared Find Sound / Sound Memory clip set, <id>.ogg
+  soundmemory/  shared Find the sound / Sound Memory clip set, <id>.ogg
   flashcards/   recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
   (no music/ — win stingers live in sfx/ and play on the Music bus)
 assets/data/       content files — see §J
@@ -152,8 +152,8 @@ lists the pools).
 
 ### B.1 Rules
 
-- **B.1.1** Any game that shows "a picture" (Puzzle, Wipe, Photo Album,
-  Find It, quiz-picture, …) MUST draw it from a **shared pool** filtered by
+- **B.1.1** Any game that shows "a picture" (Puzzles, Picture Wipe, Photo Album,
+  Picture Find, quiz-picture, …) MUST draw it from a **shared pool** filtered by
   the level's difficulty tier — **never** a hard-coded per-level filename.
 - **B.1.2** Selection is **random** within the eligible set.
 - **B.1.3** Selection has **session no-repeat memory**: a picture is not
@@ -202,9 +202,9 @@ return result
 
 ### B.4 Concrete retargets
 
-- **Puzzle**: `LEVELS[i].img` → `backgrounds` pool, tier by level. Levels 1–3
-  `easy`, 4–6 `med`, 7–10 `hard` (see §H — Puzzle also needs more levels).
-- **Wipe**: same `backgrounds` pool, **shared with Puzzle** (a session
+- **Puzzles**: `LEVELS[i].img` → `backgrounds` pool, tier by level. Levels 1–3
+  `easy`, 4–6 `med`, 7–10 `hard` (see §H — Puzzles also needs more levels).
+- **Picture Wipe**: same `backgrounds` pool, **shared with Puzzles** (a session
   playing both should not see the same painting twice). Both call the same
   `Bag('backgrounds:'+tier)` — so make the poolKey `backgrounds:<tier>`
   (no `gameId` prefix) for this shared pool specifically.
@@ -415,7 +415,7 @@ Result: animal sounds / BGM keep playing on the menu after you quit.
 - A game with named entities MAY expose a persisted **"say the names"** toggle:
   - **off** — sound effect only (age 2–3).
   - **on** — also `speak(name)` on interaction (age 3+).
-- Applies to: Aquarium (fish/shark species), Find Sound, Flashcards, Electro,
+- Applies to: Aquarium (fish/shark species), Find the sound, Flashcards, ImageLink,
   Memory (pictures). Toggle lives on the game's start screen or a small
   in-HUD control; default **off**.
 
@@ -491,7 +491,7 @@ one master mute; web has none — add it, §F).
 - **F.3.3** Portrait: expect 2–3 columns and 2+ pages. That's fine.
 - **F.3.4** **Bundle families behind one tile** (the Memory sub-menu pattern)
   to cut tile count: Memory (already), and — when they land — a single
-  **Quiz** tile opening a deck picker. Consider grouping the two-player-
+  **Quizzes** tile opening a deck picker. Consider grouping the two-player-
   capable board games or the word games similarly if the grid stays crowded.
 
 ### F.4 Menu chrome
@@ -530,8 +530,8 @@ one master mute; web has none — add it, §F).
 | centre | centred | **exactly one** instruction line + the 🔊 button (§E.2) right of it |
 | right | → VIEW_W−24 | lives / status / timer (`● ● ○`, `your turn`) |
 
-- **G.2.1** A game MUST NOT draw a **second** text line in the band. Numbers
-  currently prints a "study / peek / tap number N" line **and** the
+- **G.2.1** A game MUST NOT draw a **second** text line in the band. Remember the
+  Number currently prints a "study / peek / tap number N" line **and** the
   level/score line — fold the state hint into the single centre line.
 - **G.2.2** The centre instruction is the string §E.2 speaks.
 - **G.2.3** HUD text vs the HUD background MUST pass §D.4.1 (4.5:1).
@@ -574,7 +574,7 @@ Document both in each game's header comment so nobody draws a score at `y=10`.
 - **H.1.3 House style — no punishing failure.** No lives-to-zero game-over
   that ejects the player. Allowed patterns: infinite retry (Simon), lose a
   life then **replay the same level** (Block Breaker's "lost the wall"),
-  wrong answer costs **time/hint** not progress (Numbers' peek). A level ends
+  wrong answer costs **time/hint** not progress (Remember the Number's peek). A level ends
   only by success or the player choosing Menu.
 - **H.1.4** `LEVELS` maps to difficulty tiers for §B (default: even thirds
   easy/med/hard; state the exact rows).
@@ -583,10 +583,10 @@ Document both in each game's header comment so nobody draws a score at `y=10`.
 
 | Game | Change |
 | --- | --- |
-| **Wipe** | Expand to **10–12 levels**; `target` ramps ~`0.65 → 0.99` roughly linear; `sponge` `54 → 26`. Current 6 levels at 0.55–0.84 are too easy and too few. |
+| **Picture Wipe** | Expand to **10–12 levels**; `target` ramps ~`0.65 → 0.99` roughly linear; `sponge` `54 → 26`. Current 6 levels at 0.55–0.84 are too easy and too few. |
 | **Simon** | Expand to **8–10 levels** (sequence length 2 → 11). |
-| **Falling Letter** | Add a real `LEVELS` table (≥ 6 tiers: `spawnInterval`, `fallSpeed`, `lives`). Keep the small score-based ramp **within** a tier. Starting speed on level 1 MUST be gentle enough for a 4-year-old on a phone. |
-| **Puzzle** | Add levels (target ~10) so §B has room: 1–3 grid/`easy`, 4–7 free-cut/`med`, 8–10 free-cut many-piece/`hard`, images from the shared `backgrounds` pool. |
+| **Falling Letters** | Add a real `LEVELS` table (≥ 6 tiers: `spawnInterval`, `fallSpeed`, `lives`). Keep the small score-based ramp **within** a tier. Starting speed on level 1 MUST be gentle enough for a 4-year-old on a phone. |
+| **Puzzles** | Add levels (target ~10) so §B has room: 1–3 grid/`easy`, 4–7 free-cut/`med`, 8–10 free-cut many-piece/`hard`, images from the shared `backgrounds` pool. |
 
 > **Play-test findings addressed:** "Falling letter has no levels and falls
 > too fast after a few letters on a phone"; "Wipe goal percentages too low —
@@ -615,12 +615,12 @@ Document both in each game's header comment so nobody draws a score at `y=10`.
   `SNAP_TOL ≈ 60`** world units. Do not require landing on the pixel.
 - **I.2.3** Draw a **fat halo / highlight** under the finger and on the
   nearest snap candidate while dragging.
-- **Electro** violates all three (`NODE_R = 13`, hit ≈ 29, no snap). Fix:
+- **ImageLink** violates all three (`NODE_R = 13`, hit ≈ 29, no snap). Fix:
   hit radius ≥ 44, snap-to-nearest, halo.
 
 ### I.3 Text entry — dual keyboard (normative)
 
-Any game needing letters (**Falling Letter**, **Word Maker**, future
+Any game needing letters (**Falling Letters**, **StartsWith**, future
 spellers):
 
 - **I.3.1 On a touch device**, the **primary** input is the **OS keyboard**:
@@ -675,7 +675,7 @@ frog    | animals/frog_1
 dog     | animals/dog | Puppy | animals/puppy      # asymmetric pair
 ```
 
-`assets/data/words-en.txt` — one word per line (Word Maker).
+`assets/data/words-en.txt` — one word per line (StartsWith).
 `assets/data/wordmaker.txt` — `letter | target` per line.
 `assets/data/quiz-animals.json` — `[{ q, img, choices:[…], answer }]`.
 
@@ -691,7 +691,7 @@ for `.txt`, parsed object for `.json`). Games call it in `enter()`.
 
 ## §K — Local multiplayer
 
-- **K.1** Turn-based games — **Four in a Row**, **Tic Tac Toe** (and
+- **K.1** Turn-based games — **Connect Four**, **Tic-Tac-Toe** (and
   optionally Memory / Sound Memory) — SHOULD offer **local "Pass & Play"
   2-player**. (Pong is real-time and already effectively 2-player-capable via
   a second paddle — that's a separate toggle, not this one.)
@@ -733,7 +733,7 @@ game has a `docs/assets/<id>.assets.md` (§A.7).
 "say the names" pill, both targets; util.js `makeNameToggle` /
 GameContext `name_toggle_*` + `draw_name_pill`).
 
-~~findsound §J~~ — superseded: a Find Sound level is now a **graphics pool
+~~findsound §J~~ — superseded: a Find the sound level is now a **graphics pool
 folder** (`animals` / `vehicles` / `instruments` / `sounds`); its cards are
 the pictures in that pool that have a matching `soundmemory/<stem>.ogg`.
 No data file, no label map (stems are clean words). Adding a picture +
@@ -765,7 +765,7 @@ outstanding — every game verified headless (parse + load), not eyeballed.
 | **wipe** | **H** (10–12 levels, target 0.65→0.99, sponge 54→26), **B** (shared `backgrounds` pool with Puzzle, no-repeat), D, E, G, A/C |
 | **ichanger** | **B** (animal pool + no-repeat), D, E (stop + TTS + spoken-labels), G, H (has 4 levels×3 rounds — bump to ≥5 levels or document as compliant) |
 | **numbers** | **G** (fold the study/peek hint into the single centre line — overlap bug), D, E (stop + TTS), H (has 6 — ok) |
-| **synonyms** (Word Maker) | **I.3** (OS keyboard primary on touch), **J** (`words-en.txt` + `wordmaker.txt`), D, E (stop + TTS), G, H (5 → ≥5 ok, verify ramp) |
+| **synonyms** (StartsWith) | **I.3** (OS keyboard primary on touch), **J** (`words-en.txt` + `wordmaker.txt`), D, E (stop + TTS), G, H (5 → ≥5 ok, verify ramp) |
 | **packid** | D, E (stop + TTS), G (`HUD_H` rename from `HUD_H=64` — already 64, just the name), A/C (`sprites/packid/`) |
 | **billiards** | D, E (stop + TTS), G, A/C (`sprites/billiards/`). (Play-tested clean otherwise.) |
 
