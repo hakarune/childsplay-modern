@@ -73,7 +73,7 @@ export class QuizMenu extends Scene {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = theme.text;
     ctx.font = '700 56px system-ui, sans-serif';
-    ctx.fillText('Quiz', VIEW_W / 2, TITLE_H / 2 - 4);
+    ctx.fillText('Quizzes', VIEW_W / 2, TITLE_H / 2 - 4);
     ctx.fillStyle = theme.text_muted;
     ctx.font = '400 24px system-ui, sans-serif';
     ctx.fillText('pick a quiz', VIEW_W / 2, TITLE_H / 2 + 40);

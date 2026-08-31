@@ -47,7 +47,13 @@ this file).
 
 ### Menu structure
 
-The main dashboard has **20 tiles**: Memory, Falling Letter, Find Sound, Puzzle, Find It, Aquarium, Pong, Four in a Row, Flashcards, Block Breaker, Simon, Electro, Tic Tac Toe, Wipe, Image Changer, Numbers, Word Maker, Packid, Billiards, Quiz.
+The main dashboard has **20 tiles** (internal id in parentheses where it
+differs): Memory, Falling Letters, Find the sound (`findsound`), Puzzles
+(`puzzle`), Picture Find (`findit`), Aquarium, Pong, Connect Four
+(`fourrow`), Flashcards, Block Breaker, Simon, ImageLink (`electro`),
+Tic-Tac-Toe, Picture Wipe (`wipe`), What changed (`ichanger`), Remember
+the Number (`numbers`), StartsWith (`synonyms`), PacKid, Billiards,
+Quizzes (`quiz`).
 The **Quiz** tile opens a deck picker (`quiz-menu.js` / `QuizMenu.tscn`)
 routing to the shared engine (`quiz.js` / `Quiz.tscn`) with a `deck` id.
 The **Memory** tile opens a sub-menu (`MemoryMenu.tscn` / `memory-menu.js`)

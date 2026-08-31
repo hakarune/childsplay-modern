@@ -134,7 +134,7 @@ function launchFromMemory(id, opts) {
 }
 
 function openQuizMenu() {
-  title.textContent = 'Quiz';
+  title.textContent = 'Quizzes';
   backHandler = toMainMenu;
   setHud(true);
   game.setState('QuizMenu');
