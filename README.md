@@ -323,10 +323,12 @@ are the curated pools the games actually reference. They are built from the
 legacy dumps by **`tools/migrate-assets.sh`** and **`tools/migrate-audio.sh`**
 (see [`docs/ASSETS.md`](docs/ASSETS.md) for the whole picture and
 `docs/Design-Policy.md` §A for the naming rules). To add or swap an asset,
-either drop a correctly-named file straight into a pool folder, or edit the
-relevant `migrate-*.sh` mapping table and re-run it. The legacy trees
-(`graphics/lib/`, `audio/lib/`, `audio/alphabet-sounds/`) stay in the repo
-for provenance but are **not** synced to either target.
+edit the relevant `migrate-*.sh` mapping table, **or** — since a re-run
+wipes and rebuilds the pools — drop a hand-made file into
+`assets/graphics/custom/<pool>/<file>` (mirrors `pools/` exactly). Those
+are copied over the top on every `migrate-assets.sh` run, so they survive.
+The legacy trees (`graphics/lib/`, `audio/lib/`, `audio/alphabet-sounds/`)
+stay in the repo for provenance but are **not** synced to either target.
 
 ### After editing anything under `assets/`
 

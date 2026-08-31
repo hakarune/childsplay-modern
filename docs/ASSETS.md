@@ -49,6 +49,8 @@ assets/
       icons/            one <game-id>.png per menu tile
       sprites/<game>/   dense single-game frame sets: packid, billiards, aquarium
     themes/<style>/     optional alternate-art overlay (Design Policy §C.4)
+    custom/<pool>/     hand-made art copied over the rebuilt pools every
+                       migrate-assets.sh run (e.g. custom/ui/card_back.png)
     lib/               legacy CPData dump — PROVENANCE ONLY, not synced
     activity_dev/      scratch art for WIP activities — not synced
 

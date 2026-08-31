@@ -63,10 +63,13 @@ for f in "$AN_SRC"/[0-9]*_*.png; do
 done
 
 # ...then override every animal that also appears in the Find Sound set with
-# that (much better) art — dedupes the two picture sets into one.
+# that (much better) art — dedupes the two picture sets into one. bird /
+# duck / frogs are animals too (they go in the "Animals" Find Sound level,
+# not "Noises").
 FS_IMG="$LIB/FindsoundData/Images"
-for a in cat cow dog elephant frog horse lion rooster sheep chicken; do
-  src="chiken"; [ "$a" != chicken ] && src="$a"
+for a in cat cow dog elephant frog horse lion rooster sheep chicken bird duck frogs; do
+  src="$a"
+  case "$a" in chicken) src=chiken;; duck) src=duck2;; esac
   f="$(find "$FS_IMG" -name "$src.png" -print -quit 2>/dev/null || true)"
   [ -n "$f" ] && cp "$f" "$POOL/animals/$a.png"
 done
@@ -86,7 +89,7 @@ declare -A FS_POOL=(
   [boat]=vehicles [car]=vehicles [plane]=vehicles [police]=vehicles [rocket]=vehicles [carhorn]=vehicles
   [drum]=instruments [flute]=instruments [guitar]=instruments [harp]=instruments [piano]=instruments [violin]=instruments
   [banjo]=instruments [cello]=instruments [chimes]=instruments [clarinette]=instruments [didjeridu]=instruments [shenai]=instruments
-  [alarm]=sounds [bird]=sounds [bubbles]=sounds [clang]=sounds [foghorn]=sounds [hey]=sounds [zap]=sounds [frogs]=sounds [duck2]=sounds
+  [alarm]=sounds [bubbles]=sounds [clang]=sounds [foghorn]=sounds [hey]=sounds [zap]=sounds
 )
 for f in "$FS_IMG/"level*/*.png; do
   [ -f "$f" ] || continue
@@ -151,6 +154,17 @@ for id in "${!ICONMAP[@]}"; do
   src="$SP/${ICONMAP[$id]}"
   [ -f "$src" ] && cp "$src" "$POOL/icons/$id.png"
 done
+
+# --- hand-made overrides ----------------------------------------------
+# assets/graphics/custom/<pool>/<file> is copied over the top of whatever
+# the legacy dump produced above — drop a file here (e.g.
+# custom/ui/card_back.png) to swap pool art and have it survive every
+# re-run. The tree mirrors pools/ exactly.
+CUSTOM="$HERE/../assets/graphics/custom"
+if [ -d "$CUSTOM" ]; then
+  cp -R "$CUSTOM/." "$POOL/"
+  echo "  custom overrides: $(find "$CUSTOM" -type f | wc -l) files"
+fi
 
 echo "pools built:"
 for d in backgrounds animals vehicles instruments sounds ui icons sprites/packid sprites/billiards sprites/aquarium; do
