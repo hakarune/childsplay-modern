@@ -362,4 +362,13 @@ indexed); web + Godot voice dirs both 118._
   `AssetLoader.list_pool` + `stem_tier` (Godot); `GameContext.draw_tiered`
   lost its `tier_of` Dict param. The aquarium tank photos are now in play
   for all three games (untagged → every tier). Adding a background = drop
-  a correctly-named file, re-run migrate + sync; no code/JSON edit._
+  a correctly-named file, re-run migrate + sync; no code/JSON edit.
+- **Stage 3 — Aquarium fish naming.** Sprite stem is now the fish name
+  (`sprites/aquarium/manta-ray_0.png`); the roster is a runtime scan of
+  the sprite pool, the spoken/label name is the stem (`-` → ` `), and
+  `gen-voice.sh` bakes `v_<name>.ogg` from that same file list — full
+  auto-pairing. The hard-coded `SPECIES` map shrank to an optional
+  `TUNING` size/rarity table on both targets. **The Godot Aquarium now
+  speaks fish names** (it never did) — `GameContext.speak` on poke + a
+  §E.3 "say the names" toggle, matching web. Adding a fish = drop
+  `<name>_0.png` / `<name>_1.png`, re-run migrate + gen-voice + sync._

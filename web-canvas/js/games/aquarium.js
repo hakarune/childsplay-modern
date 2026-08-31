@@ -2,8 +2,8 @@
 // poke one to hear a bubble + see its name, or tap the water to drop food
 // the nearby fish swim over to.
 
-import { Scene, VIEW_W, VIEW_H, img, loadImage, playSound, playLoop } from '../engine.js';
-import { rand, clamp, shuffle } from '../util.js';
+import { Scene, VIEW_W, VIEW_H, img, loadImage, loadManifest, playSound, playLoop } from '../engine.js';
+import { rand, clamp, shuffle, poolKeys } from '../util.js';
 import { theme } from '../theme.js';
 import { speak, hasVoice } from '../tts.js';
 
@@ -12,24 +12,30 @@ const KEY_NAMES = 'cp:aquarium:names';
 const TANKS = ['backgrounds/aquarium_1', 'backgrounds/aquarium_2', 'backgrounds/aquarium_3', 'backgrounds/aquarium_4', 'backgrounds/aquarium_5', 'backgrounds/aquarium_6'];
 const BUBBLE = 'ui/bubble';
 
-const SPECIES = [
-  { id: 'shark1', name: 'shark', base: 0.9, rare: true },
-  { id: 'manta', name: 'manta ray', base: 0.8, rare: true },
-  { id: 'eel', name: 'eel', base: 0.9 },
-  { id: 'discus2', name: 'discus', base: 1.0 },
-  { id: 'QueenAngel', name: 'angelfish', base: 1.2 },
-  { id: 'butfish', name: 'butterfly fish', base: 1.1 },
-  { id: 'blueking2', name: 'blue tang', base: 1.0 },
-  { id: 'collaris', name: 'tang', base: 1.3 },
-  { id: 'six_barred', name: 'wrasse', base: 1.2 },
-  { id: 'cichlid1', name: 'cichlid', base: 1.3 },
-  { id: 'newf1', name: 'goldfish', base: 1.0 },
-  { id: 'f01', name: 'emperor angelfish', base: 1.2 },
-  { id: 'f04', name: 'Moorish idol', base: 1.2 },
-  { id: 'f06', name: 'bass', base: 1.1 },
-  { id: 'f09', name: 'pomfret', base: 1.2 },
-  { id: 'f13', name: 'snapper', base: 1.1 },
-];
+// The fish roster is discovered from the sprite pool at runtime — a fish
+// is `sprites/aquarium/<name>_0.png` + `_1.png`, spoken/label name is
+// `<name>` with '-' → ' ', and its voice clip is `v_<name>.ogg` (baked by
+// gen-voice.sh from the same file list). Adding a fish needs no code here.
+// TUNING is an OPTIONAL per-name override for size / rarity; anything not
+// listed uses DEFAULT_TUNING.
+const DEFAULT_TUNING = { base: 1.0, rare: false };
+const TUNING = {
+  shark: { base: 0.9, rare: true },
+  'manta-ray': { base: 0.8, rare: true },
+  eel: { base: 0.9 },
+  angelfish: { base: 1.2 },
+  'butterfly-fish': { base: 1.1 },
+  'blue-tang': { base: 1.0 },
+  tang: { base: 1.3 },
+  wrasse: { base: 1.2 },
+  cichlid: { base: 1.3 },
+  'emperor-angelfish': { base: 1.2 },
+  'moorish-idol': { base: 1.2 },
+  bass: { base: 1.1 },
+  pomfret: { base: 1.2 },
+  snapper: { base: 1.1 },
+};
+const tuneFor = (name) => ({ ...DEFAULT_TUNING, ...(TUNING[name] || {}) });
 
 const SND_BLUB = 'sfx/blub0.wav';
 const SND_SPLASH = 'sfx/poolsplash.wav';
@@ -63,22 +69,33 @@ export default class AquariumGame extends Scene {
       r: rand(1.4, 5), depth: Math.random() < 0.5 ? 0.35 : 0.85, ph: rand(0, 6.28),
     }));
 
-    const pool = shuffle(SPECIES.flatMap((s) => (s.rare ? [s] : [s, s])));
     this._fish = [];
+    loadManifest().then((m) => this._spawnFish(m));
+  }
+
+  _spawnFish(manifest) {
+    // every distinct sprites/aquarium/<name> (drop the _0/_1 frame suffix)
+    const names = [...new Set(
+      poolKeys(manifest, 'sprites/aquarium').map((k) => k.replace(/_[01]$/, '')),
+    )];
+    if (!names.length) return;
+
+    const pool = shuffle(names.flatMap((n) => (tuneFor(n).rare ? [n] : [n, n])));
     for (let i = 0; i < FISH_COUNT; i++) {
-      const sp = pool[i % pool.length];
+      const name = pool[i % pool.length];
+      const tune = tuneFor(name);
       const dir = Math.random() < 0.5 ? 1 : -1;
-      const speed = rand(30, 82) * (sp.rare ? 0.7 : 1);
+      const speed = rand(30, 82) * (tune.rare ? 0.7 : 1);
       const fish = {
-        sp, frames: null,
+        sp: { name: name.replace(/-/g, ' ') }, frames: null,
         x: rand(60, VIEW_W - 60),
         y: rand(BAND.top + 40, BAND.bottom - 40),
         vx: dir * speed, vy: 0, speed,
-        scale: sp.base * rand(0.7, 1.15) * (sp.rare ? 1.1 : 1),
+        scale: tune.base * rand(0.7, 1.15) * (tune.rare ? 1.1 : 1),
         frameT: Math.random() * 2, phase: Math.random() * 10,
         dart: 0, target: null, hover: 0,
       };
-      Promise.all([loadImage(`sprites/aquarium/${sp.id}_0`), loadImage(`sprites/aquarium/${sp.id}_1`)])
+      Promise.all([loadImage(`sprites/aquarium/${name}_0`), loadImage(`sprites/aquarium/${name}_1`)])
         .then(([a, b]) => { fish.frames = [a, b]; });
       this._fish.push(fish);
     }

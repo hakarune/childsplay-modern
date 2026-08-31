@@ -16,7 +16,14 @@
 
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| fish frames | sprites/aquarium/<id>_0 , _1 | png (svg drop-in ok) | 62x50 … 266x91 | ≤ base*scale, contain | per sprite | — (toy, no levels) | GPL, legacy `FishtankData` |
+| fish frames | sprites/aquarium/`<name>`_0 , _1 | png (svg drop-in ok) | 62x50 … 266x91 | ≤ base*scale, contain | per sprite | — (toy, no levels) | GPL, legacy `FishtankData` |
+
+> The sprite stem **is** the fish name (hyphens → spaces for the spoken /
+> floating label); the roster is a runtime scan of the pool, and
+> `gen-voice.sh` bakes `v_<name>.ogg` from the same file list, so adding a
+> fish is just dropping `<name>_0.png` + `<name>_1.png`. `TUNING` in
+> `aquarium.js` / `Aquarium.gd` is an optional per-name size/rarity
+> override.
 | bubble | ui/bubble | png | 35x60 | ≤ 18 sq, contain | ~1:1.7 | — | GPL-3 |
 | tank photo layer | backgrounds/aquarium_1 … _6 | jpg | ~800x600 | cover, 0.38 alpha | ~4:3 | — | GPL, legacy `FishtankData/backgrounds` |
 

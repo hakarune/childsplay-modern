@@ -13,19 +13,24 @@ const SND_AMBIENT := "aqua_ambient.ogg"
 
 const FISH_COUNT := 12
 
-# id -> friendly name (frames are <id>_0.png / <id>_1.png via AssetLoader)
-const SPECIES := [
-	["shark1", "shark", 0.9], ["manta", "manta ray", 0.8], ["eel", "eel", 0.9],
-	["discus2", "discus", 1.0], ["QueenAngel", "angelfish", 1.2],
-	["butfish", "butterfly fish", 1.1], ["blueking2", "blue tang", 1.0],
-	["collaris", "tang", 1.3], ["six_barred", "wrasse", 1.2],
-	["cichlid1", "cichlid", 1.3], ["newf1", "goldfish", 1.0],
-	["f01", "emperor angelfish", 1.2], ["f04", "Moorish idol", 1.2], ["f06", "bass", 1.1],
-	["f09", "pomfret", 1.2], ["f13", "snapper", 1.1],
-]
+# The fish roster is discovered from the sprite pool at runtime — a fish is
+# sprites/aquarium/<name>_0.png + _1.png; the spoken/label name is <name>
+# with "-" -> " ", and its voice clip is v_<name>.ogg (baked from the same
+# file list by gen-voice.sh). TUNING is an OPTIONAL per-name size/rarity
+# override; anything not listed uses base 1.0, not rare.
+const TUNING := {
+	"shark": [0.9, true], "manta-ray": [0.8, true], "eel": [0.9, false],
+	"angelfish": [1.2, false], "butterfly-fish": [1.1, false],
+	"blue-tang": [1.0, false], "tang": [1.3, false], "wrasse": [1.2, false],
+	"cichlid": [1.3, false], "emperor-angelfish": [1.2, false],
+	"moorish-idol": [1.2, false], "bass": [1.1, false], "pomfret": [1.2, false],
+	"snapper": [1.1, false],
+}
 
 var _bounds := Rect2(0, 84, 1280, 720 - 84 - 40)
 var _t := 0.0
+var _say_names := false            # §E.3 "say the names" toggle
+var _names_btn: Button
 var _bg_home := Vector2.ZERO
 var _food: Array = []          # [{ "node": Sprite2D, "fans": Array[AquariumFish] }]
 var _fish: Array = []
@@ -69,6 +74,31 @@ func _ready() -> void:
 	GameContext.theme_changed.connect(queue_redraw)
 	_spawn_fish()
 
+	# "say the names" toggle (§E.3) — hidden where the platform has no voice
+	if GameContext.has_voice():
+		_say_names = GameContext.name_toggle_get("aquarium")
+		_names_btn = Button.new()
+		_names_btn.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		_names_btn.offset_left = -170.0
+		_names_btn.offset_top = 12.0
+		_names_btn.offset_right = -16.0
+		_names_btn.custom_minimum_size = Vector2(154, 38)
+		_names_btn.focus_mode = Control.FOCUS_ALL
+		_names_btn.pressed.connect(_toggle_names)
+		add_child(_names_btn)
+		_sync_names_btn()
+
+
+func _toggle_names() -> void:
+	_say_names = not _say_names
+	GameContext.name_toggle_set("aquarium", _say_names)
+	_sync_names_btn()
+
+
+func _sync_names_btn() -> void:
+	if _names_btn:
+		_names_btn.text = "🔊 names on" if _say_names else "🔇 names off"
+
 
 func _draw() -> void:
 	# deep tonal gradient (Material-3 flavour), painted under the child
@@ -94,19 +124,38 @@ func _draw() -> void:
 
 
 func _spawn_fish() -> void:
-	var pool := SPECIES.duplicate()
+	# every distinct sprites/aquarium/<name> (drop the _0/_1 frame suffix)
+	var names := {}
+	for stem in AssetLoader.list_pool("sprites/aquarium"):
+		var s := String(stem)
+		names[s.substr(0, s.rfind("_"))] = true   # drop the _0 / _1 frame suffix
+	var roster: Array = names.keys()
+	if roster.is_empty():
+		return
+
+	var pool: Array = []
+	for n in roster:
+		pool.append(n)
+		if not _tuning(n)[1]:      # non-rare fish are twice as common
+			pool.append(n)
 	pool.shuffle()
+
 	for i in FISH_COUNT:
-		var sp: Array = pool[i % pool.size()]
-		var f0 := AssetLoader.get_texture(sp[0] + "_0.png")
-		var f1 := AssetLoader.get_texture(sp[0] + "_1.png")
+		var name: String = pool[i % pool.size()]
+		var tune: Array = _tuning(name)
+		var f0 := AssetLoader.get_texture(name + "_0.png")
+		var f1 := AssetLoader.get_texture(name + "_1.png")
 		var fish: AquariumFish = FISH_SCENE.instantiate()
 		_fish_root.add_child(fish)
 		fish.position = Vector2(randf_range(80, 1200), randf_range(_bounds.position.y + 60, _bounds.end.y - 60))
-		fish.setup(f0, f1, sp[1], sp[2])
+		fish.setup(f0, f1, name.replace("-", " "), tune[0])
 		fish.set_bounds(_bounds)
 		fish.poked.connect(_on_fish_poked)
 		_fish.append(fish)
+
+
+func _tuning(name: String) -> Array:
+	return TUNING.get(name, [1.0, false])
 
 
 func _process(delta: float) -> void:
@@ -149,6 +198,8 @@ func _on_fish_poked(fish: AquariumFish) -> void:
 	_play(_sfx_blub)
 	_bubble_burst(fish.position, 7)
 	_float_name(fish.species_name, fish.position)
+	if _say_names:
+		GameContext.speak(fish.species_name)
 
 
 func _drop_food(pos: Vector2) -> void:

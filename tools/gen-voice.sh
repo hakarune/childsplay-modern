@@ -169,10 +169,7 @@ PHRASES=(
   "here is a word you could make"
   "that is a word"
   "not a word, try again"
-  # --- Aquarium fish names (Aquarium.gd / aquarium.js SPECIES) ---
-  "shark" "manta ray" "eel" "discus" "angelfish" "butterfly fish" "blue tang"
-  "tang" "wrasse" "cichlid" "goldfish" "fish"
-  "emperor angelfish" "Moorish idol" "bass" "pomfret" "snapper"
+  "fish"
   # --- animal-pool names (Flashcards deck + Memory/Image Changer nameFromId) ---
   "bear" "cow" "dog" "elephant" "fox" "frog" "hippopotamus" "horse" "lion"
   "pig" "penguin" "rooster" "cat" "sheep" "panda" "wolf" "monkey"
@@ -183,6 +180,17 @@ PHRASES=(
   a b c d e f g h i j k l m n o p q r s t u v w x y z
   0 1 2 3 4 5 6 7 8 9
 )
+
+# --- Aquarium fish names: discovered from the sprite pool so a dropped-in
+#     fish (sprites/aquarium/<name>_0.png) automatically gets a v_<name>.ogg.
+AQ_SPRITES="$HERE/../assets/graphics/pools/sprites/aquarium"
+if [ -d "$AQ_SPRITES" ]; then
+  for f in "$AQ_SPRITES"/*_0.png; do
+    [ -e "$f" ] || continue
+    stem="$(basename "$f" _0.png)"
+    PHRASES+=("${stem//-/ }")
+  done
+fi
 
 echo "rendering ${#PHRASES[@]} phrases with $ENGINE -> $OUT"
 for p in "${PHRASES[@]}"; do

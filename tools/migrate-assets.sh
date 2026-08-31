@@ -79,12 +79,21 @@ cp "$LIB/PackidData/"pac_*.png "$LIB/PackidData/brick.png" \
 cp "$LIB/BilliardData/ball1.png" "$LIB/BilliardData/ball2.png" \
    "$LIB/BilliardData/hole.png"  "$LIB/BilliardData/stick.png" "$POOL/sprites/billiards/"
 
-# --- sprites/aquarium: 2-frame fish swim cycles --------------------
+# --- sprites/aquarium: 2-frame fish swim cycles ---------------------
+# The pool stem IS the fish name (hyphenated) — the game derives the
+# spoken/label name from it (`_` ← `-`) and gen-voice.sh bakes a
+# v_<name>.ogg to match. Adding a fish = drop <name>_0.png / <name>_1.png.
 FT="$LIB/FishtankData"
-for n in shark1 manta eel discus2 QueenAngel butfish blueking2 collaris \
-         six_barred cichlid1 newf1 f01 f04 f06 f09 f13; do
-  [ -f "$FT/${n}_0.png" ] && cp "$FT/${n}_0.png" "$POOL/sprites/aquarium/${n}_0.png"
-  [ -f "$FT/${n}_1.png" ] && cp "$FT/${n}_1.png" "$POOL/sprites/aquarium/${n}_1.png"
+declare -A FISH=(
+  [shark1]=shark [manta]=manta-ray [eel]=eel [discus2]=discus
+  [QueenAngel]=angelfish [butfish]=butterfly-fish [blueking2]=blue-tang
+  [collaris]=tang [six_barred]=wrasse [cichlid1]=cichlid [newf1]=goldfish
+  [f01]=emperor-angelfish [f04]=moorish-idol [f06]=bass [f09]=pomfret [f13]=snapper
+)
+for src in "${!FISH[@]}"; do
+  name="${FISH[$src]}"
+  [ -f "$FT/${src}_0.png" ] && cp "$FT/${src}_0.png" "$POOL/sprites/aquarium/${name}_0.png"
+  [ -f "$FT/${src}_1.png" ] && cp "$FT/${src}_1.png" "$POOL/sprites/aquarium/${name}_1.png"
 done
 
 # --- icons: one per game id (renamed from the legacy menuicons) ------
