@@ -16,7 +16,7 @@
 
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| picture pool | backgrounds/* (paintings + aquarium tanks) | jpg | ~800x560 | half-width panel, contain | ~4:3 | 6 levels — any background, no tier | GPL, legacy `WipeData` |
+| picture pool | backgrounds/* (paintings + aquarium tanks) | jpg | ~800x560 | half-width panel, contain | ~4:3 | 6 levels — any background, no tier | kid-friendly scene art |
 
 ## Notes
 

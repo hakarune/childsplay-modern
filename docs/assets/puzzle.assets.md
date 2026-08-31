@@ -16,7 +16,7 @@
 
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| background pool | backgrounds/* (paintings + aquarium tanks + future drops) | jpg | ~800x560 | frame, contain | ~4:3 | easy \| med \| hard — `_tier` filename tag (`bruegel0_hard.jpg`); untagged = any tier | GPL, legacy `WipeData` paintings |
+| background pool | backgrounds/* (paintings + aquarium tanks + future drops) | jpg | ~800x560 | frame, contain | ~4:3 | easy \| med \| hard — `_tier` filename tag (`bruegel0_hard.jpg`); untagged = any tier | kid-friendly scene art (castle-dragon, fairy-forest, …) |
 
 ## Notes
 

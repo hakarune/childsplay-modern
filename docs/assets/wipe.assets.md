@@ -16,7 +16,7 @@
 
 | Logical name | Pool / path (no ext) | Formats | Native px | Target box (world units) | Aspect / fit | Difficulty tag | Licence / source |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| background pool | backgrounds/* (shared with Puzzle, no-repeat) | jpg | ~800x560 | frame, contain | ~4:3 | easy(1-4) \| med(5-8) \| hard(9-12) — `_tier` filename tag; untagged = any tier | GPL, legacy `WipeData` |
+| background pool | backgrounds/* (shared with Puzzle, no-repeat) | jpg | ~800x560 | frame, contain | ~4:3 | easy(1-4) \| med(5-8) \| hard(9-12) — `_tier` filename tag; untagged = any tier | kid-friendly scene art |
 | sponge | ui/sponge | png | 60x61 | level sponge radius 54→26 | ~1:1 | — | GPL-3 |
 
 ## Notes
