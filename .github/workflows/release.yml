@@ -1,0 +1,90 @@
+name: Build desktop binaries (.deb + .exe)
+
+# Push a version tag (e.g. `v0.5.0`) to build both packages and attach them
+# to a GitHub Release. Or run it by hand from the Actions tab to just get
+# the binaries as workflow artifacts (no release).
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string for the artifacts (defaults to config/version in project.godot)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write        # needed to create the Release on a tag
+
+env:
+  # Godot cross-exports Windows from Linux — no Windows runner needed.
+  GODOT_VERSION: '4.7.2'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            V='${{ github.event.inputs.version }}'
+          elif [ "${{ github.ref_type }}" = tag ]; then
+            V="${GITHUB_REF_NAME#v}"
+          else
+            V="$(sed -n 's/^config\/version="\(.*\)"/\1/p' desktop-godot/project.godot)"
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Building version $V"
+
+      - name: System deps
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends dpkg fakeroot desktop-file-utils
+
+      - name: Install Godot ${{ env.GODOT_VERSION }} + export templates
+        run: |
+          set -eux
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          # editor (headless-capable) — used for --export-release
+          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          install -Dm755 "Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/.local/bin/godot"
+          # export templates (Linux + Windows Desktop live in the same .tpz)
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -q templates.tpz -d _tpz
+          mv _tpz/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Sanity — Godot version
+        run: godot --version
+
+      - name: Build .deb (Linux x86_64)
+        run: bash desktop-godot/build-deb.sh "${{ steps.ver.outputs.version }}"
+
+      - name: Build .exe (Windows x86_64, zipped)
+        run: bash desktop-godot/build-windows.sh "${{ steps.ver.outputs.version }}"
+
+      - name: List outputs
+        run: ls -la dist/
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: childsplay-modern-${{ steps.ver.outputs.version }}
+          path: |
+            dist/*.deb
+            dist/*_windows_x86_64.zip
+          if-no-files-found: error
+
+      - name: Attach to GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.deb
+            dist/*_windows_x86_64.zip
+          fail_on_unmatched_files: true
+          generate_release_notes: true

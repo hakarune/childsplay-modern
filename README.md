@@ -411,8 +411,18 @@ version):
 ```
 
 To publish a release: bump `config/version` in `desktop-godot/project.godot`,
-build both, then
-`gh release create v<x.y.z> dist/childsplay-modern_<x.y.z>_amd64.deb dist/childsplay-modern_<x.y.z>_windows_x86_64.zip`.
+commit, then push a matching tag:
+
+```sh
+git tag v0.5.0 && git push origin v0.5.0
+```
+
+`.github/workflows/release.yml` then builds **both** the `.deb` and the
+Windows `.zip` on an Ubuntu runner (Godot cross-exports Windows from
+Linux — no Windows machine needed) and attaches them to a GitHub Release.
+The same workflow can be run manually from the Actions tab to get the
+binaries as artifacts without cutting a release. To build locally instead,
+run the two scripts above and `gh release create v<x.y.z> dist/*`.
 
 ---
 
