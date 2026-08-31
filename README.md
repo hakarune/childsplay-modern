@@ -66,8 +66,8 @@ Download the latest `childsplay-modern_<version>_amd64.deb` from
 [**Releases**](https://github.com/hakarune/childsplay-modern/releases), then:
 
 ```sh
-sudo apt install ./childsplay-modern_0.4.0_amd64.deb
-#   or:  sudo dpkg -i childsplay-modern_0.4.0_amd64.deb && sudo apt -f install
+sudo apt install ./childsplay-modern_0.5.0_amd64.deb
+#   or:  sudo dpkg -i childsplay-modern_0.5.0_amd64.deb && sudo apt -f install
 ```
 
 It's an x86_64 build with an embedded data pack (~130 MB installed).
@@ -389,7 +389,7 @@ Build the package:
 
 ```sh
 ./build-deb.sh                 # -> dist/childsplay-modern_<project version>_amd64.deb
-./build-deb.sh 0.4.0           # override the version string
+./build-deb.sh 0.5.0           # override the version string
 ./build-deb.sh --no-export     # just re-package the already-exported binary
 ```
 
@@ -406,8 +406,8 @@ Windows build (needs the Windows export templates for the same Godot
 version):
 
 ```sh
-./desktop-godot/build-windows.sh 0.4.0
-#   -> dist/childsplay-modern_0.4.0_windows_x86_64.zip
+./desktop-godot/build-windows.sh 0.5.0
+#   -> dist/childsplay-modern_0.5.0_windows_x86_64.zip
 ```
 
 To publish a release: bump `config/version` in `desktop-godot/project.godot`,
