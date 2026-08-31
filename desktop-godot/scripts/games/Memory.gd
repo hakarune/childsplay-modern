@@ -31,7 +31,7 @@ const CARD_IMAGES := [
 	"panda", "chicken", "redbird", "wolf",
 	"monkey", "fox", "bluebirds", "elephant",
 	"lion", "gnu", "bluebaby", "greenbaby",
-	"frog",
+	"boy-in-black", "frog",
 ]
 const BACK_IMAGE := "card_back"
 const FRONT_IMAGE := "card_front"

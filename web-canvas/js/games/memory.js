@@ -18,7 +18,7 @@ const LEVELS = [
 const PIC_NAMES = ['cat', 'pig', 'bear', 'hippopotamus', 'penguin',
   'cow', 'sheep', 'turtle', 'panda', 'chicken', 'redbird',
   'wolf', 'monkey', 'fox', 'bluebirds', 'elephant', 'lion',
-  'gnu', 'bluebaby', 'greenbaby', 'frog'];
+  'gnu', 'bluebaby', 'greenbaby', 'boy-in-black', 'frog'];
 
 const BACK = 'ui/card_back';
 const FRONT = 'ui/card_front';
