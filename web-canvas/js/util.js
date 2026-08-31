@@ -195,8 +195,8 @@ export function makeNameToggle(gameId, rect = { x: 0, y: 0, w: 150, h: 32 }) {
 // Friendlier spoken labels for pool ids whose auto-name reads oddly.
 // Keyed on the result of the generic tidy below.
 const NAME_OVERRIDES = {
-  bluebaby: 'baby blue bird',
-  greenbaby: 'baby green bird',
+  bluebaby: 'baby in blue',
+  greenbaby: 'baby in green',
 };
 
 // Tidy a pool id ("01_cat", "redbird", "car_horn") into a spoken label.
