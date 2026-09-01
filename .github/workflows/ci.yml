@@ -1,0 +1,90 @@
+name: CI
+
+# Headless scene-load smoke on every push/PR, then (once that passes) a
+# package job that builds deb/exe/web on every push as downloadable
+# workflow artifacts. A vX.Y.Z tag additionally publishes a GitHub
+# Release (release.yml); pushes to main redeploy the web build to
+# GitHub Pages (pages.yml).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  godot-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Godot + templates
+        run: bash tools/ci_setup_godot.sh
+
+      - name: Import project
+        working-directory: godot
+        run: |
+          "$GODOT_BIN" --headless --import || true
+          "$GODOT_BIN" --headless --editor --quit || true
+
+      - name: Scene-load smoke (load + instantiate every scene)
+        run: GODOT_BIN="$GODOT_BIN" bash godot/tests/smoke.sh
+
+  package:
+    needs: godot-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Godot + templates
+        run: bash tools/ci_setup_godot.sh
+
+      - name: Extra tools (deb packaging, icon raster)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends dpkg-dev librsvg2-bin
+
+      - name: Import project
+        working-directory: godot
+        run: |
+          "$GODOT_BIN" --headless --import || true
+          "$GODOT_BIN" --headless --editor --quit || true
+
+      - name: Build Linux / Windows / Web
+        working-directory: godot
+        run: |
+          mkdir -p ../dist ../dist/web
+          "$GODOT_BIN" --headless --export-release "Linux"           ../dist/childsplay-modern.x86_64
+          "$GODOT_BIN" --headless --export-release "Windows Desktop" ../dist/childsplay-modern.exe
+          "$GODOT_BIN" --headless --export-release "Web"             ../dist/web/index.html
+          test -s ../dist/web/index.wasm
+          test -s ../dist/web/index.pck
+          test -s ../dist/web/index.js
+          test -s ../dist/childsplay-modern.x86_64
+          test -s ../dist/childsplay-modern.exe
+
+      - name: Package .deb
+        run: |
+          sh tools/package_deb.sh dist/childsplay-modern.x86_64 dist
+          dpkg-deb -I dist/childsplay-modern_*_amd64.deb
+          dpkg-deb -c dist/childsplay-modern_*_amd64.deb | head
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: childsplay-modern-deb
+          path: dist/childsplay-modern_*_amd64.deb
+
+      - name: Upload Windows .exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: childsplay-modern-windows
+          path: dist/childsplay-modern.exe
+
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: childsplay-modern-linux
+          path: dist/childsplay-modern.x86_64
+
+      - name: Upload Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: childsplay-modern-web
+          path: dist/web
