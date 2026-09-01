@@ -227,7 +227,7 @@ func has_texture(asset_name: String) -> bool:
 const TIER_TAGS := ["easy", "med", "hard"]
 
 ## Trailing difficulty tag of a pool stem (Design Policy §A.3):
-## "bruegel0_hard" -> "hard"; "aquarium_1" -> "" (any tier).
+## "castle-dragon_easy" -> "easy"; "sea-stacks" -> "" (any tier).
 func stem_tier(stem: String) -> String:
 	var i := stem.rfind("_")
 	if i >= 0 and stem.substr(i + 1) in TIER_TAGS:

@@ -93,7 +93,7 @@ const _TIER_TAGS = new Set(['easy', 'med', 'hard']);
 
 /** Split a pool filename stem on a trailing difficulty tag (Design Policy
  *  §A.3): "bruegel0_hard" -> {name:'bruegel0', tier:'hard'};
- *  "aquarium_1" -> {name:'aquarium_1', tier:null}. */
+ *  "sea-stacks" -> {name:'sea-stacks', tier:null}. */
 export function parseTier(stem) {
   const i = String(stem).lastIndexOf('_');
   const tag = i >= 0 ? stem.slice(i + 1) : '';

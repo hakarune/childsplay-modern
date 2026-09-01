@@ -508,3 +508,14 @@ web module; `godot --headless --import` clean; `desktop-godot/tests/smoke.sh`
 31/31; both `sync-assets.sh` clean; the release workflow test-run built a
 `.deb` (45.5 MB) + Windows `.zip` (62.1 MB) green. Still not visually QA'd
 on a real device / browser._
+
+2026-09-01 (aquarium tank photos tagged by tier):
+- The six `backgrounds/aquarium_*` photos now carry a difficulty tag —
+  `aquarium_1_med.jpg`, `aquarium_2..6_hard.jpg` — so Puzzles / Picture
+  Wipe / Picture Find only draw them in mid/late levels instead of at
+  every tier. Tag is `_med` (not `_medium`) — `parseTier` / `stem_tier`
+  only know `easy|med|hard`.
+- Follow-through so the **Aquarium** toy still shows a tank photo:
+  `aquarium.js` `TANKS` and `Aquarium.tscn`'s Background `ext_resource`
+  point at the tagged names. Headless: Aquarium Background texture loads
+  (`aquarium_1_med.jpg`, 800×500); smoke 31/31._

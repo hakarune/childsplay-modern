@@ -9,7 +9,17 @@ import { speak, hasVoice } from '../tts.js';
 
 const KEY_NAMES = 'cp:aquarium:names';
 
-const TANKS = ['backgrounds/aquarium_1', 'backgrounds/aquarium_2', 'backgrounds/aquarium_3', 'backgrounds/aquarium_4', 'backgrounds/aquarium_5', 'backgrounds/aquarium_6'];
+// The six tank photos double as Puzzle / Wipe / Find It backgrounds and
+// carry a difficulty tag (`_med` / `_hard`) in the filename; the Aquarium
+// toy ignores the tag and just uses all six.
+const TANKS = [
+  'backgrounds/aquarium_1_med',
+  'backgrounds/aquarium_2_hard',
+  'backgrounds/aquarium_3_hard',
+  'backgrounds/aquarium_4_hard',
+  'backgrounds/aquarium_5_hard',
+  'backgrounds/aquarium_6_hard',
+];
 const BUBBLE = 'ui/bubble';
 
 // The fish roster is discovered from the sprite pool at runtime — a fish
