@@ -7,8 +7,8 @@
 | --- | --- |
 | Game id | `electro` (electro.js / Electro.tscn) |
 | Owns any art? | no |
-| Shared pools used | `animals` — the picture side of each picture↔name pair (pairs from `assets/data/electro.json`). |
-| Content file(s) | `assets/data/electro.json` (picture↔name pairs) |
+| Shared pools used | `animals` — the picture side of each picture↔name pair (pairs from `godot/assets/data/electro.json`). |
+| Content file(s) | `godot/assets/data/electro.json` (picture↔name pairs) |
 | Theme variants | light+dark from palette only |
 | Style themes | none |
 

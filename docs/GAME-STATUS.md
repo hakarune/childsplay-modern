@@ -1,13 +1,18 @@
 # Game conversion status
 
 Tracks every activity from the original **Childsplay**
-(`legacy-sources/childsplay-legacy/`) against the two modern targets:
+(`legacy-sources/childsplay-legacy/`) against the modern Godot port:
 
-- **Godot** — `desktop-godot/scenes/games/*.tscn` (+ `scripts/games/*.gd`),
-  wired into `desktop-godot/scripts/MainMenu.gd`
-- **Web** — `web-canvas/js/games/*.js`, wired into `web-canvas/js/games/index.js`
+- **Godot** — `godot/scenes/games/*.tscn` (+ `scripts/games/*.gd`),
+  wired into `godot/scripts/MainMenu.gd`. Web is this same project's Godot
+  Web export (see [ASSETS.md](ASSETS.md)) — there is no separate web codebase.
 
 Update this file in the same commit that adds or finishes a game.
+
+> **2026-09-01:** entries below dated before this note describe the
+> earlier two-codebase architecture (`desktop-godot/` + a hand-written
+> `web-canvas/`), since consolidated into one Godot project at `godot/`.
+> Kept as-written for history rather than rewritten throughout.
 
 ## Design Policy
 
@@ -89,10 +94,10 @@ is committed to porting first.
 ### What's next
 
 Feature-complete. The classic 14, the nine shipped extras and the Quiz
-suite are all done on both targets, every playtest §L row in
+suite are all done, every playtest §L row in
 [Design-Policy.md](Design-Policy.md) is closed, **`v0.5.0` is released**
 (browser + `.deb` + Windows `.zip`), and a headless scene-load smoke
-(`desktop-godot/tests/smoke.sh`, 31 scenes) gates every push and every
+(`godot/tests/smoke.sh`, 31 scenes) gates every push and every
 release. Since the tag, `main` has taken a second web-playtest pass,
 kid-friendly background art, new activity icons and a display-name remap
 (see the changelog at the end).

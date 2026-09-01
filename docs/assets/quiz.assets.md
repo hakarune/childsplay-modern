@@ -7,7 +7,7 @@
 | Game id | `quiz` (quiz.js / Quiz.tscn) — one shared engine behind the Quiz deck picker (quiz-menu.js / QuizMenu.tscn) |
 | Owns any art? | no |
 | Shared pools used | `animals` — only the **Pictures** deck, which sets `image` on its questions |
-| Content file(s) | `assets/data/quiz/*.json` — one per deck (`general`, `picture`, `math`, `words`, `sayings`) |
+| Content file(s) | `godot/assets/data/quiz/*.json` — one per deck (`general`, `picture`, `math`, `words`, `sayings`) |
 | Theme variants | light+dark from palette only |
 | Style themes | none |
 

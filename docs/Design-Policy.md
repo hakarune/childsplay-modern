@@ -1,10 +1,16 @@
 # Childsplay-Modern — Design Policy
 
-**Status: authoritative.** Every game (current and future) on **both** targets
-— `web-canvas/` (HTML5 canvas) and `desktop-godot/` (Godot 4) — MUST follow
-this document. It was written after the first full play-test; the "Play-test
+**Status: authoritative.** Every game (current and future) MUST follow this
+document. It was written after the first full play-test; the "Play-test
 findings" at the end of each section are the concrete bugs that motivated the
 rule.
+
+> **2026-09-01:** `web-canvas/` (the hand-written HTML5 canvas target) was
+> retired — Web is now this same Godot project's Web export, at
+> `godot/` (renamed from `desktop-godot/`). Sections below written against
+> "both targets" or `web-canvas/js/...` describe decisions made while that
+> target existed; they're kept for history rather than rewritten throughout.
+> Asset paths have been updated to the current `godot/assets/` location.
 
 Audience: ages **2–7**. Most players cannot read. Most play on a **phone or
 tablet** in **portrait**. Assume touch, assume no reading, assume a short
@@ -45,20 +51,20 @@ survives, git-ignored, under `legacy-sources/`).
 The **only** graphics locations games may reference:
 
 ```
-assets/graphics/
+godot/assets/graphics/
   backgrounds/     full-scene pictures: paintings, photos, tank scenes, quiz-picture art
   animals/         single-subject animal cutouts (plain-named)
   objects/         single-subject non-animals: vehicles, instruments, food, tools
   ui/              shared chrome: card_front, card_back, button, sponge, danger_line, bubble, particle
   icons/           one per game id (menu tiles) + menu chrome
   sprites/<game>/  DENSE single-game sprite/frame sets only (packid tiles, billiards balls, fish swim frames)
-assets/audio/
+godot/assets/audio/
   sfx/          flat effect clips, referenced by bare filename
   voice/        baked spoken lines, v_<slug>.ogg (tools/gen-voice.sh: human → google/piper → espeak-ng)
   soundmemory/  shared Find the sound / Sound Memory clip set, <id>.ogg
   flashcards/   recorded animal names, flat: <word>_<lang>.ogg (de/nl/fr/es)
   (no music/ — win stingers live in sfx/ and play on the Music bus)
-assets/data/       content files — see §J
+godot/assets/data/       content files — see §J
 ```
 
 Rules:
@@ -97,28 +103,27 @@ Rules:
   `backgrounds/aquarium_1.jpg` … `aquarium_6.jpg`. A game asks the pool for
   `aquarium_*`.
 
-### A.4 How each target resolves it
+### A.4 How the game resolves it
 
-- **Web** (`sync-assets.sh`): curates the pools into `web-canvas/assets/` and
-  writes `web-canvas/assets/manifest.json` (see §C.2). Games reference a pool
-  path **without extension** (`backgrounds/castle`); `engine.resolveImage()`
-  picks the best available. Audio is referenced by explicit path.
-- **Godot** (`sync-assets.sh`): mirrors **only** the curated pools into
-  `res://assets/` (`graphics/{pools,themes}`, `audio/{sfx,voice,soundmemory,
-  flashcards}`, `fonts`, `data`). `AssetLoader` keeps filename indexing with
-  (a) extension-preference on stem collisions (§C.3) and (b)
-  `pick_from_pool(prefix, {difficulty})` (§B). Every pool filename is
-  globally unique (flashcards carry a `_<lang>` suffix), so with `lib/`
-  out of `res://` the old ~1668-collision warning is down to 3 known
-  pool-vs-pool image overlaps (`dog/horse/rooster.png`).
+`godot/assets/` **is** `res://assets/` — there is no sync step. `AssetLoader`
+keeps filename indexing with (a) extension-preference on stem collisions
+(§C.3) and (b) `pick_from_pool(prefix, {difficulty})` (§B). Every pool
+filename is globally unique (flashcards carry a `_<lang>` suffix), so with
+`lib/` out of `res://` the old ~1668-collision warning is down to 3 known
+pool-vs-pool image overlaps (`dog/horse/rooster.png`).
 
-### A.5 Migration — **DONE** (2026-08-31)
+> Until 2026-09, this project also shipped a second, hand-written web
+> target (`web-canvas/`) with its own asset mirror and manifest, kept in
+> sync by a second `sync-assets.sh`. That target was retired in favour of
+> exporting this same Godot project to Web (see [`ASSETS.md`](ASSETS.md));
+> the paragraph above describes the current, single-target flow.
+
+### A.5 Migration — **DONE** (2026-08-31, folded into one asset tree 2026-09-01)
 
 The pools were curated out of the legacy dump by one-time extraction
-scripts; every game's asset paths point at pools; both `sync-assets.sh`
-scripts only copy `/assets/` outward; and the dump + those scripts have
-been removed. `/assets/` is now the hand-maintained source of truth — see
-[`ASSETS.md`](ASSETS.md).
+scripts; every game's asset paths point at pools; and the dump + those
+scripts have been removed. `godot/assets/` is now the hand-maintained
+source of truth and the only copy — see [`ASSETS.md`](ASSETS.md).
 
 ### A.6 First mapping decisions (do these first — they unblock §B/§H)
 
@@ -230,16 +235,10 @@ just wins. Games therefore reference assets **without an extension**.
 svg → png → jpg → jpeg → webp
 ```
 
-- **Web**: `sync-assets.sh` emits `web-canvas/assets/manifest.json`:
-  `{ "backgrounds/castle": "backgrounds/castle.jpg", … }` (best ext per stem).
-  `engine.resolveImage(base)` = manifest lookup; `loadImage`/`img` accept a
-  base and resolve internally. A base that already has an extension is used
-  as-is (escape hatch).
-- **Godot**: reorder `AssetLoader.IMAGE_EXTS` to
-  `["svg","png","jpg","jpeg","webp"]` **and** change `_register` so that on a
-  stem collision it keeps the **higher-priority extension**, not merely the
-  first seen. `get_texture("backgrounds/castle")` (stem, no ext) already
-  resolves via stem-indexing; make it return the best ext.
+`AssetLoader.IMAGE_EXTS` is ordered `["svg","png","jpg","jpeg","webp"]`, and
+`_register` keeps the **higher-priority extension** on a stem collision, not
+merely the first seen. `get_texture("backgrounds/castle")` (stem, no ext)
+resolves via stem-indexing to the best available ext.
 
 ### C.3 SVG caveats (Godot 4)
 
@@ -259,7 +258,7 @@ the theme/style selector (§D) MAY point the loader at an overlay dir checked
 **before** the base pool:
 
 ```
-assets/graphics/themes/<themeName>/<pool>/<name>.<ext>
+godot/assets/graphics/themes/<themeName>/<pool>/<name>.<ext>
 ```
 
 Recommendation: ship ext-fallback **now**; add the overlay dir only when the
@@ -654,8 +653,8 @@ Every interactive element MUST be reachable and ≥ its minimum size in the
 - **J.1.1** A game whose content is a **list** (match pairs, word lists,
   letter sets, quiz questions) MUST read it from a **data file**, not an
   inline array > ~8 entries.
-- **J.1.2** Data files live in **`assets/data/`** and are synced to both
-  targets like graphics.
+- **J.1.2** Data files live in **`godot/assets/data/`**, shipped in every
+  export exactly like graphics.
 
 ### J.2 Formats
 
@@ -666,7 +665,7 @@ Every interactive element MUST be reachable and ≥ its minimum size in the
 
 ### J.3 Examples
 
-`assets/data/electro.txt` — pairs (left label ` | ` asset base; resolved via §C):
+`godot/assets/data/electro.txt` — pairs (left label ` | ` asset base; resolved via §C):
 
 ```
 # animal → its name.  Both sides same asset unless a 3rd/4th field is given.
@@ -675,9 +674,9 @@ frog    | animals/frog_1
 dog     | animals/dog | Puppy | animals/puppy      # asymmetric pair
 ```
 
-`assets/data/words-en.txt` — one word per line (StartsWith).
-`assets/data/wordmaker.txt` — `letter | target` per line.
-`assets/data/quiz-animals.json` — `[{ q, img, choices:[…], answer }]`.
+`godot/assets/data/words-en.txt` — one word per line (StartsWith).
+`godot/assets/data/wordmaker.txt` — `letter | target` per line.
+`godot/assets/data/quiz-animals.json` — `[{ q, img, choices:[…], answer }]`.
 
 ### J.4 Loader
 
@@ -747,7 +746,7 @@ decks, both targets — see GAME-STATUS). Since then: a second web-playtest
 pass (SW cache-bust, light-mode HUD/menu text, Sound Memory clip cut-off,
 Quiz two-tap "hear then confirm", 1P/2P asked up front on both targets),
 the paintings swapped for kid scene art, new activity-icon art + a
-display-name remap, a headless scene-load smoke (`desktop-godot/tests/`)
+display-name remap, a headless scene-load smoke (`godot/tests/`)
 run in CI, and the v0.5.0 `.deb` + Windows release pipeline. A visual-QA
 pass on a real device/browser is still the one open item — every game is
 verified headless (parse + load), not eyeballed.
@@ -766,7 +765,7 @@ verified headless (parse + load), not eyeballed.
 | **flashcards** | **E.4** (TTS baseline for de/nl/fr/es, packs optional), E (stop + TTS button), D, G. Toy → exempt from H. |
 | **blockbreaker** | D, E (stop + TTS), G, C. (H already good — 6 walls, lose-wall replay is the model pattern.) |
 | **simon** | **H** (8–10 levels), D, E (stop + TTS), G |
-| **electro** | **I.2** (hit radius ≥44, snap-to-nearest, finger halo — primary offender), **J** (pairs → `assets/data/electro.txt`), D, E (stop + TTS + spoken-labels), G, B (animal art pool) |
+| **electro** | **I.2** (hit radius ≥44, snap-to-nearest, finger halo — primary offender), **J** (pairs → `godot/assets/data/electro.txt`), D, E (stop + TTS + spoken-labels), G, B (animal art pool) |
 | **tictactoe** | **K** (Pass & Play), D, E (stop + TTS), G |
 | **wipe** | **H** (10–12 levels, target 0.65→0.99, sponge 54→26), **B** (shared `backgrounds` pool with Puzzle, no-repeat), D, E, G, A/C |
 | **ichanger** | **B** (animal pool + no-repeat), D, E (stop + TTS + spoken-labels), G, H (has 4 levels×3 rounds — bump to ≥5 levels or document as compliant) |

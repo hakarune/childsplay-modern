@@ -10,10 +10,10 @@
 
 | Field | Value |
 | --- | --- |
-| Game id | `<gameid>` (matches `web-canvas/js/games/<id>.js` / `desktop-godot/scenes/games/<Name>.tscn`) |
+| Game id | `<gameid>` (matches `godot/scenes/games/<Name>.tscn`) |
 | Owns any art? | yes / no — set **no** if it only pulls from shared pools |
 | Shared pools used | `backgrounds`, `animals`, `objects`, `ui`, … (see policy §A.2) |
-| Content file(s) | `assets/data/<name>.txt` / `.json`, or — |
+| Content file(s) | `godot/assets/data/<name>.txt` / `.json`, or — |
 | Theme variants | `light+dark from palette only` **or** list which assets ship a `_dark` override |
 | Style themes | none / `atari, neon, y2k, material` (each provides light+dark) |
 

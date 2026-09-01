@@ -7,8 +7,8 @@
 | --- | --- |
 | Game id | `synonyms` (synonyms.js / WordMaker.tscn) |
 | Owns any art? | no |
-| Shared pools used | None — keyboard and word tray drawn. Dictionary: `assets/data/wordlist.json` (~1235 words). |
-| Content file(s) | `assets/data/wordlist.json` (~1235-word kid dictionary) |
+| Shared pools used | None — keyboard and word tray drawn. Dictionary: `godot/assets/data/wordlist.json` (~1235 words). |
+| Content file(s) | `godot/assets/data/wordlist.json` (~1235-word kid dictionary) |
 | Theme variants | light+dark from palette only |
 | Style themes | none |
 
