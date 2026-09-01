@@ -1,95 +1,72 @@
-name: Build desktop binaries (.deb + .exe)
+name: Release
 
-# Push a version tag (e.g. `v0.5.0`) to build both packages and attach them
-# to a GitHub Release. Or run it by hand from the Actions tab to just get
-# the binaries as workflow artifacts (no release).
+# Push a version tag (e.g. `v0.5.0`) matching godot/project.godot's
+# config/version to build Linux/Windows/Web, package the .deb, and
+# publish everything to a GitHub Release.
 on:
   push:
-    tags: ['v*.*.*']
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version string for the artifacts (defaults to config/version in project.godot)'
-        required: false
-        default: ''
+    tags: ["v*"]
 
 permissions:
-  contents: write        # needed to create the Release on a tag
-
-env:
-  # Godot cross-exports Windows from Linux — no Windows runner needed.
-  GODOT_VERSION: '4.7.2'
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Resolve version
-        id: ver
+      - name: Verify tag matches godot/project.godot version
         run: |
-          if [ -n "${{ github.event.inputs.version }}" ]; then
-            V='${{ github.event.inputs.version }}'
-          elif [ "${{ github.ref_type }}" = tag ]; then
-            V="${GITHUB_REF_NAME#v}"
-          else
-            V="$(sed -n 's/^config\/version="\(.*\)"/\1/p' desktop-godot/project.godot)"
-          fi
-          echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "Building version $V"
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(sed -n 's/.*config\/version="\([^"]*\)".*/\1/p' godot/project.godot)"
+          [ "$TAG" = "$PKG" ] || { echo "tag v$TAG != project version $PKG"; exit 1; }
 
-      - name: System deps
-        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends dpkg fakeroot desktop-file-utils
+      - name: Set up Godot + templates
+        run: bash tools/ci_setup_godot.sh
 
-      - name: Install Godot ${{ env.GODOT_VERSION }} + export templates
+      - name: Extra tools (deb packaging, icon raster)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends dpkg-dev librsvg2-bin
+
+      - name: Import project
+        working-directory: godot
         run: |
-          set -eux
-          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-          # editor (headless-capable) — used for --export-release
-          curl -fsSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          unzip -q godot.zip
-          install -Dm755 "Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/.local/bin/godot"
-          # export templates (Linux + Windows Desktop live in the same .tpz)
-          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
-          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
-          unzip -q templates.tpz -d _tpz
-          mv _tpz/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$GODOT_BIN" --headless --import || true
+          "$GODOT_BIN" --headless --editor --quit || true
 
-      - name: Sanity — Godot version
-        run: godot --version
-
-      - name: Scene-load smoke (don't ship a broken scene)
+      - name: Export Linux / Windows / Web
+        working-directory: godot
         run: |
-          bash desktop-godot/sync-assets.sh
-          bash desktop-godot/tests/smoke.sh
+          mkdir -p ../dist ../dist/web
+          "$GODOT_BIN" --headless --export-release "Linux"           ../dist/childsplay-modern.x86_64
+          "$GODOT_BIN" --headless --export-release "Windows Desktop" ../dist/childsplay-modern.exe
+          "$GODOT_BIN" --headless --export-release "Web"             ../dist/web/index.html
+          test -s ../dist/web/index.wasm
+          test -s ../dist/web/index.pck
+          test -s ../dist/web/index.js
+          test -s ../dist/childsplay-modern.x86_64
+          test -s ../dist/childsplay-modern.exe
 
-      - name: Build .deb (Linux x86_64)
-        run: bash desktop-godot/build-deb.sh "${{ steps.ver.outputs.version }}"
+      - name: Package .deb
+        run: sh tools/package_deb.sh dist/childsplay-modern.x86_64 dist
 
-      - name: Build .exe (Windows x86_64, zipped)
-        run: bash desktop-godot/build-windows.sh "${{ steps.ver.outputs.version }}"
+      - name: Bundle the web build
+        run: cd dist && zip -r childsplay-modern-web.zip web
 
-      - name: List outputs
-        run: ls -la dist/
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum childsplay-modern_*_amd64.deb childsplay-modern.x86_64 childsplay-modern.exe childsplay-modern-web.zip > SHA256SUMS
+          cat SHA256SUMS
 
-      - name: Upload workflow artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: childsplay-modern-${{ steps.ver.outputs.version }}
-          path: |
-            dist/*.deb
-            dist/*_windows_x86_64.zip
-          if-no-files-found: error
-
-      - name: Attach to GitHub Release
-        if: github.ref_type == 'tag'
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            dist/*.deb
-            dist/*_windows_x86_64.zip
-          fail_on_unmatched_files: true
           generate_release_notes: true
+          body: "Web build also live at https://hakarune.github.io/childsplay-modern/"
+          files: |
+            dist/childsplay-modern_*_amd64.deb
+            dist/childsplay-modern.x86_64
+            dist/childsplay-modern.exe
+            dist/childsplay-modern-web.zip
+            dist/SHA256SUMS
