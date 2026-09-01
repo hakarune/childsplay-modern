@@ -8,7 +8,7 @@
 //          game, which then picks a variant / Sound Memory.
 
 export const GAMES = [
-  { id: 'memory',       name: 'Memory',               load: () => import('./memory.js') },
+  { id: 'memory',       name: 'Memory Games',               load: () => import('./memory.js') },
   { id: 'fallingletter',name: 'Falling Letters',      load: () => import('./fallingletter.js') },
   { id: 'soundmemory',  name: 'Sound Memory',         load: () => import('./soundmemory.js') },
   { id: 'findsound',    name: 'Find the sound',       load: () => import('./findsound.js') },
@@ -32,7 +32,7 @@ export const GAMES = [
 ];
 
 export const MENU = [
-  { id: 'memory',       name: 'Memory',               icon: 'icons/memory.png',        submenu: true },
+  { id: 'memory',       name: 'Memory Games',               icon: 'icons/memory.png',        submenu: true },
   { id: 'fallingletter',name: 'Falling Letters',      icon: 'icons/fallingletter.png' },
   { id: 'findsound',    name: 'Find the sound',       icon: 'icons/findsound.png' },
   { id: 'puzzle',       name: 'Puzzles',              icon: 'icons/puzzle.png' },

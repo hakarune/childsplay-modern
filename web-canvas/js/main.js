@@ -123,7 +123,7 @@ function setHud(visible) {
 }
 
 function openMemoryMenu() {
-  title.textContent = 'Memory';
+  title.textContent = 'Memory Games';
   backHandler = toMainMenu;
   setHud(true);
   game.setState('MemoryMenu');

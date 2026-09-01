@@ -8,7 +8,7 @@ extends Control
 ## desktop twin of the web menu chrome.
 
 const GAMES := [
-	{"id": "memory", "title": "Memory", "scene": "res://scenes/MemoryMenu.tscn"},
+	{"id": "memory", "title": "Memory Games", "scene": "res://scenes/MemoryMenu.tscn"},
 	{"id": "fallingletter", "title": "Falling Letters", "scene": "res://scenes/games/FallingLetter.tscn"},
 	{"id": "findsound", "title": "Find the sound", "scene": "res://scenes/games/FindSound.tscn"},
 	{"id": "puzzle", "title": "Puzzles", "scene": "res://scenes/games/Puzzle.tscn"},
