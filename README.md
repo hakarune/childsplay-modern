@@ -7,10 +7,19 @@ coordination). The original is a Python/Pygame application; Childsplay-Modern
 rebuilds the core activities on two independent, self-contained targets that
 share one pool of art and audio.
 
-**20 activities** (including a multiple-choice **Quiz** with five decks), a
-**light / dark theme**, **spoken instructions baked in** (no text-to-speech
-engine required), **per-channel sound** (music / effects / voice), and
-**local 2-player** for the board games. Everything runs offline.
+**20 activities** (including **Quizzes**, a five-deck multiple-choice
+picker), a **light / dark theme**, **spoken instructions baked in** (no
+text-to-speech engine required), **per-channel sound** (music / effects /
+voice), and **local 2-player** for the board games. Everything runs
+offline.
+
+**Status:** every classic Childsplay activity, nine extras and the Quiz
+suite are done on both targets at feature parity. `v0.5.0` is released
+(browser + `.deb` + Windows `.zip`); `main` carries a batch of
+post-release playtest fixes, new activity-icon art and a headless
+scene-load smoke run in CI. The one open item is a visual-QA pass on real
+devices — everything is verified headless, not yet eyeballed. Full detail
+in [`docs/GAME-STATUS.md`](docs/GAME-STATUS.md).
 
 * **Play in a browser:** <https://hakarune.github.io/childsplay-modern>
 * **Install on Linux:** grab the `.deb` from
@@ -91,21 +100,21 @@ Launch it from your desktop menu ("Childsplay Modern") or run
 childsplay-modern/
 ├── assets/                     Source of truth (hand-maintained) — see docs/ASSETS.md
 │   ├── graphics/pools/           Flat, purpose-named art the games read from
-│   │   ├── backgrounds/            paintings + aquarium_1..6 (`_tier` filename tag)
+│   │   ├── backgrounds/            kid scene art + aquarium_1..6 (`_tier` filename tag)
 │   │   ├── animals/               plain-named cutouts (cat, cow, dog, bird, …)
 │   │   ├── ui/                    card faces, sponge, bubble, soundbut
-│   │   ├── vehicles/ instruments/ sounds/   Find Sound level pools
+│   │   ├── vehicles/ instruments/ sounds/   Find the sound level pools
 │   │   ├── icons/                 one <game-id>.png per menu tile
 │   │   └── sprites/<game>/        packid / billiards / aquarium sprite sheets
 │   ├── audio/
 │   │   ├── sfx/                  Flat effect clips (referenced by bare filename)
 │   │   ├── voice/               Baked spoken lines: v_<slug>.ogg
-│   │   ├── soundmemory/         Shared Find Sound / Sound Memory clip set: <id>.ogg
+│   │   ├── soundmemory/         Shared Find the sound / Sound Memory clip set: <id>.ogg
 │   │   ├── flashcards/          Recorded animal names, <word>_<lang>.ogg (de/nl/fr/es)
 │   │   └── human/               Raw human recordings gen-voice.sh may use (en_GB a–z / 0–9)
 │   ├── data/                    Editable game content (see "Customising content")
-│   │   ├── electro.json           Electro picture↔name pairs
-│   │   ├── wordlist.json          Word Maker dictionary (~1200 words)
+│   │   ├── electro.json           ImageLink picture↔name pairs
+│   │   ├── wordlist.json          StartsWith dictionary (~1200 words)
 │   │   └── quiz/*.json            One deck per Quiz (general/picture/math/words/sayings)
 │   └── fonts/                   DejaVu Sans Condensed (UI font)
 ├── desktop-godot/              Godot 4 engine source
@@ -115,7 +124,8 @@ childsplay-modern/
 │   ├── build-deb.sh             Export + package the .deb (Linux)
 │   ├── build-windows.sh        Export + zip the .exe (Windows x86_64)
 │   ├── scenes/                   MainMenu.tscn, MemoryMenu.tscn, QuizMenu.tscn, games/*.tscn
-│   └── scripts/                  AssetLoader + GameContext (autoloads), MenuTile, menus, games/*
+│   ├── scripts/                  AssetLoader + GameContext (autoloads), MenuTile, menus, games/*
+│   └── tests/                    smoke.sh + scene_smoke.gd — headless load every scene
 ├── web-canvas/                 HTML5 / JS / Canvas implementation (PWA)
 │   ├── index.html               Responsive full-viewport canvas + chrome buttons
 │   ├── manifest.webmanifest     PWA manifest
@@ -137,7 +147,10 @@ childsplay-modern/
 │   ├── GAME-STATUS.md            Per-activity conversion tracker + changelog
 │   ├── assets/<id>.assets.md     Per-game graphics declaration (§A.7)
 │   └── templates/ASSETS.template.md
-├── .github/workflows/deploy-pages.yml   Auto-deploys web-canvas/ to Pages on push
+├── .github/workflows/
+│   ├── deploy-pages.yml         Auto-deploys web-canvas/ to Pages on push to main
+│   ├── godot-smoke.yml          Headless scene-load smoke on push / PR
+│   └── release.yml              Build .deb + Windows .zip on a v*.*.* tag
 ├── legacy-sources/             Upstream checkout for asset extraction (git-ignored)
 ├── LICENSE                     GPL-3.0
 └── README.md
@@ -160,30 +173,31 @@ childsplay-modern/
   offline-neural / `espeak-ng` fallback). Each
   game's HUD has a 🔊 button that re-speaks the current prompt; live
   OS/browser TTS is used only as a fallback. Games with named
-  pictures (Memory, Find Sound, Electro, Image Changer, Aquarium) have a
-  **"say the names"** toggle — off by default, on speaks the picture on
-  interaction.
+  pictures (Memory Games, Find the sound, ImageLink, What changed,
+  Aquarium) have a **"say the names"** toggle — off by default, on speaks
+  the picture on interaction.
 * **Per-channel sound** — Music / Effects / Voice, each independently
   muteable. Web: the 🔊 popover in the top bar. Desktop: the **Sound**
   button opens the same three-way panel. The setting persists
   (`localStorage` / `user://settings.cfg`).
-* **No-repeat asset pools** — Puzzle / Memory / Wipe / Find It draw
-  pictures from shared "bags" so the same image doesn't recur within a
-  session; Puzzle and Wipe share a **per-difficulty-tier** painting bag
-  (the tier is an `_easy/_med/_hard` tag on the filename).
+* **No-repeat asset pools** — Puzzles / Memory Games / Picture Wipe /
+  Picture Find draw pictures from shared "bags" so the same image doesn't
+  recur within a session; Puzzles and Picture Wipe share a
+  **per-difficulty-tier** scene-art bag (the tier is an
+  `_easy/_med/_hard` tag on the filename).
 * **Drop-in SVG art** — every image is referenced without an extension, so
   a newer `.svg` next to a `.png` / `.jpg` wins automatically
   (`svg → png → jpg → jpeg → webp`). A dormant **artwork** menu toggle
   switches to an `assets/graphics/themes/<style>/` overlay set once one
   exists — the button only appears when overlay art is present.
-* **Typing games** — Falling Letter and Word Maker take a physical
+* **Typing games** — Falling Letters and StartsWith take a physical
   keyboard, the device's on-screen keyboard, **or** an in-canvas QWERTY
   kept as the accessibility path; a `⌨` button switches between the last
   two.
 * **Responsive** — a fixed 1280×720 world is aspect-fit into any screen;
   portrait phones play fit-to-width with the game ratio preserved.
-* **Local 2-player** — Four in a Row and Tic Tac Toe have a 1P/2P toggle
-  (Pass & Play) shown before the first move.
+* **Local 2-player** — Connect Four and Tic-Tac-Toe ask **1 Player /
+  2 Players** (Pass & Play) up front, before the first move.
 
 ---
 
@@ -193,14 +207,14 @@ Game content lives in plain files under `assets/`. Edit, regenerate if
 there's a helper, then re-sync the target(s) and commit. All generators
 need only `bash` + `python3` unless noted.
 
-### Electro — picture ↔ name matches
+### ImageLink (`electro`) — picture ↔ name matches
 
 `assets/data/electro.json` — one `{ "img", "say" }` per line:
 
 ```json
 { "pairs": [
-  { "img": "01_cat", "say": "cat" },
-  { "img": "dog",    "say": "dog" }
+  { "img": "cat", "say": "cat" },
+  { "img": "dog", "say": "dog" }
 ] }
 ```
 
@@ -211,13 +225,12 @@ need only `bash` + `python3` unless noted.
   a line here, and — so it's spoken without live TTS — add the word to the
   `PHRASES` list in `tools/gen-voice.sh` and re-bake (below).
 * `tools/gen-electro-data.sh` rebuilds this file from **every** picture in
-  the animals pool (strips a leading `NN_`, turns `_` into spaces). Run it
-  after adding art if you want all of it in play; it **overwrites** hand
-  edits.
+  the animals pool (turns `_`/`-` into spaces). Run it after adding art if
+  you want all of it in play; it **overwrites** hand edits.
 
 Both targets fall back to a built-in list if the file is missing.
 
-### Word Maker — the dictionary
+### StartsWith (`synonyms`) — the dictionary
 
 The ~1200-word kid dictionary is `assets/data/wordlist.json`. Don't edit the
 JSON directly — edit the `WORDS` blob in **`tools/gen-wordlist.py`** (any
@@ -233,19 +246,18 @@ per-level starting letters and word targets are in `LEVELS` in
 `web-canvas/js/games/synonyms.js` and
 `desktop-godot/scripts/games/WordMaker.gd`.
 
-### Find Sound — levels
+### Find the sound (`findsound`) — levels
 
 A level is a graphics pool folder (`animals` / `vehicles` / `instruments`
 / `sounds`); its cards are the pictures in that pool that have a matching
-`assets/audio/soundmemory/<stem>.ogg`. To add a card, drop
-`assets/graphics/pools/<pool>/<stem>.png` + the `.ogg`. No data file.
+`assets/audio/soundmemory/<stem>.ogg`. Picture and clip pair by identical
+stem, and the stem (`-` → space) is the spoken word. To add a card, drop
+`assets/graphics/pools/<pool>/<stem>.png` + `assets/audio/soundmemory/<stem>.ogg`
+and re-sync — no data file, no label map. To add a level, make a new pool
+folder and add its name to the short level array in `findsound.js` /
+`FindSound.gd`.
 
-Each `id` must be both a picture stem in `assets/graphics/pools/soundpics/`
-**and** a clip stem (`<id>.ogg`). `labels` overrides the spoken word for
-ids whose filename reads oddly; anything not listed is de-slugged
-automatically. Both targets fall back to a built-in list.
-
-### Quiz — decks
+### Quizzes (`quiz`) — decks
 
 One file per deck in `assets/data/quiz/` (`general`, `picture`, `math`,
 `words`, `sayings` ship):
@@ -255,22 +267,25 @@ One file per deck in `assets/data/quiz/` (`general`, `picture`, `math`,
   "questions": [
     { "level": 1, "q": "How many legs does a dog have?",
       "choices": ["Two", "Four", "Six"], "answer": 1 },
-    { "level": 2, "image": "animals/17_lion", "q": "Which animal is this?",
+    { "level": 2, "image": "animals/lion", "q": "Which animal is this?",
       "choices": ["Lion", "Tiger", "Cat"], "answer": 0 }
   ] }
 ```
 
 `answer` is the index into `choices` (the engine shuffles the display
 order). `image` is an extension-less pool stem (optional). Questions are
-grouped by `level`. To add a whole new deck: drop the JSON in and add a
-`{ deck, label }` entry to the picker list in
+grouped by `level`. Each answer is **tapped twice** — the first tap speaks
+the choice, the second locks it in — so `tools/gen-voice.sh` scans
+`assets/data/quiz/*.json` and bakes every distinct answer string, keeping
+choices voiced with no live TTS. To add a whole new deck: drop the JSON in,
+add a `{ deck, label }` entry to the picker list in
 `web-canvas/js/games/quiz-menu.js` and
-`desktop-godot/scripts/QuizMenu.gd`.
+`desktop-godot/scripts/QuizMenu.gd`, then re-bake the voice pack.
 
-### Puzzle / Wipe — painting difficulty
+### Puzzles / Picture Wipe — scene-art difficulty
 
 Difficulty is a trailing `_easy` / `_med` / `_hard` tag on the background
-filename (`bruegel0_hard.jpg`); an untagged file is eligible at every
+filename (`castle-dragon_easy.jpg`); an untagged file is eligible at every
 tier. The level → tier map is in the `LEVELS` tables of `puzzle.js` /
 `Puzzle.gd` and `wipe.js` / `Wipe.gd`. Drop a new `backgrounds/*.jpg` in
 and it's picked up automatically.
@@ -354,10 +369,12 @@ Deploying is just copying `web-canvas/` to any static host; a push to
 
 The web target is a **PWA**: `manifest.webmanifest` + `sw.js` (a
 stale-while-revalidate service worker) make it installable and fully
-offline once visited, on Android / ChromeOS / Windows / macOS / iOS. Bump
-`CACHE` in `sw.js` on a release if you want old cache entries evicted
-immediately rather than lazily refreshed. Icons live in `web-canvas/icons/`
-(regenerate the PNGs from `icon.svg` with `rsvg-convert`).
+offline once visited, on Android / ChromeOS / Windows / macOS / iOS.
+`web-canvas/sync-assets.sh` stamps `CACHE` in `sw.js` with a content hash
+of everything the worker caches, so a deploy that changes any file evicts
+the stale cache on the next visit — no manual bump. Icons live in
+`web-canvas/icons/` (regenerate the PNGs from `icon.svg` with
+`rsvg-convert`).
 
 `js/` layout:
 
@@ -422,12 +439,19 @@ commit, then push a matching tag:
 git tag v0.5.0 && git push origin v0.5.0
 ```
 
-`.github/workflows/release.yml` then builds **both** the `.deb` and the
-Windows `.zip` on an Ubuntu runner (Godot cross-exports Windows from
-Linux — no Windows machine needed) and attaches them to a GitHub Release.
-The same workflow can be run manually from the Actions tab to get the
-binaries as artifacts without cutting a release. To build locally instead,
-run the two scripts above and `gh release create v<x.y.z> dist/*`.
+`.github/workflows/release.yml` then runs the headless scene-load smoke
+(`desktop-godot/tests/smoke.sh` — a broken scene stops the release) and
+builds **both** the `.deb` and the Windows `.zip` on an Ubuntu runner
+(Godot cross-exports Windows from Linux — no Windows machine needed),
+attaching them to a GitHub Release. The same workflow can be run manually
+from the Actions tab to get the binaries as artifacts without cutting a
+release. To build locally instead, run the two scripts above and
+`gh release create v<x.y.z> dist/*`.
+
+Separately, `.github/workflows/godot-smoke.yml` runs that same smoke on
+every push to `main` and every PR touching `desktop-godot/**` or
+`assets/**` — every scene is `load()`ed + `instantiate()`d headless, so a
+parse error or a missing resource fails CI before merge.
 
 ---
 
@@ -450,29 +474,32 @@ Full conversion status and per-game notes live in
 [`docs/GAME-STATUS.md`](docs/GAME-STATUS.md). All 20 below are implemented
 on **both** targets.
 
+The name shown on the tile is first; the internal id (scene / JS module
+name) follows in parentheses where it differs.
+
 | Activity | Skill | What you do |
 | --- | --- | --- |
-| **Memory** | Visual memory | Flip-and-match picture pairs. A sub-menu picks the deck: Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
-| **Sound Memory** | Listening, memory | `?`-tiles play a clip; match by ear, a pair reveals the picture. |
-| **Falling Letter** | Letter recognition, keyboard | Type the letter on each balloon (physical, device, or in-canvas keyboard) before it hits the danger line. 6 levels, gentle first; out of lives replays the level. |
-| **Find Sound** | Listening | Hear a clip, tap the picture it belongs to. Themed levels — one per graphics pool folder. |
+| **Memory Games** (`memory`) | Visual memory | Flip-and-match picture pairs. A sub-menu picks the deck: Pictures / lowercase / UPPERCASE / Numbers / Sounds. |
+| **Sound Memory** (`soundmemory`) | Listening, memory | `?`-tiles play a clip; match by ear, a matched pair reveals its picture. |
+| **Falling Letters** (`fallingletter`) | Letter recognition, keyboard | Type the letter on each balloon (physical, device, or in-canvas keyboard) before it hits the danger line. 6 levels, gentle first; out of lives replays the level. |
+| **Find the sound** (`findsound`) | Listening | Hear a clip, tap the picture it belongs to. Themed levels — one per graphics pool folder. |
 | **Flashcards** | Vocabulary | Picture + word cards for 12 animals; tap to hear the word. English + Deutsch / Nederlands / Français / Español. |
-| **Puzzle** | Spatial reasoning | Drag the pieces of a painting into the frame. 10 levels, grids → irregular rectangles; the picture is picked from a shared pool by the level's difficulty tier. |
-| **Find It** | Attention | Spot-the-difference — the painting is shown twice, the right copy has coloured spots added; tap them all. |
-| **Wipe** | Fine motor | Drag a sponge to wipe a grey cover off a hidden painting. 12 levels, rising target %, shrinking sponge; picture by difficulty tier. |
-| **Image Changer** | Attention, memory | Study a row of pictures; the cards flip and one has changed — tap it. |
+| **Puzzles** (`puzzle`) | Spatial reasoning | Drag the pieces of a scene into the frame. 10 levels, grids → irregular rectangles; the picture is drawn from a shared pool by the level's difficulty tier. |
+| **Picture Find** (`findit`) | Attention | Spot-the-difference — the scene is shown twice, the right copy has coloured spots added; tap them all. |
+| **Picture Wipe** (`wipe`) | Fine motor | Drag a sponge to wipe a grey cover off a hidden scene. 12 levels, rising target %, shrinking sponge; picture by difficulty tier. |
+| **What changed** (`ichanger`) | Attention, memory | Study a row of pictures; the cards flip and one has changed — tap it. |
 | **Aquarium** | Calm play (no score) | A fish tank toy over a Material-3 parallax backdrop: poke a fish for its name + a bubble, tap the water to drop food. Optional "read the fish names" mode. |
 | **Pong** | Hand–eye | Bat and ball vs a gentle AI; first to 5; 3 speeds. Framed court with a style picker: Retro (Atari) / 90s Neon / Y2K / Modern. |
-| **Block Breaker** | Hand–eye | Calm Breakout — slide the paddle, clear six brick walls. Tough bricks take two hits; 3 lives. |
+| **Block Breaker** (`blockbreaker`) | Hand–eye | Calm Breakout — slide the paddle, clear six brick walls. Tough bricks take two hits; 3 lives. |
 | **Billiards** | Aim, fine motor | Drag back from the cue ball to aim + set power. 6 pockets, 3/6/10-ball racks. |
-| **Packid** | Planning, coordination | Steer through an open maze eating dots, avoiding fruit "ghosts". Arrow keys or swipe. Friendly bump-reset, no game over. |
+| **PacKid** (`packid`) | Planning, coordination | Steer through an open maze eating dots, avoiding fruit "ghosts". Arrow keys or swipe. Friendly bump-reset, no game over. |
 | **Simon** | Sequence memory | Repeat the growing colour-and-tone sequence. 10 levels (length 2→11). Synthesised tones. A miss just replays — no game over. |
-| **Electro** | Matching, vocabulary | Drag a wire from each animal picture to its name; targets snap to the nearest node. Pairs from `assets/data/electro.json`. 6 levels, 3→8 pairs. |
-| **Numbers** | Number order, memory | Study numbered tiles, they blank out, tap them 1→N from memory. A wrong tap peeks the board. 6 levels (4→9 tiles). |
-| **Four in a Row** | Planning | Connect Four vs the computer (3 AI levels) or a **local Pass & Play** 2-player game. |
-| **Tic Tac Toe** | Planning | Noughts and crosses vs Easy / Medium / perfect-minimax computer, or **local Pass & Play**. |
-| **Word Maker** | Early literacy | Given a starting letter, build words on the on-screen or device keyboard. Scored against a ~1200-word dictionary; **2 hints per level**; spoken prompt on open. |
-| **Quiz** | General knowledge | Tap the right answer to a spoken multiple-choice question. A deck picker: General / Pictures / Math / Words / Sayings, hand-editable JSON. |
+| **ImageLink** (`electro`) | Matching, vocabulary | Drag a wire from each animal picture to its name; targets snap to the nearest node. Pairs from `assets/data/electro.json`. 6 levels, 3→8 pairs. |
+| **Remember the Number** (`numbers`) | Number order, memory | Study numbered tiles, they blank out, tap them 1→N from memory. A wrong tap peeks the board. 6 levels (4→9 tiles). |
+| **Connect Four** (`fourrow`) | Planning | Four-in-a-row vs the computer (3 AI levels) or **local Pass & Play**; asks 1 Player / 2 Players before the first move. |
+| **Tic-Tac-Toe** (`tictactoe`) | Planning | Noughts and crosses vs Easy / Medium / perfect-minimax computer, or **local Pass & Play**; asks 1 Player / 2 Players up front. |
+| **StartsWith** (`synonyms`) | Early literacy | Given a starting letter, build words on the on-screen or device keyboard. Scored against a ~1200-word dictionary; **2 hints per level**; spoken prompt on open. |
+| **Quizzes** (`quiz`) | General knowledge | A spoken multiple-choice question; tap an answer once to hear it, again to lock it in. Deck picker: General / Pictures / Math / Words / Sayings, hand-editable JSON. |
 
 ---
 
@@ -486,16 +513,16 @@ on **both** targets.
 | Any activity | 🔊 button in the HUD | Re-speak the current instruction |
 | Any activity | `Esc` (desktop) / **Menu** button (web) | Back to the dashboard |
 | Menu | Click / tap · ← → · swipe | Select · change page |
-| Falling Letter / Word Maker | Letter keys, the device keyboard, or the in-canvas one; `⌨` toggle | Type · switch keyboard |
-| Word Maker | **Hint** button | Reveal a word you haven't found (2 per level) |
-| Memory / Find Sound / Electro / Image Changer | "names" pill | Toggle spoken picture names |
-| Quiz | Tap an answer button · 🔊 | Answer · hear the question again |
-| Memory / Sound Memory / Find Sound / Find It / Image Changer | Click / tap | Flip / pick / tap the target |
+| Falling Letters / StartsWith | Letter keys, the device keyboard, or the in-canvas one; `⌨` toggle | Type · switch keyboard |
+| StartsWith | **Hint** button | Reveal a word you haven't found (2 per level) |
+| Memory Games / Find the sound / ImageLink / What changed | "names" pill | Toggle spoken picture names |
+| Quizzes | Tap an answer (1st = hear it, 2nd = lock in) · 🔊 | Answer · hear the question again |
+| Memory Games / Sound Memory / Find the sound / Picture Find / What changed | Click / tap | Flip / pick / tap the target |
 | Billiards / Pong / Block Breaker | Click-drag or touch-drag | Aim & power / move the paddle |
 | Pong | "Look" button (before serving) | Cycle the court style |
-| Packid | Arrow keys / swipe | Move through the maze |
-| Electro | Drag between the dots (snaps to nearest) | Wire a picture to its name |
-| Four in a Row / Tic Tac Toe | 1P / 2P pill (before the first move) | Switch opponent |
+| PacKid | Arrow keys / swipe | Move through the maze |
+| ImageLink | Drag between the dots (snaps to nearest) | Wire a picture to its name |
+| Connect Four / Tic-Tac-Toe | 1 Player / 2 Players (asked before the first move) | Choose opponent |
 
 The Godot project enables mouse↔touch emulation both ways, so every
 activity is playable with a pointer or a touchscreen.

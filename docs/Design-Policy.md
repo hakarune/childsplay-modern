@@ -742,9 +742,15 @@ its clip is the whole edit.
 themed `hud` surface + `line` divider + theme-aware HUD labels, wired into
 16 games).
 
-**All playtest §L rows are now closed.** Next is the Quiz suite (see
-GAME-STATUS). A visual-QA pass on a real device/browser is still
-outstanding — every game verified headless (parse + load), not eyeballed.
+**All playtest §L rows are now closed**, and the Quiz suite shipped (5
+decks, both targets — see GAME-STATUS). Since then: a second web-playtest
+pass (SW cache-bust, light-mode HUD/menu text, Sound Memory clip cut-off,
+Quiz two-tap "hear then confirm", 1P/2P asked up front on both targets),
+the paintings swapped for kid scene art, new activity-icon art + a
+display-name remap, a headless scene-load smoke (`desktop-godot/tests/`)
+run in CI, and the v0.5.0 `.deb` + Windows release pipeline. A visual-QA
+pass on a real device/browser is still the one open item — every game is
+verified headless (parse + load), not eyeballed.
 
 | Game | Must change |
 | --- | --- |

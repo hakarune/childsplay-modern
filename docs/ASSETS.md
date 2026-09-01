@@ -30,13 +30,13 @@ never write to `/assets/` itself.
 assets/
   graphics/
     pools/            ← the ONLY graphics location games may reference
-      backgrounds/      paintings + aquarium_1..6; difficulty is a
+      backgrounds/      kid scene art + aquarium_1..6; difficulty is a
                         `_easy`/`_med`/`_hard` filename tag, untagged = any tier
       animals/          plain-named cutouts (cat, cow, dog, bird, duck, …)
       ui/               card_front, card_back, sponge, bubble, soundbut
-      vehicles/         Find Sound level pool: boat, car, plane, …
-      instruments/      Find Sound level pool: drum, flute, guitar, …
-      sounds/           Find Sound level pool: alarm, bubbles, clang, …
+      vehicles/         Find the sound level pool: boat, car, plane, …
+      instruments/      Find the sound level pool: drum, flute, guitar, …
+      sounds/           Find the sound level pool: alarm, bubbles, clang, …
       icons/            one <game-id>.png per menu tile
       sprites/<game>/   dense single-game frame sets: packid, billiards, aquarium
     themes/<style>/     optional alternate-art overlay (Design Policy §C.4)
@@ -137,7 +137,7 @@ path (`sfx/good.ogg`, `soundmemory/snd/<id>.ogg`, `voice/v_<slug>.ogg`,
 ### Add a background
 Drop `castle.jpg` (or `castle_hard.jpg` to tag its tier) into
 `assets/graphics/pools/backgrounds/`, run both `sync-assets.sh`, commit.
-Puzzle / Wipe / Find It pick it up automatically.
+Puzzles / Picture Wipe / Picture Find pick it up automatically.
 
 ### Add an Aquarium fish
 Drop `octopus_0.png` + `octopus_1.png` into
