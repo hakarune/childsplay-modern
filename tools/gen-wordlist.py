@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""gen-wordlist.py - build assets/data/wordlist.json for Word Maker.
+"""gen-wordlist.py - build godot/assets/data/wordlist.json for Word Maker.
 
 The master list lives here. Add words to WORDS (any whitespace/newlines
 are fine) and re-run:  python3 tools/gen-wordlist.py
@@ -154,7 +154,7 @@ ship shut skip slug swan swap swing step stew stir
 
 def main() -> int:
     here = os.path.dirname(os.path.abspath(__file__))
-    out = os.path.join(here, "..", "assets", "data", "wordlist.json")
+    out = os.path.join(here, "..", "godot", "assets", "data", "wordlist.json")
     seen = set()
     words = []
     for tok in re.split(r"\s+", WORDS.strip()):

@@ -3,11 +3,11 @@
 # gen-voice.sh — bake the spoken lines into audio files so the games never
 # depend on the OS / browser having a speech engine (Design Policy §E).
 #
-# Each phrase a game may pass to `say()` becomes assets/audio/voice/<slug>.ogg.
-# The <slug> is computed the SAME way here, in web-canvas/js/tts.js and in
-# desktop-godot GameContext.gd, so a runtime lookup by phrase finds the clip.
-# At runtime the baked clip plays first; live TTS and then silence are the
-# fallbacks.
+# Each phrase a game may pass to `say()` becomes
+# godot/assets/audio/voice/<slug>.ogg. The <slug> is computed the SAME way
+# here and in godot/scripts/GameContext.gd, so a runtime lookup by phrase
+# finds the clip. At runtime the baked clip plays first; live TTS and then
+# silence are the fallbacks.
 #
 # Per clip, best first:
 #   1. an original human recording, if we have one   (HUMAN_SRC map below)
@@ -22,17 +22,18 @@
 # A piper or google run re-bakes the synthetic clips (that is the point);
 # espeak keeps whatever already exists unless FORCE=1. Human-sourced clips
 # are never overwritten by a synthesiser — use FORCE=1 to swap a new one
-# in. Re-run whenever a spoken string changes; commit the .ogg files, then
-# re-run both sync-assets.sh.
+# in. Re-run whenever a spoken string changes and commit the .ogg files —
+# godot/assets/ is what the game loads, there's no separate copy step.
 #
 #   TTS=google tools/gen-voice.sh            # natural voice, no install
 #   PIPER_MODEL=~/piper/en_US-lessac-medium.onnx tools/gen-voice.sh
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OUT="$HERE/../assets/audio/voice"
+OUT="$HERE/../godot/assets/audio/voice"
 # raw human recordings kept in-repo (letters + digits, en_GB, named by
-# codepoint: U0061 = 'a'). Preferred over any synthesiser.
+# codepoint: U0061 = 'a'). Preferred over any synthesiser. Not shipped —
+# repo-root assets/, not godot/assets/ — this is a generator input only.
 HUMAN="$HERE/../assets/audio/human"
 mkdir -p "$OUT"
 
@@ -186,7 +187,7 @@ PHRASES=(
 
 # --- Aquarium fish names: discovered from the sprite pool so a dropped-in
 #     fish (sprites/aquarium/<name>_0.png) automatically gets a v_<name>.ogg.
-AQ_SPRITES="$HERE/../assets/graphics/pools/sprites/aquarium"
+AQ_SPRITES="$HERE/../godot/assets/graphics/pools/sprites/aquarium"
 if [ -d "$AQ_SPRITES" ]; then
   for f in "$AQ_SPRITES"/*_0.png; do
     [ -e "$f" ] || continue
@@ -197,9 +198,10 @@ fi
 
 # --- Quiz answer choices: spoken on the first tap of the two-tap confirm
 #     (Design Policy §J). Every distinct `choices` string across
-#     assets/data/quiz/*.json gets a clip so the answer is read aloud even
-#     with no speech engine. Add a question, get its answers voiced for free.
-QUIZ_DATA="$HERE/../assets/data/quiz"
+#     godot/assets/data/quiz/*.json gets a clip so the answer is read aloud
+#     even with no speech engine. Add a question, get its answers voiced
+#     for free.
+QUIZ_DATA="$HERE/../godot/assets/data/quiz"
 if [ -d "$QUIZ_DATA" ] && command -v python3 >/dev/null; then
   while IFS= read -r line; do
     [ -n "$line" ] && PHRASES+=("$line")
